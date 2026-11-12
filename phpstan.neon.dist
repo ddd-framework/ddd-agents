@@ -1,0 +1,9 @@
+# PHPStan of the package source, at the level the first host application analyses the same code (4).
+# Run without an application on the class path: vendor/bin/phpstan analyse -c phpstan.neon.dist
+# (inside a host: DDD_AGENTS_VENDOR_DIR=<host>/vendor <host>/vendor/bin/phpstan analyse -c <package>/phpstan.neon.dist)
+parameters:
+    level: 4
+    paths:
+        - src
+    bootstrapFiles:
+        - tests/Support/phpstan-bootstrap.php

@@ -1,0 +1,10 @@
+/vendor/
+composer.lock
+/.phpunit.cache/
+.idea
+.DS_Store
+# env files hold local values: only the .env.dist files are committed
+.env
+.env.test
+.env.local
+.env.*.local

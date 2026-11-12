@@ -1,0 +1,175 @@
+{
+  "about": "DEMO ONLY - the reference application's hand-written model answers (ReferenceScriptedModelTransport): the first answer whose conditions hold for a request is returned; no request reaches a provider.",
+  "answers": [
+    {
+      "name": "turn 1, after addDemoNote: the confirmation",
+      "endpoint": "POST:https://openrouter.ai/api/v1/chat/completions",
+      "lastMessageRole": "tool",
+      "lastUserMessageContains": "Please note",
+      "lastMessageContains": "Notes:",
+      "response": {
+        "id": "chatcmpl-reference-3",
+        "object": "chat.completion",
+        "created": 1794300003,
+        "model": "openai/gpt-6-luna",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "Noted: order coffee beans on Friday. You have 1 note now."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 12100,
+          "completion_tokens": 30,
+          "total_tokens": 12130
+        }
+      }
+    },
+    {
+      "name": "turn 1, after load_skills: keep the note",
+      "endpoint": "POST:https://openrouter.ai/api/v1/chat/completions",
+      "lastMessageRole": "tool",
+      "lastUserMessageContains": "Please note",
+      "offersTool": "addDemoNote",
+      "response": {
+        "id": "chatcmpl-reference-2",
+        "object": "chat.completion",
+        "created": 1794300002,
+        "model": "openai/gpt-6-luna",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_reference_2",
+                  "type": "function",
+                  "function": {
+                    "name": "addDemoNote",
+                    "arguments": "{\"text\": \"Order coffee beans on Friday\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 12000,
+          "completion_tokens": 24,
+          "total_tokens": 12024
+        }
+      }
+    },
+    {
+      "name": "turn 1, the owner's request: load the notes skill",
+      "endpoint": "POST:https://openrouter.ai/api/v1/chat/completions",
+      "lastMessageRole": "user",
+      "lastUserMessageContains": "Please note",
+      "offersTool": "load_skills",
+      "response": {
+        "id": "chatcmpl-reference-1",
+        "object": "chat.completion",
+        "created": 1794300001,
+        "model": "openai/gpt-6-luna",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_reference_1",
+                  "type": "function",
+                  "function": {
+                    "name": "load_skills",
+                    "arguments": "{\"skill_names\": [\"Demo.Notes\"]}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 12000,
+          "completion_tokens": 24,
+          "total_tokens": 12024
+        }
+      }
+    },
+    {
+      "name": "turn 2, after getDemoNotes: the list",
+      "endpoint": "POST:https://openrouter.ai/api/v1/chat/completions",
+      "lastMessageRole": "tool",
+      "lastUserMessageContains": "What is on my notes",
+      "lastMessageContains": "Notes:",
+      "response": {
+        "id": "chatcmpl-reference-5",
+        "object": "chat.completion",
+        "created": 1794300005,
+        "model": "openai/gpt-6-luna",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "Your notes:\n\n1. Order coffee beans on Friday"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 12100,
+          "completion_tokens": 30,
+          "total_tokens": 12130
+        }
+      }
+    },
+    {
+      "name": "turn 2, the owner's question: read the notes",
+      "endpoint": "POST:https://openrouter.ai/api/v1/chat/completions",
+      "lastMessageRole": "user",
+      "lastUserMessageContains": "What is on my notes",
+      "offersTool": "getDemoNotes",
+      "response": {
+        "id": "chatcmpl-reference-4",
+        "object": "chat.completion",
+        "created": 1794300004,
+        "model": "openai/gpt-6-luna",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_reference_4",
+                  "type": "function",
+                  "function": {
+                    "name": "getDemoNotes",
+                    "arguments": "{}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 12000,
+          "completion_tokens": 24,
+          "total_tokens": 12024
+        }
+      }
+    }
+  ]
+}

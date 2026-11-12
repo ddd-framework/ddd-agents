@@ -1,0 +1,46 @@
+# The framework's own services (mgamadeus/ddd), registered from its source directory — the same blocks an application
+# carries for the framework. The modules (ddd-argus, ddd-common-money, ddd-ai, ddd-agents) are registered by the DDD
+# ModuleCompilerPass from AgentsTestKernel::getAdditionalModuleClasses(); nothing here names a module class.
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  DDD\:
+    resource: '%agents_test.framework_source_dir%/*'
+    exclude:
+      - '%agents_test.framework_source_dir%/**/*{Attributes,Exceptions,Traits,Validators,Interfaces,Lazyload,QueryOptions}*'
+      - '%agents_test.framework_source_dir%/Domain/Base/Repo/DB/{Database,Doctrine}*'
+      - '%agents_test.framework_source_dir%/Infrastructure/{Cache,Reflection,Validation,Helpers}*'
+      - '%agents_test.framework_source_dir%/Presentation/**/*{OpenApi,QueryOptions,Router,Dto,Dtos}*'
+      - '%agents_test.framework_source_dir%/Symfony/{Bundles,Kernels,Extended}*'
+      - '%agents_test.framework_source_dir%/Symfony/DependencyInjection*'
+      - '%agents_test.framework_source_dir%/Symfony/EventListeners/CorsListener.php'
+
+  DDD\Domain\Base\Services\:
+    resource: '%agents_test.framework_source_dir%/Domain/Base/Services/*'
+    public: true
+
+  DDD\Domain\Common\Services\:
+    resource: '%agents_test.framework_source_dir%/Domain/Common/Services/*'
+    public: true
+
+  DDD\Presentation\Services\:
+    resource: '%agents_test.framework_source_dir%/Presentation/Services/*'
+    public: true
+
+  DDD\Infrastructure\Services\:
+    resource: '%agents_test.framework_source_dir%/Infrastructure/Services/*'
+    public: true
+
+  DDD\Symfony\:
+    resource: '%agents_test.framework_source_dir%/Symfony/*'
+    exclude:
+      - '%agents_test.framework_source_dir%/Symfony/{Bundles,Kernels,Extended}*'
+      - '%agents_test.framework_source_dir%/Symfony/DependencyInjection*'
+
+  # DDDService::getLogger() fetches `logger` from the container by id: every host application publishes it.
+  logger:
+    alias: 'monolog.logger'
+    public: true

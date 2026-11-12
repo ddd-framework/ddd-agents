@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The package's own run (no application): php tests/Support/bin/phpunit.php [-testsuite package]
+  The bootstrap boots the package kernel (tests/Support/AgentsTestKernel) once. Suites:
+  - package: every test outside tests/Integration (no database);
+  - integration: tests that read or write the database (base class DDD\Tests\Agents\Support\DatabaseTestCase). They
+    run on MariaDB AND on PostgreSQL against the throwaway databases of tests/Integration/docker-compose.yml:
+    DDD_AGENTS_TEST_DRIVER=pdo_mysql|pdo_pgsql selects the engine, without it every database test skips itself.
+  - application: the tests of the fixture application of tests/Fixtures/Application (an application that subclasses
+    the space with a column of its own). They need a run that loads that application, and in such a run every
+    database test runs once more against the application's classes. A run of its own, on both engines:
+    DDD_AGENTS_TEST_WITH_APPLICATION=1 DDD_AGENTS_TEST_DRIVER=pdo_mysql|pdo_pgsql … -testsuite application,integration
+    Without the variable the tests of the suite application skip themselves. Never set it for the suite package:
+    with it every package class that the application subclasses resolves to the application's class.
+  Abstract contracts are named *Contract.php and are never collected; an application extends them.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <php>
+        <server name="APP_ENV" value="test" force="true"/>
+    </php>
+    <testsuites>
+        <testsuite name="package">
+            <directory>tests</directory>
+            <exclude>tests/Integration</exclude>
+            <exclude>tests/Application</exclude>
+            <exclude>tests/Fixtures</exclude>
+            <exclude>tests/Support</exclude>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+        <testsuite name="application">
+            <directory>tests/Application</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -1,0 +1,20 @@
+# A minimal application Messenger configuration that meets the agent's transport contract.
+framework:
+  messenger:
+    transports:
+      ai_conversation_turn: 'in-memory://'
+      ai_conversation_compaction: 'in-memory://'
+      ai_conversation_scorecard: 'in-memory://'
+      ai_conversation_message_embedding: 'in-memory://'
+      ai_tool_result_screening: 'in-memory://'
+      ai_activity_lines: 'in-memory://'
+    routing:
+      'DDD\Domain\AI\MessageHandlers\AIConversationResumeMessage': ai_conversation_turn
+      'DDD\Domain\AI\MessageHandlers\AIConversationCompactionMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationFinalizeMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationSummarizeMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationReportEmailSendMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationScorecardMessage': ai_conversation_scorecard
+      'DDD\Domain\AI\MessageHandlers\AIConversationMessageEmbeddingMessage': ai_conversation_message_embedding
+      'DDD\Domain\AI\MessageHandlers\AgentToolResultScreeningMessage': ai_tool_result_screening
+      'DDD\Domain\AI\MessageHandlers\AgentActivityLinesNarrateMessage': ai_activity_lines

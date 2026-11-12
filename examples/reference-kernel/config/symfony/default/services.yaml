@@ -1,0 +1,83 @@
+# The framework's own services (mgamadeus/ddd), registered from its source directory — the same blocks every DDD
+# application carries — and this host's classes. The modules (ddd-argus, ddd-common-money, ddd-ai, ddd-agents) are
+# registered by the DDD ModuleCompilerPass from ReferenceKernel::getAdditionalModuleClasses().
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  DDD\:
+    resource: '%reference.framework_source_dir%/*'
+    exclude:
+      - '%reference.framework_source_dir%/**/*{Attributes,Exceptions,Traits,Validators,Interfaces,Lazyload,QueryOptions}*'
+      - '%reference.framework_source_dir%/Domain/Base/Repo/DB/{Database,Doctrine}*'
+      - '%reference.framework_source_dir%/Infrastructure/{Cache,Reflection,Validation,Helpers}*'
+      - '%reference.framework_source_dir%/Presentation/**/*{OpenApi,QueryOptions,Router,Dto,Dtos}*'
+      - '%reference.framework_source_dir%/Symfony/{Bundles,Kernels,Extended}*'
+      - '%reference.framework_source_dir%/Symfony/DependencyInjection*'
+      - '%reference.framework_source_dir%/Symfony/EventListeners/CorsListener.php'
+
+  DDD\Domain\Base\Services\:
+    resource: '%reference.framework_source_dir%/Domain/Base/Services/*'
+    public: true
+
+  DDD\Domain\Common\Services\:
+    resource: '%reference.framework_source_dir%/Domain/Common/Services/*'
+    public: true
+
+  DDD\Presentation\Services\:
+    resource: '%reference.framework_source_dir%/Presentation/Services/*'
+    public: true
+
+  DDD\Infrastructure\Services\:
+    resource: '%reference.framework_source_dir%/Infrastructure/Services/*'
+    public: true
+
+  DDD\Symfony\:
+    resource: '%reference.framework_source_dir%/Symfony/*'
+    exclude:
+      - '%reference.framework_source_dir%/Symfony/{Bundles,Kernels,Extended}*'
+      - '%reference.framework_source_dir%/Symfony/DependencyInjection*'
+
+  # DDDService::getLogger() fetches `logger` from the container by id: every host application publishes it.
+  logger:
+    alias: 'monolog.logger'
+    public: true
+
+  # The framework's route loaders (a controller class may carry several route attributes; `type: annotation` in
+  # routes.yaml): the framework ships them, every application tags them.
+  DDD\Symfony\Loaders\CustomAnnotationClassLoader:
+    tags: [ routing.loader ]
+
+  DDD\Symfony\Loaders\CustomAnnotationFileLoader:
+    tags: [ routing.loader ]
+    autowire: true
+
+  DDD\Symfony\Loaders\CustomAnnotationDirectoryLoader:
+    tags: [ routing.loader ]
+    autowire: true
+
+  # The framework's request-DTO resolver ahead of Symfony's default resolvers (priority 100): every application tags it.
+  DDD\Symfony\Http\ValueResolvers\DtoValueResolver:
+    tags:
+      - { name: 'controller.argument_value_resolver', priority: 150 }
+
+  # This host's classes (the kernel and the directory helper are no services).
+  AgentsReference\:
+    resource: '../../../src/*'
+    exclude:
+      - '../../../src/ReferenceKernel.php'
+      - '../../../src/Infrastructure/Kernel/*'
+      - '../../../src/Presentation/**/Dtos/*'
+      # an MCP package is a value object the tool executor instantiates, never a service
+      - '../../../src/Presentation/Mcp/*'
+
+  AgentsReference\Domain\Demo\Services\:
+    resource: '../../../src/Domain/Demo/Services/*'
+    public: true
+
+  AgentsReference\Presentation\Api\:
+    resource: '../../../src/Presentation/Api/*'
+    tags: ['controller.service_arguments']
+    public: true

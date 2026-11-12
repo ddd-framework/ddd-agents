@@ -1,0 +1,12 @@
+# The six agent transports (DDD\Domain\AI\MessageHandlers\AgentMessengerTransports) run synchronously: the reference
+# application has no worker and no broker, so a dispatched turn runs inside the request that dispatched it.
+framework:
+  messenger:
+    transports:
+      sync: 'sync://'
+      ai_conversation_turn: 'sync://'
+      ai_conversation_compaction: 'sync://'
+      ai_conversation_scorecard: 'sync://'
+      ai_conversation_message_embedding: 'sync://'
+      ai_tool_result_screening: 'sync://'
+      ai_activity_lines: 'sync://'

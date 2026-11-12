@@ -1,0 +1,12 @@
+# The six agent transports (DDD\Domain\AI\MessageHandlers\AgentMessengerTransports) in memory: the package kernel
+# consumes nothing, a test reads what was sent from the in-memory transport.
+framework:
+  messenger:
+    transports:
+      sync: 'sync://'
+      ai_conversation_turn: 'in-memory://'
+      ai_conversation_compaction: 'in-memory://'
+      ai_conversation_scorecard: 'in-memory://'
+      ai_conversation_message_embedding: 'in-memory://'
+      ai_tool_result_screening: 'in-memory://'
+      ai_activity_lines: 'in-memory://'

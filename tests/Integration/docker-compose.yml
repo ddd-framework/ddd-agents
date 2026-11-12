@@ -1,0 +1,47 @@
+# Throwaway databases for the package's database tests (tests/Integration, base class
+# DDD\Tests\Agents\Support\DatabaseTestCase). tmpfs data directories: nothing survives a restart and no real data is
+# ever loaded. Both containers may run at once; DDD_AGENTS_TEST_DRIVER=pdo_mysql|pdo_pgsql selects the one a run uses.
+#
+#   docker compose -p ddd-agents-test -f tests/Integration/docker-compose.yml up -d --wait
+#   DDD_AGENTS_TEST_DRIVER=pdo_mysql php tests/Support/bin/phpunit.php --testsuite integration
+#   DDD_AGENTS_TEST_DRIVER=pdo_pgsql php tests/Support/bin/phpunit.php --testsuite integration
+#   docker compose -p ddd-agents-test -f tests/Integration/docker-compose.yml down
+#
+# Ports: MariaDB DDD_AGENTS_TEST_DB_PORT (default 3318), PostgreSQL DDD_AGENTS_TEST_PG_PORT (default 5434) — next to
+# the framework's own test databases (3317 / 5433), so both sets can run on one machine.
+services:
+  mariadb:
+    image: mariadb:11.8.5
+    environment:
+      MARIADB_ROOT_PASSWORD: ddd-agents-test
+      MARIADB_DATABASE: ddd_agents_test
+    command: ["--sql-mode=ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"]
+    ports:
+      - "127.0.0.1:${DDD_AGENTS_TEST_DB_PORT:-3318}:3306"
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  postgres:
+    # The image carries the extensions the framework's PostgreSQL schema needs (postgis, pgvector, pgvectorscale,
+    # pg_trgm, unaccent) on PostgreSQL 18 and boots as a plain single-node server with the POSTGRES_* variables.
+    image: timescale/timescaledb-ha:pg18
+    environment:
+      POSTGRES_PASSWORD: ddd-agents-test
+      POSTGRES_DB: ddd_agents_test
+      POSTGRES_USER: postgres
+    ports:
+      - "127.0.0.1:${DDD_AGENTS_TEST_PG_PORT:-5434}:5432"
+    tmpfs:
+      # The image keeps its data below /home/postgres/pgdata and runs as uid/gid 1000: a bare tmpfs mount belongs to
+      # root and the server could not create its data directory.
+      - /home/postgres/pgdata:uid=1000,gid=1000,mode=0755
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ddd_agents_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

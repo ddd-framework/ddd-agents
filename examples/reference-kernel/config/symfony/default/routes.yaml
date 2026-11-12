@@ -1,0 +1,5 @@
+# The reference application's routes: its conversations controller (the package's chat traits) below /api.
+reference_api:
+    resource: '../../../src/Presentation/Api'
+    type: annotation
+    prefix: '/api'

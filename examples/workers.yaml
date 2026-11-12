@@ -1,0 +1,24 @@
+# Example consumer list for the agent's Messenger transports, in the format of the framework's worker list
+# (config/system/workers.yaml in the host; `app:workers:list` shows it, `app:workers:check` compares it with the
+# transports and routing of the compiled container). Copy the entries into the host's own list and size them for the
+# host's load. The transport names and the routing are DDD\Domain\AI\MessageHandlers\AgentMessengerTransports.
+#
+# - limit / memoryLimit: the consume command's --limit / --memory-limit (worker recycling; the handlers raise their own
+#   memory_limit, the turn handler to 1024M).
+# - busySilentSeconds: how long one message may run before its process counts as silent. A turn may run up to 1800 s
+#   (the turn handler's time limit), so the turn transport needs more than that.
+# - The process manager's stop grace of the turn consumers must also cover a whole turn (e.g. 1830 s): a restart waits
+#   for the running turn instead of killing it.
+consumers:
+  # one agent turn per message (AIConversationResumeMessage)
+  - {transport: ai_conversation_turn, replicas: 4, limit: 200, memoryLimit: 1024M, busySilentSeconds: 1830}
+  # compaction, the idle finalize, the display summary and the run report mail (handlers allow up to 1800 s)
+  - {transport: ai_conversation_compaction, replicas: 2, limit: 50, memoryLimit: 512M, busySilentSeconds: 1830}
+  # the quality assessment of a finished conversation (handler allows 900 s)
+  - {transport: ai_conversation_scorecard, replicas: 1, limit: 50, memoryLimit: 512M, busySilentSeconds: 960}
+  # the embedding of one message (handler allows 600 s)
+  - {transport: ai_conversation_message_embedding, replicas: 1, limit: 100, memoryLimit: 512M}
+  # the background injection screen of an untrusted tool result (the turn never waits for it)
+  - {transport: ai_tool_result_screening, replicas: 1, limit: 100, memoryLimit: 256M}
+  # the narration of what the agent does while it works (short; stale lines are worthless)
+  - {transport: ai_activity_lines, replicas: 1, limit: 200, memoryLimit: 256M}

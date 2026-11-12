@@ -1,0 +1,10 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    http_method_override: false
+    property_info: { with_constructor_extractor: true }
+    php_errors:
+        log: true
+    validation:
+        email_validation_mode: html5
+    router:
+        utf8: true
