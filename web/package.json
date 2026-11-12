@@ -1,6 +1,6 @@
 {
   "name": "@mgamadeus/ddd-agents",
-  "version": "0.0.0-stage",
+  "version": "0.0.1-stage",
   "description": "React frontend of mgamadeus/ddd-agents (Composer package mgamadeus/ddd-agents). The first usable version is released from this repository; this version reserves the package name.",
   "keywords": [
     "ddd",
