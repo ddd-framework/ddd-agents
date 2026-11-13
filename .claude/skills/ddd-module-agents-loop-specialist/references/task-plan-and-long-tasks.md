@@ -86,11 +86,21 @@ this turn's platform closing, the cascade cap, then the item's gates and transit
   call counts as completed.
 - **The echo of a platform closing:** the first tick in a turn of an item the platform closed in this turn is answered
   "nothing to do" (`TaskPlanItemTickGate::checkEchoOfThisTurnsPlatformClosing()`); a second tick of the same item takes
-  the already-in-status path, which marks the call FAILED — with plan tools exempt from the repeat guard, that is what
-  keeps a re-tick loop finite.
-- **The all-no-op breaker:** a call whose every update was already in status forces the tool-less answer step only when
-  no open item remains, when an earlier tick of the turn failed while no item carries `← next`, or after
-  `AgentTaskPlanTickOutcome::LOOPING_FAILED_TICKS_IN_A_TURN` failed ticks
+  the same-status path below.
+- **A tick that repeats the item's stored status** changes nothing and has three answers
+  (`TaskPlanItemTickGate::answerSameStatusReTick()`): an item whose stored status is terminal while its subtasks are
+  still open gets a line that names the open subtasks by key and is not counted as a no-op; the first true no-op of a
+  call carries the long instruction, once per call; every further one in the same call is one short line. None of
+  them counts as applied, so a call in which nothing was applied or noted is marked FAILED
+  (`AgentTaskPlanTickOutcome::failsTheCall()`), and that failed tick counts toward the brakes of section 9.
+- **A later tick replaces a run-time status note:** a same-status tick with a non-empty `statusNote` overwrites the
+  item's note (`TaskPlanItem::refreshStatusNoteUnlessPreResolvedAtSeed()`, called from
+  `TaskPlanItemTickGate::applyTick()`). Only an item the platform resolved when the plan was seeded keeps its note,
+  which states what the record shows.
+- **The all-no-op breaker:** a call that applied no update and carried at least one true no-op (the one with the long
+  instruction; a re-tick of an item with open subtasks does not count, `AgentTaskPlanTickOutcome::isAllAlreadyInStatus()`)
+  forces the tool-less answer step only when no open item remains, when an earlier tick of the turn failed while no
+  item carries `← next`, or after `AgentTaskPlanTickOutcome::LOOPING_FAILED_TICKS_IN_A_TURN` failed ticks
   (`AgentTaskPlanTickOutcome::requiresToolLessAnswerStep()`). Forcing on the first redundant tick while workable items
   remain made the model announce the next item instead of doing it.
 - **The judgement is read lazily:** for the statuses an `update_task_plan` call sends, the evidence and the criteria a

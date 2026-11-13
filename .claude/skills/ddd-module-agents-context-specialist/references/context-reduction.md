@@ -69,14 +69,18 @@ reply's footprint is the growth of its `inputTokens` over the previous reply's; 
 is in the next reply's growth); the first measured reply counts only its `outputTokens`, so the fixed overhead stays
 out of the history; a non-positive growth (a compaction just shrank the prompt) falls back to the reply's
 `outputTokens`, a deliberate lower bound. A conversation without any measured reply uses the estimated token count of
-each row. A node's `summaryTokens` comes from the summarizer's output tokens.
+each row. A node's `summaryTokens` comes from the summarizer's output tokens. A level-0 leaf's `coveredTokens` is the
+summed footprint of the raw rows it covers, counted the same way (`AIConversationCompactionNode::buildLeafFor()` calls
+`AIConversationMessageFootprints::sumOverMessages()` on the rows of its range); a roll-up sums its children's values
+(`AIConversationCompactionNode::buildRollUpOf()`).
 
 **Debugging a deep tree.** A low `CompactionSettings::$triggerTokens` only makes the budget degenerate (the overhead
 alone exceeds it). Set `CompactionSettings::$debugLeafSegmentTokensOverride` instead: it forces small leaves, keeps at
 least one leaf of raw tail, and is independent of the threshold.
 
-**Per-model defaults** of `effectiveContextTokens` for a model without its own value come from the model catalog of
-`mgamadeus/ddd-ai` (by window size, capped at 80 % of the window): `ddd-module-ai-specialist`.
+**Per-model defaults** of `effectiveContextTokens` for a model without its own value are computed by
+`AIModelsService::defaultEffectiveContextTokensForWindow()` in the `mgamadeus/ddd-ai` package (by window size, capped
+at 80 % of the window) and documented in `ddd-module-ai-specialist`.
 
 **Cost with prompt caching.** A call costs roughly the cached price of the prefix plus the full price of the tail, plus
 a cache write at each compaction. A lower threshold shrinks a prefix that is already discounted but brings the next

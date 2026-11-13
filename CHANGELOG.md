@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0-alpha.8
+
+Documentation only; no behaviour change.
+
+- Context skill: a compaction node's `coveredTokens` is the model-counted footprint of its raw rows (a roll-up sums its
+  children's); the per-model default threshold names `AIModelsService::defaultEffectiveContextTokensForWindow()`.
+- Loop skill: the three answers to a tick that repeats an item's status, when such a call fails, what the all-no-op
+  breaker counts, and that a later same-status tick with a note replaces the item's run-time note.
+- Docblocks of `AIConversationCompactionNode::$coveredTokens` and `AgentTaskPlanTickOutcome::isAllAlreadyInStatus()`
+  corrected; a comment no longer cites source line numbers.
+
 ## 0.1.0-alpha.7
 
 Documentation only; no source class changes.

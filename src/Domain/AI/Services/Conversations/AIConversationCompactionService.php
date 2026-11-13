@@ -96,7 +96,7 @@ class AIConversationCompactionService extends Service
     {
         // Load the tree + the round's messages BEFORE sizing the budget: buildCompactionBudgets reads the
         // message footprint, and on the async path `messages` is unset → the #[LazyLoad] default returns only the ~50
-        // OLDEST messages (AIConversationAgentService:291-292/:978-980), which would size the budget AND the whole
+        // OLDEST messages (the default lazy load reads the first page only), which would size the budget AND the whole
         // round off the wrong turns (the round compacts the oldest 50 of a long conversation and stops). Nodes first
         // (the cover edge needs them), then the settle-able tail past that edge.
         $this->ensureCompactionNodesLoaded($conversation);

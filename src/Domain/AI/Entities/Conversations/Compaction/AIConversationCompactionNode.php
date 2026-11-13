@@ -105,7 +105,7 @@ class AIConversationCompactionNode extends Entity
     /** @var int|null Count of RAW messages ultimately covered (for metrics / cost). */
     public ?int $coveredMessageCount;
 
-    /** @var int|null Estimated tokens of the covered RAW content (the savings this node buys). */
+    /** @var int|null Model-counted token footprint of the covered RAW content (a roll-up sums its children's; the savings this node buys). */
     public ?int $coveredTokens;
 
     #[DatabaseForeignKey(onDeleteAction: DatabaseForeignKey::ACTION_CASCADE, onUpdateAction: DatabaseForeignKey::ACTION_CASCADE)]

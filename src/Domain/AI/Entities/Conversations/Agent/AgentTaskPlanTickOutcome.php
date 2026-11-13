@@ -164,8 +164,9 @@ class AgentTaskPlanTickOutcome extends ValueObject
     }
 
     /**
-     * Every update was a same-status no-op (the ALREADY class) — a model that re-ticks resolved items is stalling before
-     * its owed answer; plan tools are repeat-guard-exempt, so this is the only brake against a re-tick loop.
+     * Nothing was applied and at least one same-status no-op was counted (only the no-op answered with the long
+     * instruction counts) — a model that re-ticks resolved items is stalling before its owed answer; plan tools are
+     * repeat-guard-exempt, so this is the only brake against a re-tick loop.
      */
     public function isAllAlreadyInStatus(): bool
     {
