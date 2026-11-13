@@ -1,0 +1,2 @@
+# Names a developer skill writes in backticks that are deliberately no declaration of the package, the framework,
+# the AI or Argus module or the reference kernel. One per line: <name><TAB><reason>. Read by DeveloperSkillNamesExistTest.

@@ -6,13 +6,14 @@ delegation, the supervisor, run claims, the decision layer, the loop's message h
 
 **Package:** `mgamadeus/ddd-agents` (v0.1.x, not released)
 **Namespace:** `DDD\`
-**Depends on:** `mgamadeus/ddd` (^3.24.2), `mgamadeus/ddd-ai` (^3.2.1), `mgamadeus/ddd-argus` (^1.3.2),
+**Depends on:** `mgamadeus/ddd` (^3.27.0), `mgamadeus/ddd-ai` (^3.2.1), `mgamadeus/ddd-argus` (^1.3.2),
 `mgamadeus/ddd-common-money` (^1.1.1)
 
 > **This module follows all DDD Core conventions.** For base patterns, see `vendor/mgamadeus/ddd/AGENTS.md` and skills in `vendor/mgamadeus/ddd`. For models, prompts and usage envelopes, see `vendor/mgamadeus/ddd-ai`. For Argus patterns, see `vendor/mgamadeus/ddd-argus`.
 
-Detailed knowledge (installation checklist, override points, transports, controller traits, table prefix):
-`.claude/skills/ddd-module-agents-specialist/SKILL.md`.
+Detailed knowledge: the entry skill `.claude/skills/ddd-module-agents-specialist/SKILL.md` (installation, host
+duties, configuration, the folder → skill table) and eight topic skills `ddd-module-agents-<topic>-specialist` (loop,
+context, skills-and-purposes, tools, widgets, autonomy, decisions-and-guards, observability).
 
 ## Architecture
 
@@ -106,8 +107,8 @@ examples/workers.yaml                   [consumer list for the six transports]
   even in a test: an application that builds on the module checks its own names against the installed package in its
   own test suite. What an application has always written (log prefix, console label, environment variable names) it
   declares in `config/app/AI/agentApplicationNames.php`.
-- **Persisted class names.** Classes whose name reaches stored JSON as an `objectType`, and the Messenger message
-  classes, are listed in `CHANGELOG.md`. Moving one needs a migration entry (`Common.objectTypeMigrations`) or, for a
+- **Persisted class names.** A class whose name reaches stored JSON as an `objectType`, and every Messenger message
+  class (`AgentMessengerTransports`), is a stored name. Moving one needs a migration entry (`Common.objectTypeMigrations`) or, for a
   message class, a drained queue or an alias in the host.
 
 ## Messenger

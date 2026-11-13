@@ -1,6 +1,6 @@
 # mgamadeus/ddd-agents
 
-Status: not released. Nothing here is stable API yet.
+Status: pre-release (0.1.0-alpha). Nothing here is stable API yet.
 
 The agentic loop for `mgamadeus/ddd`, on top of `mgamadeus/ddd-ai`: conversations, messages, compaction, the task
 plan, skills and MCP metadata, purposes and done criteria, widgets and signal sources, delegation and sub-runs, the
@@ -13,14 +13,18 @@ supervisor, run claims, the decision layer, the message handlers of the loop and
 | `src/Modules/Agents/AgentsModule.php` | the `DDDModule` (source and config path, public service namespaces, exclude patterns) |
 | `src/Domain/AI/…` | the agent core, in the namespace `DDD\Domain\AI\…` shared with `ddd-ai` (no class name collides) |
 | `src/Presentation/…` | the agent console printer, the JSON-RPC base controller `MCPController`, `MCPToolExecutorService` |
-| `config/app/` | the module's config root (empty in this step; the agent's defaults move here in a later step) |
-| `tests/` | the package's own tests (none yet; the tests of the moved classes still run in the application) |
+| `config/app/AI/` | the module's defaults: application names and wording, egress, persona, the tool-call child process, context retention (an application overrides a file under its own `config/app/AI/`) |
+| `tests/` | the package's own suite: unit, contract, integration (a local MariaDB) and the reference-kernel smoke test |
+| `examples/` | `reference-kernel/` (a minimal host without an application) and `workers.yaml` (one consumer per transport) |
+| `.claude/skills/` | the developer skills: the entry skill `ddd-module-agents-specialist` and eight topic skills |
 
-## State of this step
+## Developer skills
 
-The code was moved mechanically out of an application (the namespace root swapped from `App\` to `DDD\`, every class
-suffix unchanged). It still references application classes (`App\…`); the measured list of those references is the
-work list of the next steps. The package therefore does not run standalone yet.
+Start with `.claude/skills/ddd-module-agents-specialist/SKILL.md`: install, wiring, the duties a host takes over
+(console commands, crons, middlewares, transports) and a table that names the topic skill of every source folder —
+loop, context, skills and purposes, tools, widgets, autonomy, decisions and guards, observability.
+`tests/Contract/DeveloperSkill*Test.php` keep the skills in step with the code (every named class exists, every file
+under `src/` and `config/` has exactly one owning skill).
 
 ## Application overrides
 

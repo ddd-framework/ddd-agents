@@ -1,0 +1,53 @@
+# The agent's part of a host's Messenger configuration (config/symfony/default/packages/messenger.yaml).
+# Placeholders: {{MESSENGER_TRANSPORT_DSN}} sample: %env(MESSENGER_TRANSPORT_DSN)%
+#               {{MIDDLEWARE_NAMESPACE}} sample: App\Symfony\Messenger\Middleware
+#
+# The transport names and the routing are DDD\Domain\AI\MessageHandlers\AgentMessengerTransports (ALL and
+# ROUTING_BY_MESSAGE_CLASS); the framework registers neither. A message the host does not route runs synchronously in
+# the dispatching process. The reference kernel defines the six transports with `sync://` and routes no message, so
+# every agent message runs in the request that dispatched it.
+# DSN: the sample appends the transport name to one shared DSN. That works for an AMQP DSN that ends at the vhost (the
+# segment names the exchange) and for a Redis DSN (the segment names the stream); a Doctrine transport names its queue
+# with a query parameter instead (`doctrine://default?queue_name=ai_conversation_turn`), so write one DSN per
+# transport there.
+# The two middlewares are the host's own classes, made from the templates beside this file. The framework prepends
+# fresh worker state, worker monitoring and the workspace origin guard (which refuses a message dispatched by another
+# workspace) to every bus; the host's middlewares run after them. The agent's worker state resetter is autoconfigured.
+# Retry: a turn rethrows only a failure of its load phase, a failed drive is released by the loop and resumed by the
+# owed-work recovery command, so one retry is enough. Merge the keys into the host's existing blocks.
+framework:
+  messenger:
+    buses:
+      messenger.bus.default:
+        middleware:
+          - '{{MIDDLEWARE_NAMESPACE}}\AgentUsageEnvelopeMiddleware'
+          - '{{MIDDLEWARE_NAMESPACE}}\AgentConversationOverheadCostsMiddleware'
+    transports:
+      ai_conversation_turn:
+        dsn: '{{MESSENGER_TRANSPORT_DSN}}/ai_conversation_turn'
+        retry_strategy: { max_retries: 1, delay: 5000, multiplier: 2, max_delay: 10000 }
+      ai_conversation_compaction:
+        dsn: '{{MESSENGER_TRANSPORT_DSN}}/ai_conversation_compaction'
+        retry_strategy: { max_retries: 1, delay: 5000, multiplier: 2, max_delay: 10000 }
+      ai_conversation_scorecard:
+        dsn: '{{MESSENGER_TRANSPORT_DSN}}/ai_conversation_scorecard'
+        retry_strategy: { max_retries: 1, delay: 5000 }
+      ai_conversation_message_embedding:
+        dsn: '{{MESSENGER_TRANSPORT_DSN}}/ai_conversation_message_embedding'
+        retry_strategy: { max_retries: 1, delay: 5000 }
+      ai_tool_result_screening:
+        dsn: '{{MESSENGER_TRANSPORT_DSN}}/ai_tool_result_screening'
+        retry_strategy: { max_retries: 1, delay: 2000 }
+      ai_activity_lines:
+        dsn: '{{MESSENGER_TRANSPORT_DSN}}/ai_activity_lines'
+        retry_strategy: { max_retries: 0 }
+    routing:
+      'DDD\Domain\AI\MessageHandlers\AIConversationResumeMessage': ai_conversation_turn
+      'DDD\Domain\AI\MessageHandlers\AIConversationCompactionMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationFinalizeMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationSummarizeMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationReportEmailSendMessage': ai_conversation_compaction
+      'DDD\Domain\AI\MessageHandlers\AIConversationScorecardMessage': ai_conversation_scorecard
+      'DDD\Domain\AI\MessageHandlers\AIConversationMessageEmbeddingMessage': ai_conversation_message_embedding
+      'DDD\Domain\AI\MessageHandlers\AgentToolResultScreeningMessage': ai_tool_result_screening
+      'DDD\Domain\AI\MessageHandlers\AgentActivityLinesNarrateMessage': ai_activity_lines

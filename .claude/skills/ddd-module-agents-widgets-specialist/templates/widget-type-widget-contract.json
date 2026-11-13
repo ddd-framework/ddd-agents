@@ -1,0 +1,27 @@
+{
+  "wireName": "{{WIDGET_TYPE}}",
+  "description": "The owner keeps or discards the record the {{WIDGET_TYPE}} widget proposes. Keep and discard post a FRONTEND_WIDGET_CLICK signal through injectSignal; the sentence names the wire name and ends with the quoted {{ID_FIELD}}. The backend reader is {{WIDGET_TYPE}}ConversationWidget. A stored contract: the wording never changes without the reader accepting both forms.",
+  "exampleBlocks": [
+    "```widget\n{\"type\":\"{{WIDGET_TYPE}}\",\"agentSpaceId\":42,\"{{ID_FIELD}}\":\"17\",\"label\":\"Order coffee beans on Friday\",\"emittedBy\":\"tool:{{TOOL_NAME}}\"}\n```",
+    "```widget\n{\"type\":\"{{WIDGET_TYPE}}\",\"agentSpaceId\":42,\"{{ID_FIELD}}\":\"18\",\"label\":\"Call the supplier\"}\n```"
+  ],
+  "exampleReactions": [
+    {
+      "exampleBlock": 0,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "User confirmed on the {{WIDGET_TYPE}} widget: {{ID_FIELD}} \"17\".",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedAnswer": {"confirmedId": "17"}
+    },
+    {
+      "exampleBlock": 1,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "User declined on the {{WIDGET_TYPE}} widget: {{ID_FIELD}} \"18\".",
+      "expectsAnswer": false,
+      "expectsDecline": true
+    }
+  ]
+}

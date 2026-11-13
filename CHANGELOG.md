@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.0-alpha.6
+
+Documentation only; no source class changes.
+
+- Developer skills: the entry skill `ddd-module-agents-specialist` (install, wiring, host duties, configuration,
+  folder → skill table, templates for the host's console commands, middlewares, `messenger.yaml` and crons) and eight
+  topic skills `ddd-module-agents-{loop,context,skills-and-purposes,tools,widgets,autonomy,decisions-and-guards,observability}-specialist`.
+  `references/source-ownership.tsv` of the entry skill names the owning skill of every file under `src/` and `config/`.
+- Contract tests `tests/Contract/DeveloperSkill*Test.php`: skill format, source ownership, every named identifier
+  exists, every PHP template passes the syntax check.
+- `README.md` and `AGENTS.md` describe the current state (config defaults, the package's own suite, the `ddd` floor
+  `^3.27.0`).
+
 ## 0.1.0-alpha.5
 
 - A `delegate` call that names `toolName` is a tool run, also when it carries a `task` text beside it (the text is
