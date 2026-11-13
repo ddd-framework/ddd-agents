@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-alpha.2
+
+- The answer contract owes the outcomes of the writes since the owner's newest input: their text or, newer than it,
+  their own signal (a widget submit, an action confirmation). Before, a turn started by a widget submit listed the
+  writes of the previous turn again, and the model repeated that turn's whole answer.
+- The doc comment of `CustomVisualizationConversationWidget::$script` names the package's sandbox global
+  `window.AGENTS_VISUALIZATION`.
+
 ## 0.1.0-alpha.1
 
 First pre-release. Requires `mgamadeus/ddd` ^3.27.0, `mgamadeus/ddd-ai` ^3.2.1, `mgamadeus/ddd-argus` ^1.3.2,
