@@ -1199,8 +1199,9 @@ class AgentModelInput extends ValueObject
      * context's messages — the write classifier is the {@see buildRecentToolCallsHintText()} read predicate
      * (not a reusable read, not the load_skills/delegate/plan meta tools) plus every completed reusable read whose result carried
      * pictures ({@see \DDD\Domain\AI\Entities\Conversations\Messages\ToolCall::$imageReferences}); the turn boundary
-     * is the newest genuine owner text message (the {@see buildReplyLanguageTailCue()} walk). Null when the turn
-     * holds neither.
+     * is the owner's newest input: their genuine text message (the {@see buildReplyLanguageTailCue()} walk) or, newer
+     * than it, their own signal (a widget submit, an action confirmation) — the writes before such a signal were
+     * reported in the answer the owner acted on and are not owed again. Null when the turn holds neither.
      * Volatile wire-tail contract like the other hints: never persisted, cache-neutral.
      */
     public function completedWritesAnswerContractHint(): ?string
@@ -1208,8 +1209,10 @@ class AgentModelInput extends ValueObject
         $newestOwnerMessagePosition = -1;
         for ($i = count($this->messages) - 1; $i >= 0; $i--) {
             $candidate = $this->messages[$i];
-            if ($candidate->isOwnerOrOrchestratorTaskText()
-                && trim((string)($candidate->message ?? '')) !== '') {
+            $isOwnerSignal = ($candidate->messageType ?? null) === AIConversationMessage::MESSAGE_SIGNAL
+                && $candidate->isOwnerAuthoredInbound();
+            if ($isOwnerSignal
+                || ($candidate->isOwnerOrOrchestratorTaskText() && trim((string)($candidate->message ?? '')) !== '')) {
                 $newestOwnerMessagePosition = $i;
                 break;
             }
