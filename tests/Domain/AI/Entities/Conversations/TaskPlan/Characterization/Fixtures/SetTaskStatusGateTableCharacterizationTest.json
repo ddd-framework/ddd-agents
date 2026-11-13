@@ -11270,9 +11270,11 @@
             ]
         }
     },
-    "G8 a blocked verdict does not resolve → G28 applies the tick": {
-        "reachedGate": "G28",
-        "feedback": [],
+    "G8 a blocked verdict parks the leaf → the record decides": {
+        "reachedGate": "RECORD",
+        "feedback": [
+            "Task '1': the record decides this item — blocked (your done was not applied): the owner declined. The item stays parked until the record changes."
+        ],
         "counters": {
             "updatedCount": 1,
             "notedCount": 0,
@@ -11290,23 +11292,30 @@
         ],
         "planStamps": {
             "updatedAtTurnInitiatorMessageIndex": 10,
-            "resolvedAtTurnInitiatorMessageIndex": 10
+            "resolvedAtTurnInitiatorMessageIndex": null
         },
         "itemFieldChanges": {
             "1": {
                 "status": [
                     "open",
-                    "done"
+                    "blocked"
                 ],
                 "statusNote": [
                     null,
-                    "the model note"
+                    "the owner declined"
+                ],
+                "requiresUserAction": [
+                    false,
+                    true
+                ],
+                "platformResolvedAtMessageIndex": [
+                    null,
+                    10
                 ]
             }
         },
         "resolverCalls": {
             "doneCriteria": [
-                "profile.socialLinks",
                 "profile.socialLinks"
             ]
         }

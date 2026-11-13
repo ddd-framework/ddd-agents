@@ -774,6 +774,27 @@ class TaskPlanItem extends ValueObject
     }
 
     /**
+     * The RECORD parks this leaf where a `set_task_status` tick claimed done / not_applicable
+     * ({@see TaskPlanItemTickGate::checkAgainstTheRecordCriterion()}, a record verdict `blocked`): blocked with the
+     * record's note and its `requiresUserAction`, never retryable, the provenance stamp at the turn initiator's index.
+     */
+    public function adoptRecordParkInsteadOfTick(TaskPlanDoneCriterionVerdict $recordVerdict, int $currentTurnInitiatorMessageIndex): void
+    {
+        $this->writePlatformClosing(
+            self::STATUS_BLOCKED,
+            $recordVerdict->statusNote,
+            $currentTurnInitiatorMessageIndex,
+            requiresUserActionWhenBlocked: $recordVerdict->requiresUserAction
+        );
+    }
+
+    /** Whether the PLATFORM parked this item (blocked with a platform provenance stamp) — a model-set blocked is none. */
+    public function isParkedByThePlatform(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED && $this->platformResolvedAtMessageIndex !== null;
+    }
+
+    /**
      * The status the MODEL chose for this item, written as a transition (the one writer of
      * `set_task_status`'s applied tick and of `update_task_plan`'s status transition): `$status`; a CHANGED status drops the platform's provenance
      * ({@see $preResolvedAtSeed}, {@see $platformResolvedAtMessageIndex}) — a `(platform-resolved)` label on a status the

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.9
+
+- A `done` / `not_applicable` tick on a criterion leaf the record parks (`blockedByOwnerStatement()`) is no longer
+  applied: a leaf the platform already parked keeps its park, any other leaf takes the record's park now
+  (`TaskPlanItem::adoptRecordParkInsteadOfTick()`, `isParkedByThePlatform()`). Behaviour change of the gate-table row
+  G8 "a blocked verdict": it now reaches RECORD instead of G28.
+
 ## 0.1.0-alpha.8
 
 Documentation only; no behaviour change.

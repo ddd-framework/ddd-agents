@@ -151,7 +151,9 @@ class TaskPlanItemTickGate extends ValueObject
      * G7 / G8 — a done / not_applicable on a criterion leaf. G7: the record's verdict is STILL OPEN — evidence the platform
      * owns is not on the record yet: not applied. G8: the record already RESOLVES the leaf (done /
      * not applicable with its note) — the record's verdict lands now, before the tool-call gate (a platform write outside
-     * a model call leaves no call to find). A key without a criterion answers nothing — no gate.
+     * a model call leaves no call to find). The record PARKS the leaf (blocked on the owner's recorded words): the tick
+     * is not applied — a leaf the platform already parked keeps its park untouched, any other leaf takes the record's
+     * park now. A key without a criterion answers nothing — no gate.
      */
     protected function checkTheRecordsVerdict(): ?TaskPlanItemTickVerdict
     {
@@ -176,6 +178,18 @@ class TaskPlanItemTickGate extends ValueObject
                     ? "Task '{$this->taskAddress}': {$this->status} — confirmed by the record: " . $recordVerdict->statusNote . '.'
                     : "Task '{$this->taskAddress}': the record decides this item — {$recordVerdict->status} (your {$this->status} was not applied): " . $recordVerdict->statusNote . '.',
             ]);
+        }
+        if ($recordVerdict instanceof TaskPlanDoneCriterionVerdict
+            && $recordVerdict->status === TaskPlanItem::STATUS_BLOCKED
+            && trim((string)$recordVerdict->statusNote) !== ''
+        ) {
+            $recordParkFeedbackLine = "Task '{$this->taskAddress}': the record decides this item — blocked (your {$this->status} was not applied): "
+                . $recordVerdict->statusNote . '. The item stays parked until the record changes.';
+            if ($taskPlanItem->isParkedByThePlatform()) {
+                return TaskPlanItemTickVerdict::noted($recordParkFeedbackLine);
+            }
+            $taskPlanItem->adoptRecordParkInsteadOfTick($recordVerdict, $this->taskPlanEvidence->currentTurnInitiatorMessageIndex);
+            return TaskPlanItemTickVerdict::ofKind(TaskPlanItemTickVerdict::KIND_RECORD_VERDICT_APPLIED, [$recordParkFeedbackLine]);
         }
         return null;
     }
