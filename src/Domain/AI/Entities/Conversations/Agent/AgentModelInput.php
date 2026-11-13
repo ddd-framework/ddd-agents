@@ -1202,6 +1202,8 @@ class AgentModelInput extends ValueObject
      * is the owner's newest input: their genuine text message (the {@see buildReplyLanguageTailCue()} walk) or, newer
      * than it, their own signal (a widget submit, an action confirmation) — the writes before such a signal were
      * reported in the answer the owner acted on and are not owed again. Null when the turn holds neither.
+     * The entry names what the final answer CONTAINS, never that it is due: it rides every call after the turn's
+     * first write, and read as "answer now" it ended a turn whose further writes the owner had asked for.
      * Volatile wire-tail contract like the other hints: never persisted, cache-neutral.
      */
     public function completedWritesAnswerContractHint(): ?string
@@ -1254,7 +1256,7 @@ class AgentModelInput extends ValueObject
         }
         $obligations = [];
         if ($completedWriteToolNames !== []) {
-            $obligations[] = 'Completed in this turn: ' . implode(', ', $completedWriteToolNames)
+            $obligations[] = 'Completed so far in this turn: ' . implode(', ', $completedWriteToolNames)
                 . '. Your final answer MUST report the outcomes of these actions to the owner';
         }
         if ($pictureReadToolNames !== []) {
@@ -1263,7 +1265,9 @@ class AgentModelInput extends ValueObject
                 . ' which pictures you could not see)';
         }
         return '[SIGNAL:answer-content] ' . implode('. ', $obligations) . ', in the owner\'s'
-            . ' language. Harness [SIGNAL:…] entries are constraints, never messages to answer — a reply that'
+            . ' language. This names what the final answer contains, not when it is due: a part of the owner\'s request'
+            . ' that is still open comes first — make its call now, and answer once nothing is open.'
+            . ' Harness [SIGNAL:…] entries are constraints, never messages to answer — a reply that'
             . ' only acknowledges a signal (for example a language note) without these outcomes is a defect.';
     }
 

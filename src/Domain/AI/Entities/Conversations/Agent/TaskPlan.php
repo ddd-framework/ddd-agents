@@ -77,6 +77,22 @@ class TaskPlan extends ValueObject
             . ' to the owner (statusNotes are internal bookkeeping the owner never sees).';
     }
 
+    /**
+     * The result text of an `update_task_plan` call that sent the plan exactly as it stands. It says that nothing
+     * failed and what follows from the plan as it stands — the work of the next open item, or the answer when the open
+     * items wait for the owner. It orders no work: an owner who asked to be asked before the next item is answered,
+     * not overruled by a result text. The load_tool route stays named — a missing tool was the observed reason for
+     * the resend.
+     */
+    public static function buildUnchangedResendResultText(): string
+    {
+        return 'Task plan NOT updated: it is ALREADY in exactly this state — resending it does no work. Nothing failed'
+            . ' and nothing is unavailable. Go on from the plan as it stands: the work of the next open item — or your'
+            . ' answer, when the owner asked to be asked first or to stop, or the open items wait for them. If a tool you'
+            . ' need is missing from your tools list, call load_tool with its name (its schema lists every available'
+            . ' tool). For status changes use set_task_status.';
+    }
+
     /** @var TaskPlanItems|null The plan's item TREE — top level of the uniform per-depth set type. Null/empty = no plan content. */
     public ?TaskPlanItems $items = null;
 

@@ -49,6 +49,30 @@ class AgentPlanDynamicsDecisionTest extends UnitTestCase
         self::assertNull($decision->toDirectiveText(), 'a fallback without a band renders nothing');
     }
 
+    public function testADirectiveThatAsksForAPlanEndsOnceAPlanUpdateOfTheTurnApplied(): void
+    {
+        $decision = new AgentPlanDynamicsDecision();
+        $decision->decidedBy = AgentPlanDynamicsDecision::DECIDED_BY_DECISION_MODEL;
+        $decision->band = AgentPlanDynamicsDecision::BAND_REQUIRED;
+        self::assertStringContainsString('as your FIRST call', (string)$decision->toDirectiveText(0, null, false));
+        self::assertNull($decision->toDirectiveText(0, null, true), 'the plan exists: its own tail entry is the view from here');
+        self::assertNull($decision->toDirectiveText(2, '3', true));
+        $decision->band = AgentPlanDynamicsDecision::BAND_MIDDLE;
+        self::assertNull($decision->toDirectiveText(0, null, true));
+        $decision->band = AgentPlanDynamicsDecision::BAND_DIRECT;
+        self::assertStringContainsString('no task plan', (string)$decision->toDirectiveText(0, null, true), 'the direct band asks for no plan and stays');
+    }
+
+    public function testADirectTurnMayTakeEveryCallItNeeds(): void
+    {
+        $decision = new AgentPlanDynamicsDecision();
+        $decision->decidedBy = AgentPlanDynamicsDecision::DECIDED_BY_DECISION_MODEL;
+        $decision->band = AgentPlanDynamicsDecision::BAND_DIRECT;
+        $directive = (string)$decision->toDirectiveText();
+        self::assertStringContainsString('do what it asks — every call it needs —, then answer', $directive);
+        self::assertStringNotContainsString('the one thing', $directive);
+    }
+
     public function testAPlanCreatingDirectiveNamesTheDropOfAStandingPlansItems(): void
     {
         $decision = new AgentPlanDynamicsDecision();

@@ -172,7 +172,8 @@ class AIConversationTaskPlanRecordService extends Service
         if ($taskPlanUpdateOutcome->isUnchanged) {
             // NO-OP RESEND (a stalled model resends the identical plan for many consecutive steps instead of doing the
             // work): refuse WITHOUT a brake (forcing a tool-less answer here would make the model rationalize a false "I
-            // could not do it" to the owner) and name the load_tool route, which is the observed escape. The refusal
+            // could not do it" to the owner) and name the load_tool route, which is the observed escape
+            // ({@see TaskPlan::buildUnchangedResendResultText()}). The refusal
             // still counts as this turn's plan TOUCH and still delivers the feedback and the once-per-run maintenance rules.
             $priorTaskPlan?->markUpdatedInTurn($currentTurnInitiatorMessageIndex);
             $toolCall->taskPlanCallOutcome = ToolCall::TASK_PLAN_CALL_OUTCOME_UNCHANGED;
@@ -185,11 +186,7 @@ class AIConversationTaskPlanRecordService extends Service
                     . $feedbackSentence . $maintenanceText;
             }
             $toolCall->wasRefusedAsDuplicate = true;
-            return 'Task plan NOT updated: it is ALREADY in exactly this state — resending it '
-                . 'does no work. Nothing failed and nothing is unavailable. Continue the work of the next '
-                . 'open item NOW; if a tool you need is missing from your tools list, call load_tool with '
-                . 'its name (its schema lists every available tool). For status changes use set_task_status.'
-                . $feedbackSentence . $maintenanceText;
+            return TaskPlan::buildUnchangedResendResultText() . $feedbackSentence . $maintenanceText;
         }
         $updatedTaskPlan = $taskPlanUpdateOutcome->taskPlan;
         // the creation stamp names the owner turn the plan was made for (its title at retirement); a change

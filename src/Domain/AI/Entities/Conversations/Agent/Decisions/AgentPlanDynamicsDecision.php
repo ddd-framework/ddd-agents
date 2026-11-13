@@ -189,8 +189,10 @@ class AgentPlanDynamicsDecision extends AgentDecision
      *        ({@see resolveEarlierPlanItemKeyToDrop()}) — the plan-creating bands then name the drop of its items
      *        ({@see buildEarlierPlanStandsSentence()}); null = no earlier plan to drop
      * @param bool $planUpdateAppliedThisTurn an `update_task_plan` of the current turn changed the plan — the reopening
-     *        directive has done its job then and is no longer sent (the context is rebuilt on every call of the turn;
-     *        a standing "add the new parts as your FIRST call" made the model resend the plan)
+     *        directive and the directives that ask for a plan (the required and the middle band) have done their job
+     *        then and are no longer sent: the context is rebuilt on every call of the turn, a standing "create it as
+     *        your FIRST call" made the model resend the plan, and "then work the items" spoke against an owner who
+     *        had asked to be asked before the next item. From there the plan's own tail entry is the model's view.
      */
     public function toDirectiveText(int $finishedPlanCount = 0, ?string $earlierPlanItemKeyToDrop = null, bool $planUpdateAppliedThisTurn = false): ?string
     {
@@ -200,13 +202,17 @@ class AgentPlanDynamicsDecision extends AgentDecision
         if ($this->reopenedFinishedPlan) {
             return $planUpdateAppliedThisTurn ? null : self::buildReopenedPlanDirective($this->reopenedPlanItemKeys) . $finishedNote;
         }
+        if ($planUpdateAppliedThisTurn && in_array($this->band, [self::BAND_REQUIRED, self::BAND_MIDDLE], true)) {
+            return null;
+        }
         $earlierPlanNote = $earlierPlanItemKeyToDrop !== null ? self::buildEarlierPlanStandsSentence($earlierPlanItemKeyToDrop) : '';
         return match ($this->band) {
             self::BAND_REQUIRED => '[SIGNAL:plan] This request needs a working plan: several separately accountable changes or '
                 . 'deliverables, or work that must survive a pause. Create it with update_task_plan as your FIRST call (one '
                 . 'item per part), then work the items; tick each once its result is in your context, with the call for the next item or with your answer.' . $earlierPlanNote . $finishedNote,
             self::BAND_DIRECT => '[SIGNAL:plan] Answer this directly — no task plan: it is a question, one action with its '
-                . 'check, a preference, a follow-up or one deliverable. Read what you need, do the one thing, answer.' . $finishedNote,
+                . 'check, a preference, a follow-up or one deliverable. Read what you need, do what it asks — every call '
+                . 'it needs —, then answer.' . $finishedNote,
             self::BAND_MIDDLE => '[SIGNAL:plan] Start WITHOUT a task plan. If the data you read shows several separate things to '
                 . 'change or produce, create the plan then (update_task_plan) and work it; otherwise just answer.' . $earlierPlanNote . $finishedNote,
             default => null,

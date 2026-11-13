@@ -67,7 +67,7 @@ class AgentModelInputAnswerContractTurnBoundaryTest extends UnitTestCase
         ];
         $answerContractHint = (string)$agentModelInput->completedWritesAnswerContractHint();
 
-        self::assertStringContainsString('Completed in this turn: updateCompetitors.', $answerContractHint);
+        self::assertStringContainsString('Completed so far in this turn: updateCompetitors.', $answerContractHint);
         self::assertStringNotContainsString('updateProfile', $answerContractHint);
         self::assertStringNotContainsString('addCompetitors', $answerContractHint);
     }
@@ -94,7 +94,21 @@ class AgentModelInputAnswerContractTurnBoundaryTest extends UnitTestCase
         ];
         $answerContractHint = (string)$agentModelInput->completedWritesAnswerContractHint();
 
-        self::assertStringContainsString('Completed in this turn: updateProfile.', $answerContractHint);
+        self::assertStringContainsString('Completed so far in this turn: updateProfile.', $answerContractHint);
         self::assertStringNotContainsString('updateOpeningHours', $answerContractHint);
+    }
+
+    public function testTheContractNamesTheContentOfTheAnswerAndPutsOpenWorkFirst(): void
+    {
+        $agentModelInput = new AgentModelInput();
+        $agentModelInput->messages = [
+            $this->buildOwnerTextMessage('Change the scope and switch the automatic replies off.'),
+            $this->buildCompletedToolCallMessage('grantMandate'),
+        ];
+        $answerContractHint = (string)$agentModelInput->completedWritesAnswerContractHint();
+
+        self::assertStringContainsString('Your final answer MUST report the outcomes of these actions', $answerContractHint);
+        self::assertStringContainsString('not when it is due', $answerContractHint);
+        self::assertStringContainsString('still open comes first — make its call now', $answerContractHint);
     }
 }
