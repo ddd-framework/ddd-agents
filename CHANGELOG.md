@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-alpha.5
+
+- A `delegate` call that names `toolName` is a tool run, also when it carries a `task` text beside it (the text is
+  not read). Before, such a call was refused and the model ran the tool itself in the main conversation. Only a call
+  with neither shape is refused.
+
 ## 0.1.0-alpha.4
 
 - The answer contract names what the final answer contains, not that it is due: a part of the owner's request that
