@@ -118,7 +118,8 @@ class DelegateTool extends ValueObject implements AgentSeededPlanRefusingMetaToo
                     . 'result that has not arrived. '
                     . 'check_delegations shows what your sub-agents are doing; message_sub_agent sends one of them a message '
                     . '(a running one reads it at its next step, a finished one continues with it). Give EITHER `task` (with `skill_names`) for '
-                    . 'agent work, OR `toolName` + `toolArguments` to run ONE call of a tool offered to you in the background. '
+                    . 'agent work, OR `toolName` + `toolArguments` to run ONE call of a tool offered to you in the background '
+                    . '(a call that names `toolName` runs exactly that tool call; a `task` text beside it is not read). '
                     . 'Delegate for parallel or long work; a single quick lookup, a dependent step or data you need raw is '
                     . 'faster inline.',
                 'parameters' => [

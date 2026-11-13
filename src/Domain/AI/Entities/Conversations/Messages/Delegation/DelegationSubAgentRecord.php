@@ -85,7 +85,7 @@ class DelegationSubAgentRecord extends ValueObject
         return $delegationSubAgentRecord;
     }
 
-    /** The model's call that named both task shapes or neither: refused, no task. */
+    /** The model's call that named no task shape: refused, no task. */
     public static function notRunWithoutTask(int $number, DelegateToolArguments $delegateToolArguments, DateTime $now): static
     {
         $delegationSubAgentRecord = new static();

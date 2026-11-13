@@ -11,7 +11,8 @@ use DDD\Domain\Base\Entities\ValueObject;
 /**
  * The arguments of ONE `delegate` call: an optional `label` and ONE task — an agent task
  * (`task` + `skill_names`) or a tool run (`toolName` + `toolArguments`, the arguments as an object or a JSON string).
- * Both shapes or neither is no task: the call is refused with {@see buildTaskShapeCorrective()}. Fields the model has no
+ * A call that names `toolName` is a tool run, whatever else it carries; a call with neither shape is no task and is
+ * refused with {@see buildTaskShapeCorrective()}. Fields the model has no
  * say in (whether the run end resumes the parent) are not read. Old rows carry `tasks[]`, read by
  * {@see fromLegacyArguments()}. Pure parse.
  *
@@ -29,10 +30,10 @@ class DelegateToolArguments extends ValueObject
     /** The model's label for the sub-agent, cut to a label; null = none given. */
     public ?string $label = null;
 
-    /** The one task; null when the call names both task shapes or neither. */
+    /** The one task; null when the call names neither task shape. */
     public ?AgentDelegationTask $task = null;
 
-    /** The call names an agent task AND a tool run. */
+    /** The call names an agent task AND a tool run: the tool run is its task, the `task` text is not read. */
     public bool $namesBothTaskShapes = false;
 
     /** @param array<string, mixed> $arguments the call's parsed arguments */
@@ -44,8 +45,7 @@ class DelegateToolArguments extends ValueObject
             $delegateToolArguments->label = AgentDelegationTask::cutToLabel($label);
         }
         $delegateToolArguments->task = AgentDelegationTask::fromArgumentItem($arguments);
-        $delegateToolArguments->namesBothTaskShapes = $delegateToolArguments->task === null
-            && is_string($arguments['task'] ?? null) && trim($arguments['task']) !== ''
+        $delegateToolArguments->namesBothTaskShapes = is_string($arguments['task'] ?? null) && trim($arguments['task']) !== ''
             && is_string($arguments['toolName'] ?? null) && trim($arguments['toolName']) !== '';
         return $delegateToolArguments;
     }
@@ -78,18 +78,13 @@ class DelegateToolArguments extends ValueObject
         return $this->task !== null;
     }
 
-    /** The corrective of a call without exactly one task shape; null when the call names one task. */
+    /** The corrective of a call without a task shape; null when the call names a task. */
     public function buildTaskShapeCorrective(): ?string
     {
         if ($this->task !== null) {
             return null;
         }
-        if ($this->namesBothTaskShapes) {
-            return 'delegate REJECTED — one call starts ONE sub-agent with ONE task: give EITHER `task` (with '
-                . '`skill_names`) for an agent task OR `toolName` + `toolArguments` for one tool call, not both. Nothing '
-                . 'was started.';
-        }
-        // neither shape: the call named no `toolName` (a `toolName` alone is a tool run)
+        // neither shape: the call named no `toolName` (a `toolName` is a tool run, with or without a `task` text)
         return 'delegate REJECTED — the call names no task: give `task` (with `skill_names`) for an agent task, or '
             . '`toolName` + `toolArguments` for one tool call. Nothing was started. ' . self::DIRECT_WIDGET_TAIL;
     }
