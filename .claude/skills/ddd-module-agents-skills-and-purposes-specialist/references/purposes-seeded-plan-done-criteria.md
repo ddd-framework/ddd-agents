@@ -4,7 +4,7 @@
 
 Contents: what a purpose is · the three parts of a purpose · the purpose file keys · inheritance · starting a
 purposed conversation · the hooks of the purpose class · the seeded task plan · done criteria · the customer progress
-stepper · hidden purposes · reading purposed runs · the package's purposes and the purpose of a scheduled run
+stepper · hidden purposes · a run nobody reads · reading purposed runs · the package's purposes and the purpose of a scheduled run
 
 ## What a purpose is
 
@@ -63,7 +63,8 @@ misspelt key is silently ignored.
 | `startableViaApi` | default true; false = only the platform spawns it |
 | `completedConversationStaysSingleton` | a finished conversation stays the space's singleton and is reopened for reading |
 | `blockedToolNames`, `blockedToolsRefusalText` | tools refused for the conversation and its whole delegation tree, named in the directive block |
-| `maxStepsPerTurn`, `maxTurnCostUsd` | per-turn caps |
+| `maxStepsPerTurn` | the per-turn step cap, copied into the run settings at the start |
+| `maxTurnCostUsd` | read into `AIConversationPurpose::$maxTurnCostUsd`, but no start path copies it: a starter that wants a per-turn cost cap stamps `RunSettings::$maxTurnCostUsd` itself |
 | `contextBudgetTokens`, `contextRetention` | the working-context budget and the retention knobs (context skill) |
 | `runSettings` | wire API and reasoning carry-over defaults of a new conversation (`AIConversationPurposesService::buildPurposeRunSettingsFromFrontmatter()`); with the creation choices of `contextRetention` the "agent wire profile", applied whole or not at all |
 | `preferredModelName`, `reasoningEffort`, `minReasoningEffort`, `fastMode` | the model and effort of the purpose's calls |
@@ -242,6 +243,30 @@ open offers not yet reconciled), no later turn re-evaluates it. A host lists suc
 runs `AIConversationAgentService::settlePurposeConversationIfGoalReached()` on each: it delivers a waiting supervisor
 intervention first, else re-runs reconcile, completion and close. Idempotent. The reap pass is a console command of the
 host (`ddd-module-agents-specialist`, host duties).
+
+## A run nobody reads
+
+Rules for a purposed run whose result code reads and no person does (a hidden purpose, an unattended run):
+
+- **It is still a conversation.** The same loop and the same workers drive it. Only data makes it different: the
+  purpose (`startableViaApi: false`, `blockedToolNames`, `loadsEarlierSessionsItself`), the initiator type (a run whose
+  initiator type is neither empty nor `PHONE_CALL` is not user-present: `AIConversation::isUserPresentRun()` is false,
+  so it is never supervised, and `AIConversationOrigin::getReasonItIsNotTheOwnersConversation()` tells a host it holds
+  no owner's words), and the run settings its starter stamps.
+- **The record is the entity, the run is disposable.** The run writes its result through one tool call into a record
+  of its own; the code that needs the result reads that record, never the run's transcript.
+- **A failed run is noticed by the next request, not by the loop.** A turn that fails (an error, a provider or
+  transport failure) calls no purpose hook; only the loop's own stops (step budget, monthly budget, a scope no
+  longer eligible, a terminal loop stop) reach `AIConversationPurpose::recordStopOfRun()`. A host that
+  starts such runs and holds a claim or a record per run releases it itself: its next request reads the run's state
+  and treats a terminal one as ended.
+- **IDLE is not an end.** A conversation is IDLE between its chunks and while its sub-agents run. A run has ended
+  when its run state is terminal (`AIConversationRunState::isTerminal()`: completed, failed, cancelled), and is still
+  working while `AIConversation::isRunInProgress()` holds; a purpose that never closes its conversation ends when its
+  record is written. Bound every wait by a maximum age.
+- **Its tools authorise through the root conversation.** A delegation child carries no purpose, so a tool that
+  belongs to one kind of run finds its run with `AIConversationsService::findRootConversationForToolCall()` (null on
+  the MCP route, where no conversation exists) and checks the root's purpose, not the calling conversation's.
 
 ## Reading purposed runs
 

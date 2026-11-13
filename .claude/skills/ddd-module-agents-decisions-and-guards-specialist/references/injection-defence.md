@@ -20,7 +20,7 @@ self-service request is doing the authorization layer's job, badly.
 ## The layers
 
 1. **Rights and scoping** (the host's repositories and the agent space) decide what any call may touch — the
-   load-bearing layer.
+   layer everything else rests on.
 2. **Owner consent** before an irreversible step: [owner consent](owner-consent.md). Standing permissions for outward
    actions: `ddd-module-agents-autonomy-specialist`.
 3. **Detection** — the two screens below. They are the lowest tier: a cheap, best-effort filter. A classifier on a
@@ -105,7 +105,7 @@ cannot stop content that genuinely looks clean. A host uses it to measure guard 
 - Switch `ownerMessageInjection` and `toolResultInjection` to `shadow`, read the decision log (owner messages) and the
   call rows' `injectionScreening` (tool results) — neither writes a turn event, so the decision statistics show
   nothing for them — then `on`.
-- Keep the structural layers load-bearing: rights scoped by agent space, owner consent on irreversible tools, no write
+- Let the structural layers carry the protection: rights scoped by agent space, owner consent on irreversible tools, no write
   path that trusts text from a tool result.
 
 ## Honest limits

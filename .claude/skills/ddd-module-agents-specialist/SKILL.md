@@ -20,7 +20,7 @@ provide**, and routes every other question to one of eight topic skills.
 ## Scope
 
 This skill owns the module class, agent spaces, entitlements and their interfaces, the scope filter, the read rights
-of the agent tables, environments, the voice-channel seam, source-root discovery, the customer's model choice,
+of the agent tables, environments, the voice-channel override point, source-root discovery, the customer's model choice,
 transports and handler routing, the worker state resetter, listeners, table names, the chat controller traits and
 their DTOs, the naming, wording, persona and egress configs, and `examples/`. The full file list is the manifest
 [references/source-ownership.tsv](references/source-ownership.tsv).

@@ -84,7 +84,27 @@ this turn's platform closing, the cascade cap, then the item's gates and transit
 - **A call the model could not know was redundant:** when every update of a call named an item the platform resolved
   after the model wrote the call, the result starts with `SetTaskStatusTool::RESULT_PREFIX_NO_CHANGE_NEEDED` and the
   call counts as completed.
+- **The echo of a platform closing:** the first tick in a turn of an item the platform closed in this turn is answered
+  "nothing to do" (`TaskPlanItemTickGate::checkEchoOfThisTurnsPlatformClosing()`); a second tick of the same item takes
+  the already-in-status path, which marks the call FAILED — with plan tools exempt from the repeat guard, that is what
+  keeps a re-tick loop finite.
+- **The all-no-op breaker:** a call whose every update was already in status forces the tool-less answer step only when
+  no open item remains, when an earlier tick of the turn failed while no item carries `← next`, or after
+  `AgentTaskPlanTickOutcome::LOOPING_FAILED_TICKS_IN_A_TURN` failed ticks
+  (`AgentTaskPlanTickOutcome::requiresToolLessAnswerStep()`). Forcing on the first redundant tick while workable items
+  remain made the model announce the next item instead of doing it.
+- **The judgement is read lazily:** for the statuses an `update_task_plan` call sends, the evidence and the criteria a
+  tick is judged by are read only when a status transition reaches the gates
+  (`TaskPlanUpdateContext::forStatusTickOfConversation()`); a call whose statuses change nothing reads none of it.
 - The tick feedback lines are returned verbatim in the call's result; nothing is silent.
+
+**The plan note after a work tool.** When a work tool completes, the platform re-sweeps the plan first and then appends
+one note to the call's result (`ToolCall::$resultAppendix`, written by
+`AIConversationTaskPlanRecordService::closeLeavesProvenByCompletedToolCallAndAppendPlanNote()`): the items it closed
+from the record, named with their verdict and "do not tick", and the items whose tick the model owes and will be
+accepted (`TaskPlanItems::getItemNumberPathsTickableAfterToolCall()`). The note is built from the plan as it stands after
+the re-sweep — a note written before it asked for ticks of items the platform closed a moment later. A call the loop
+answered without running it (a refused repeat, a read answered from an earlier result) carries no note.
 
 ## 6. Openness and the item states
 
@@ -104,6 +124,14 @@ Each call carries the plan as a tail entry (`TaskPlan::toTailHintText()`): a hea
 from the column, it survives tool-result clearing, compaction and a worker hand-over. Placement in the model input:
 `ddd-module-agents-context-specialist`.
 
+Two wire rules keep the plan calls cheap and their lessons in context. Every `update_task_plan` call below the newest
+one sends its arguments stubbed as `{"superseded":true}` (`AIConversationMessage::toOpenAiToolCallEntryArray()`; call id
+and name stay, so call and result still pair) — the current plan is in the tail entry, and forensics read the persisted
+rows. The results of the plan tools are exempt from tool-result clearing: the creation result carries the maintenance
+rules once per run, every tick result is a one-line count, and the clearing stub's "call again" would invite exactly the
+full-plan resend the rules forbid. `ToolCall::readTaskPlanCallOutcome()` gives the outcome of a row stored before
+`$taskPlanCallOutcome` existed (failed → refused, a no-op resend → unchanged, otherwise a full replace).
+
 ## 8. Budgets and chunks
 
 A plan raises the turn's budget (`AIConversationTurnBudget`, see [architecture-of-a-turn](architecture-of-a-turn.md) §7): a turn whose plan was
@@ -122,14 +150,18 @@ budget closing step); its text becomes the owner's message with a pause footer w
 The loop asks `AgentCheckedStopPolicy::shouldBounceCheckedStop()` before it accepts a final text: a plan touched in this
 turn (or a turn a work signal started), items still owed once the candidate text's own evidence is counted
 (`TaskPlanItems::hasOwedOpenItemsAfterCandidateTextEvidence()`), and a text that hands nothing to the owner → the text is
-discarded and bounced with `SIGNAL_SOURCE_TASK_PLAN_OPEN_BOUNCE`, at most `MAX_BOUNCES_PER_CHUNK` per chunk. A plan-less
-turn is never bounced. The site and its other bounces: [stall-and-final-text](stall-and-final-text.md).
+discarded and bounced with `SIGNAL_SOURCE_TASK_PLAN_OPEN_BOUNCE`, at most `MAX_BOUNCES_PER_CHUNK` per chunk. The bounce
+is ONE text (`AgentCheckedStopPolicy::buildCheckedStopBounceText()`): the owed items by key, split into the ones the
+model ticks and the ones the record closes. A plan-less turn is never bounced, nor is the opener of a kickoff the owner
+has not answered yet (`AIConversationMessages::isKickoffBeforeTheOwnerSpoke()`). The site and its other bounces: [stall-and-final-text](stall-and-final-text.md).
 
 Plan tools are exempt from the repeat guard, so two brakes keep a re-tick loop finite:
 `AIConversationAgentService::MAX_CONSECUTIVE_REJECTED_PLAN_TICKS` and `MAX_REJECTED_PLAN_TICKS_PER_TURN` hold the plan
 tools back for the step, and `AgentTaskPlanTickOutcome::LOOPING_FAILED_TICKS_IN_A_TURN` forces the tool-less answer
 step. Under append-only loading the tools stay on the wire and the dispatch refuses them
-(`AgentStepToolRestriction::markPlanToolsHeldBackAfterRejectedTicks()`).
+(`AgentStepToolRestriction::markPlanToolsHeldBackAfterRejectedTicks()`): one such refused call (marked
+`ToolCall::$wasWithheldOnStep`) forces the tool-less answer step, and a withheld refusal never counts as a rejected tick,
+so it never re-arms the brake.
 
 ## 10. Finished plans
 
@@ -140,7 +172,12 @@ for a model-created plan of a root conversation whose purpose neither works auto
 while the plan-dynamics decision site (`AgentDecisionModelSettings::SITE_PLAN_DYNAMICS`) is on; in shadow mode the
 retirement is only recorded (`wouldRetireFinishedPlan`) and the plan stays active. `get_task_plans` (`GetTaskPlansTool`) reads the finished plans. A finished plan reopens for
 the owner's very next message when the turn right before wrote and retired it (`TaskPlan::reopensForOwnerTurn()`,
-`reopen()`), so an amendment adds items instead of starting over.
+`reopen()`), so an amendment adds items instead of starting over. The reopen
+(`AgentPlanDynamicsDecisionsService::reopenFinishedTaskPlanOfThePreviousOwnerTurnIfDue()`) records the platform's
+decision (`AgentPlanDynamicsDecision::buildForReopenedPlan()`) instead of asking the plan question, and the model reads
+`AgentPlanDynamicsDecision::buildReopenedPlanDirective()`: added parts go in as new items with `update_task_plan` as the
+first call, the finished items kept by key; an owner message that adds nothing is just answered and the plan closes
+again. The directive stops once a plan update of the turn applied.
 
 ## 11. Long unattended runs
 

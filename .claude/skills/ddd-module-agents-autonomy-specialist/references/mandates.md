@@ -118,10 +118,20 @@ loop must ask `findActiveMandateFor()` itself.
 2. The dialogue is pulled server-side: `AIConversationMessages::buildUserVisibleDialogueExcerptEndingAtMessage()` (owner
    and agent text only, fenced blocks stripped, word-budgeted). The model can neither supply nor forge the evidence.
 3. `ArgusAgentMandateApproval` judges consent (prompt `AgentAIPromptNames::APP_AI_MANDATE_APPROVAL_CHECK`, JSON, the
-   task prompt in the system role, budget not enforced). A verdict counts only with a boolean `approved` and a matching
+   task prompt in the system role, budget not enforced). It declares no shared system prompt on purpose: it is a
+   classifier, and with the assistant persona in the system role the model read the owner's imperatives in the
+   dialogue as injection and refused instead of judging. A verdict counts only with a boolean `approved` and a matching
    `verdictCode` (`AgentMandateApproval::VERDICT_CONSENT_FOUND` or one of `REJECTION_VERDICT_CODES`); anything else
    is retried once, then reported as "did not complete", never as a rejection.
-4. Approved: the ACTIVE row with the excerpt, then `supersedeCoveredMandates()` (same class, covered space).
+4. Approved: the ACTIVE row with the excerpt, then `supersedeCoveredMandates()` (same class, covered space). An
+   account-wide grant replaces the class's mandates of every space; a grant for one space never narrows an account-wide
+   mandate to that space (`AgentMandate::isSupersededBy()`) — narrowing is left to an explicit revoke.
+5. The grant's answer (`AgentMandateMcpResponseDto::forGrantOutcome()`) tells the model: the grant alone changes
+   nothing, call the refused tool again now; for a one-instruction grant, run the whole batch of the request through
+   the tool used first and do not grant again, a different action of the class needs the owner's own consent; for a
+   standing grant, tell the owner in one sentence what the agent may now do on its own, until when, and that a word
+   stops it; and the replaced mandates, so the owner hears that the old permission no longer applies. An
+   already-covered request answers "retry the refused calls, do not grant again" without a new row.
 
 The prompt's rules a host should know: only the owner's lines count; the class is a fact of the code, not judged; a
 direct order of one concrete action is one-instruction consent; a standing grant needs consent to the class as a

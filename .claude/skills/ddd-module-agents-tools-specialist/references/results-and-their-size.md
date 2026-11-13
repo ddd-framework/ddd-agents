@@ -34,11 +34,18 @@ can pass `outputFormat=structured`.
 large or repetitive; leave a small flat result (a settings object, a confirmation) structured — there the JSON costs
 nothing extra.
 
-The rendering is a pure fold over the DTO's own data: no repository call, no persist. Lead with the answer (the
+The rendering is a pure function of the DTO's own data: no repository call, no persist. Lead with the answer (the
 current value, the change), group repeats (a daily series as constant spans), give a one-line legend for any
 encoding, and let every object render itself — a container composes its children's renderings and never formats a
 child's fields. An empty or not-connected state renders as a normal answer ("No notes yet."), never as an error. Put
-an example output into the method's docblock.
+an example output into the method's docblock. Three details:
+
+- Guard a typed property that may stay uninitialized (loaded on demand, or never set) with `isset()` before reading
+  it: reading an uninitialized typed property is a fatal error, and it surfaces as a failed tool call.
+- An object that appears both alone and inside a list offers a compact or one-line variant beside its full
+  rendering; the container calls the short one.
+- Entries that carry no detail worth acting on collapse into one line of names with their count, instead of one block
+  each.
 
 ## Failures and refusals
 

@@ -27,6 +27,12 @@ Columns on the conversation row: `runState`, `runToken`, `runHeartbeatAt`, `resu
 `isTerminal()`, `holdsALiveTurn()`, `isAtRestOrFailed()`, `isRunningOrQueued()`, …). Use them; never compare against a
 literal list.
 
+**IDLE does not mean the agent is done.** `AIConversationRunClaimsService::isTurnStillUnderwayWhileIdle()` answers, for
+an IDLE row, whether its latest turn is still underway — three indexed reads: the owed-turn marker `agentTurnOwedAt` is
+set (a yield hand-over or a failed turn under the cap); a sub-agent whose end resumes the conversation is unfinished;
+or a sub-agent run-end notification still waits for the conversation's turn. A reader that reports progress (a task
+projection, a revival of a lost kickoff, the cancel guard) asks it instead of reading IDLE as finished.
+
 ## 2. The claim
 
 `AIConversationRunClaimsService::claimRun($conversation, $runToken)` is ONE conditional UPDATE:
@@ -135,8 +141,11 @@ How the exceptions reach the release (`resumeConversationIfReady()`):
 | `AIModelCallTransportFailedException` | no (logged at error level) | transient; a Guzzle transfer failure, wrapped in `sendModelCallThroughEgress()` |
 | any other `Throwable` | yes | the handler logs it; the release already left the turn owed |
 
-An HTTP error status of the provider is not a transport failure: it arrives as a response with an error body and is
-read as a provider error.
+A transport failure is the HTTP transfer itself failing: a connect timeout, the read timeout
+(`ArgusAILanguageModelTrait::DEFAULT_ARGUS_TIMEOUT`), a dropped connection, or a Guzzle response exception raised during
+the transfer; the Guzzle exception rides as the previous exception. An HTTP error status of the provider is not one:
+the Argus layer sends with `http_errors` false, so a 4xx or 5xx arrives as a response with an error body and is read as
+a provider error (`AIModelCallFailedException`, no retry).
 
 ## 7. Retry
 
@@ -203,8 +212,19 @@ WAITING signal: a parent turn that is running reads it at its next model call; a
 landed after the parent's last model call is caught by the release probe. The parent stays conversational meanwhile:
 an owner message drives a normal turn. How children claim, end and report: `ddd-module-agents-autonomy-specialist`.
 
-`AIConversationRunClaimsService::cancelLiveRun()` cancels a run and its unfinished sub-agent runs in one transaction
-that holds the row lock; the cancelled worker loses at its next heartbeat and its release becomes a no-op.
+`AIConversationRunClaimsService::cancelLiveRun()` cancels a run and its unfinished sub-agent runs in one read-committed
+transaction that locks the conversation row first:
+
+- QUEUED, RUNNING and AWAITING_DELEGATES are cancelled; an IDLE row only while `isTurnStillUnderwayWhileIdle()` holds or
+  the newest owner text has no assistant text after it — re-checked under the lock, so a completion that landed after
+  the caller's read is never overwritten; a terminal or answered row is left alone (no write, no publish).
+- The write is `runState` CANCELLED, `runToken` and `agentTurnOwedAt` NULL. Each unfinished sub-agent run ends CANCELLED
+  with `DelegationSubAgentRun::FAILURE_REASON_CANCELLED_BY_OWNER`, stamped reported, and its deadline row is ended, so
+  the reaper never times it out into the parent; the child rows go CANCELLED in the same transaction.
+- After the commit ONE change signal with `AIConversationRealtimeSignalService::STATUS_CANCELLED` goes out.
+- CANCELLED is closed: no claim takes the row, a new owner message is refused, and a run-end notification that still
+  reaches the parent neither ticks it running nor resumes it. The worker that still runs the turn loses at its next
+  heartbeat and its release becomes a no-op.
 
 ## 10. Adding a release branch
 

@@ -63,7 +63,23 @@ one tool call, no model) and an awaited run (`AgentDelegationAwaitedRunTask`: a 
 adopted as the child; nothing is seeded, it ends through the normal run end).
 
 `delegationNextStepWhenAllSubAgentsEnded` is stored on every record of the request and rendered once, as a "NEXT"
-line, in the notification of the run end that leaves no unfinished run in that request.
+line, in the notification of the run end that leaves no unfinished run in that request — only when every other record
+of the request has ended and been reported (`DelegationSubAgentRecord::hasCurrentRunEndedAndBeenReported()`). A
+request with a `superseded` run owes no next step (`DelegationRunEndNotification::buildRequestEndedLine()`).
+
+The spawn does not de-duplicate requests of a tool result: a tool that starts sub-agents guards itself against a second
+call in the same turn, for example by asking the turn's messages (`AIConversationMessages::buildCurrentTurn()`) for an
+earlier completed call of itself (`AIConversationTurnMessages::hasCompletedToolCallNamed()`).
+
+**Awaited conversations.** The child's anchor columns are stamped once, guarded
+(`AIConversationRunClaimsService::stampAwaitedConversationAsSubAgentChild()`: only while the conversation has not ended
+and belongs to no other row). A worker driving it mid-turn adopts the anchor at its turn end
+(`AIConversationDelegationResultsService::adoptDelegationAnchorJoinedMidTurn()`). One that had already ended ends its
+run COMPLETED at once; one that belongs to another request ends FAILED with the reason.
+
+**Purpose warm-ups.** A warm operation with `awaitGraceSeconds` above zero (`AIConversationPurposeWarmOperation`, carried
+on `AgentSubAgentRequest`) makes the purpose's next step wait up to that long for it
+(`AIConversationPurposeBackgroundWorkService`).
 
 ## The spawn
 
@@ -87,7 +103,11 @@ in the words of `agentApplicationWording.php` — no record, no child, no `NOT_R
    the requested ones that pass the parent's entitlement, vision and purpose gates. A tool run gets the skill that
    provides the tool and the purpose `Background.MechanicalOperation`.
 4. **The record** — `DelegationSubAgentRecord::queued()` (run 1 QUEUED) is written into the parent's `delegate` row
-   inside the parent's claim-fenced write. The number (`#3`) is unique in the conversation.
+   inside the parent's claim-fenced write. The number (`#3`) is one above the highest number of any `delegate` row of
+   the parent, reduced rows included (`AIConversationMessagesService::findNextSubAgentNumber()`). A request of several
+   platform rows is admitted only once all its rows exist
+   (`AIConversationDelegationSpawnService::admitAndAnswerPlatformDelegateRows()`); until then each row answers with
+   `DelegationSubAgentRecord::buildAnswerTextBeforeAdmission()`.
 5. **Run it.** Asynchronous: the child goes QUEUED and is admitted against the capacity (below), then an
    `AIConversationResumeMessage` is dispatched for it — on the turn transport (`AgentMessengerTransports::TURN`); a
    host that does not route it runs it synchronously in the dispatching process. Synchronous (console, eval, a drive without a run claim): the
@@ -123,6 +143,27 @@ Then the freed slot is filled and the parent is notified. On the synchronous pat
 the notifications are appended after the step's call rows
 (`AIConversationDelegationNotificationsService::appendNotificationsOfRunsEndedInThisStep()`).
 
+The transaction runs at READ COMMITTED; an orchestrator message the child never read is named in the run's end. On
+the synchronous path a child that throws ends FAILED with `budgetReached`, `providerError` or `childFailed`, and
+`reportedToParentAt` is stamped only after the notification row is stored.
+
+**The writers.** Each state change of the record has one guarded writer on `AIConversationMessagesService`:
+
+| Change | Writer | Guard |
+|---|---|---|
+| none → run 1 QUEUED, or `NOT_RUN` | `writeSubAgentRecordOfSpawn()` | the column is empty — the parent's only write |
+| QUEUED → RUNNING | `writeSubAgentRunStarted()` | run k is QUEUED |
+| → COMPLETED, FAILED, TIMED_OUT, CANCELLED | `writeSubAgentRunEnded()` | run k is QUEUED or RUNNING |
+| → `reportedToParentAt` | `stampSubAgentRunReportedToParent()` | run k ended, not yet stamped (the exactly-once gate) |
+| ended → run k+1 QUEUED | `openSubAgentContinuationRunRecord()` | run k recorded an end, run k+1 absent |
+
+The parent never rewrites the record: `writeExistingMessageRow()` unsets `delegationResults` when it rewrites a
+`delegate` row that carries a record, and restores it after the write. Readers of the current state read past the
+entity registry: `findSubAgentRecordsOfConversation()` (the newest rows), `findStoredDelegateCallRow()`,
+`lockStoredDelegateCallRow()` (a row lock). A run carries `failureDetail` (cut to
+`DelegationSubAgentRun::FAILURE_DETAIL_MAX_LENGTH`) and `costInUsd`, this run's spend only
+(`DelegationSubAgentRecord::buildCostOfCurrentRun()`).
+
 Run statuses (`DelegationSubAgentRun`): `QUEUED`, `RUNNING`, `COMPLETED`, `FAILED`, `CANCELLED`, `TIMED_OUT`,
 `NOT_RUN`; the model sees `TIMED_OUT` as FAILED. Failure reasons: `DelegationSubAgentRun::FAILURE_REASONS`.
 `cancelledByOwner` has one writer: `AIConversationRunClaimsService::cancelLiveRun()`, which nothing in the package
@@ -140,15 +181,38 @@ calls — the host's cancel endpoint does; it stops the whole tree and writes no
 
 The text: status line, the verdict cut at `DelegationRunEndNotification::VERDICT_MAX_LENGTH` with a pointer to
 `check_delegations`, "Still running: …" naming at most `DelegationRunEndNotification::STILL_RUNNING_NAMED_MAX` other
-sub-agents, and the request's next step on its last run end. A record that notifies without resuming, or a run that
-ended `superseded`, writes the WITHOUT_RESUME source.
+sub-agents, and the request's next step on its last run end. A failed tool run reads "FAILED: <tool> — … Nothing was
+saved by it.". A record that notifies without resuming, or a run that ended `superseded`, writes the WITHOUT_RESUME
+source.
+
+After the commit a notification that resumes also stamps the parent's inbound activity and sends the realtime running
+signal. The row is never merged into another row, and every release probes for waiting rows afterwards; that probe
+(`AIConversationMessagesService::hasSignalWaitingThatResumesTheConversation()`) skips the WITHOUT_RESUME source.
+
+**Hand-over and replay.** Before the next model call the loop marks waiting rows read. Run ends of one source that
+landed below model output are replayed as one row, combined in index order
+(`AIConversationMessages::buildCombinedSubAgentRunEndText()`). The replay keeps the meaning of what it replays
+(`AIConversationSignalSource::replaySourceFor()`): `SIGNAL_SOURCE_SUB_AGENT_RUN_ENDED_REPLAY` and
+`SIGNAL_SOURCE_SUB_AGENT_RUN_ENDED_WITHOUT_RESUME_REPLAY` for run ends, `SIGNAL_SOURCE_MID_TURN_SIGNAL_REPLAY` for every
+other source, owner rows included. `AIConversationTurnMessages::isOpenedBySubAgentNotificationsOnly()` reads a run-end
+replay as a run end, so a run end that landed while the model call of a `wait_for_sub_agents` ran opens a notification
+turn that may wait again; the loop reads its wait flag after the first step's hand-over
+(`AIConversationRunClaimsService::hasUnfinishedSubAgentRunOnANotificationTurn()`).
+
+**A turn that ends on its terminal report** (budget, step or cost stop) marks the waiting run-end rows read where they
+stand (`AIConversationMessagesService::markWaitingSubAgentRunEndNotificationsReadAtTerminalTurnEnd()`, fenced on the
+process's claim); the results stay on the records for `check_delegations`.
 
 ## The short wait and parking
 
 - A root turn opened by run-end notifications alone waits before its first model call so that run ends close together
   are read in one call: `waitForCloseRunEndsBeforeTheFirstModelCall()` polls every
   `AgentSubAgentRunEndQuietWait::POLL_MICROSECONDS` until no new run end for `QUIET_MILLISECONDS`, `CAP_MILLISECONDS`
-  passed, no run is unfinished or the claim was lost. Never on an owner's turn.
+  passed, no run is unfinished or the claim was lost. Never on an owner's turn, and only when no model call ran since
+  the newest turn end (`AIConversationTurnMessages::hasModelCallSinceTheNewestTurnEnd()`); it also beats the claim's
+  heartbeat, and the loop reloads the rows after any wait.
+- A completed `wait_for_sub_agents` is no stall, is never bounced and is not judged by the turn-closing decision;
+  `AIConversationMessage::isTurnEndWithoutTextCall()` makes the walks over owed work read it as the turn's end.
 - When a tool started sub-agents that resume the parent, the platform writes a completed `wait_for_sub_agents` row
   itself (`appendPlatformWaitForSubAgentsRow()`), and each later run end opens a notification turn of its own.
 
@@ -157,13 +221,16 @@ ended `superseded`, writes the WITHOUT_RESUME source.
 - **Reading.** `check_delegations` renders `DelegationStatusReport::buildFor()` over the stored records plus the live
   activity of running children (`AgentSubAgentLiveActivity`).
 - **`message_sub_agent`** (`AIConversationDelegationSpawnService::messageSubAgent()`): refused for an unknown number, a
-  `NOT_RUN` record, a tool run or an awaited run (`DelegationSubAgentRecord::findRefusalOfMessage()`). Otherwise the
-  message is first written into the child as an `ORCHESTRATOR_MESSAGE` signal, then the record is read under its row
-  lock: an unfinished run reads it at its next step (an idle child is resumed); an ended run **continues** —
-  `openContinuationRunOfRecord()` opens run k+1 with a new deadline, re-arms the child QUEUED and admits it. There is
-  no limit on runs per sub-agent.
+  `NOT_RUN` record, a tool run, an awaited run or a record stored before one sub-agent per call
+  (`DelegationSubAgentRecord::findRefusalOfMessage()`). Otherwise the message is first written into the child as an
+  `ORCHESTRATOR_MESSAGE` signal (`AIConversationMessagesService::appendOrchestratorMessageToSubAgent()`), then the
+  record is read under its row lock: an unfinished run reads it at its next step (an idle child is resumed); an ended
+  run **continues** — `openContinuationRunOfRecord()` opens run k+1 with a new deadline, re-arms the child QUEUED
+  (`AIConversationRunClaimsService::rearmTerminalDelegationChild()`) and admits it. The synchronous path continues
+  inline (`continueSubAgentInline()`). There is no limit on runs per sub-agent.
 - **Operators** continue a child through the same path, `openSubAgentContinuationRun()`, with `continuedBy` from the
-  `DelegationSubAgentRun` `CONTINUED_BY_*` constants.
+  `DelegationSubAgentRun` `CONTINUED_BY_*` constants: `driveConversation()` reaches it for an admin's continue or edit
+  and for an owner's drive of a child; a console command of the host passes its own value.
 
 ## Background operations
 
@@ -180,10 +247,16 @@ are honoured only on the asynchronous path and never from inside a sub-agent.
 
 - Every asynchronous run has one deadline row: timeout `AIConversationDelegationSpawnService::SUB_AGENT_RUN_TIMEOUT_SECONDS`,
   for a tool run `AIConversationDelegationToolRunService::TOOL_RUN_TIMEOUT_SECONDS` plus a minute. The child's
-  `delegationBatchId` points at the row of its current run.
+  `delegationBatchId` points at the row of its current run; a continuation gets a new row. The row carries
+  `expectedDelegationCount` 1 and `spawnedByMessageId` = the `delegate` row; its condition is `ALL`, or
+  `AIConversationDelegationResumeCondition::BACKGROUND` for a run that notifies without resuming, so
+  `hasUnfinishedBatchForParent()` never counts platform work. Its end stamps `settledAt` and `foldedAt` in one
+  statement, so no reader of the older group model takes it for a group with unread results. An admitted child gets a
+  full window from its admission (`AIConversationRunClaimsService::extendDeadlineOfAdmittedChild()`).
 - The deadline is extended while a running child's heartbeat is fresh, and while it is still queued for at most
   `AIConversationDelegationBatchesService::SUB_AGENT_QUEUED_MAX_WAIT_SECONDS`; then `timeOutSubAgentRun()` ends the
-  run TIMED_OUT and notifies.
+  run TIMED_OUT and notifies — one transaction, the `delegate` row locked first and the deadline re-read under the
+  lock.
 - `cancelQueuedSubAgentRunsOfDeadlines()` cancels runs that have not started (reason `superseded`); a host calls it
   when a newer request makes queued work pointless.
 - Lost notifications (a crash between the run end and the notifier): the parent's turn head re-sends them
@@ -224,4 +297,8 @@ seeded-plan purpose come from `agentApplicationWording.php`.
 - A host that never runs the reaper: a child whose worker died never ends, its deadline never fires, and the parent
   waits until the owner writes again.
 - `AIConversationDelegationResumeCondition` values `QUORUM` and `ANY` and the `SIGNAL_SOURCE_DELEGATIONS_SETTLED` path
-  serve rows stored before one sub-agent per call; new code never creates them.
+  serve rows stored before one sub-agent per call; new code never creates them. Such a row (a `delegationResults` map
+  without the `subAgent` key, `DelegationResults::isLegacyMap()`) keeps its bytes, and its child ends through the older
+  path: `AIConversationDelegationResultsService::recordDelegationChildTerminal()` →
+  `AIConversationDelegationBatchesService::claimParentResumeOnChildTerminal()` →
+  `resumeParentAfterChildTerminal()`, without cancelling the losers of a quorum. Only that path uses the last two.

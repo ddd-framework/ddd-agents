@@ -31,9 +31,11 @@ running it:
 - no completed call since that is not itself a reusable read — a write, or a read not declared reusable (exempt: the
   plan tools, `load_skills`, `delegate`, the owner report, `AIConversationMessages::NON_MUTATING_WORK_TOOL_NAMES` and
   tools that declare they keep earlier reads valid; a write refused as a duplicate does not count either), and no change signal since (an owner edit
-  in a widget, a settled delegation, a connected channel);
+  in a widget, a delegation whose sub-agents all ended, a connected channel);
 - the earlier result is still on the wire: not stubbed by the retention boundary or the budget, its pictures still
-  riding. Otherwise the read runs again.
+  riding — still resolvable (captured in this invocation or re-resolvable from a durable store) and, together with the
+  pictures of newer results, within the picture cap. Otherwise the read runs again, so a cleared result is never
+  answered with "you already called this".
 
 The repeat gets the earlier result again with a notice, so the model has the answer and keeps every tool.
 

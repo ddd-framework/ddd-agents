@@ -41,7 +41,9 @@ declares is the skills-and-purposes skill's.
 
 `AgentColdCapabilityUnloading::applyTo()` works on the newest message that carries a set; the messages service
 persists that row once and writes one `eviction` turn event per victim after the persist
-(`AIConversationMessagesService::unloadColdCapabilitiesOfRun()`).
+(`AIConversationMessagesService::unloadColdCapabilitiesOfRun()`). The event (`AIConversationTurnEvent::KIND_EVICTION`)
+names the victim and carries `evictedBy` (`skillUnloading`, `sweep`, or `speculative` for a preload removed first),
+`granularity` (`skill` or `tool`) and `prior`, the victim's telemetry right before it left.
 
 | Granularity | Moment |
 |---|---|

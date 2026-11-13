@@ -16,7 +16,7 @@ model's choice accuracy; a feature-sized package keeps a tool next to the domain
 the agent can choose from a short line.
 
 **Rejected.** One flat tool list for the agent: too large to send, too many to choose from. One router agent per
-domain: a second model hop per request and lost context between agents. A skill per tool: the catalog would be as
+domain: a second model call per request and lost context between agents. A skill per tool: the catalog would be as
 long as the tool list.
 
 **Would change if.** The models chose reliably among hundreds of tools at no per-call cost, or providers deferred
@@ -31,7 +31,7 @@ resolves the tool, applies every gate, hydrates the arguments, runs the tool and
 **Reason.** Two execution paths drift: a gate, a time-zone rule or a failure text added to one is missing in the
 other. A parameter for the package list keeps the listed and the callable tools identical on every path.
 
-**Rejected.** The agent calling the HTTP endpoint of its own host: a network hop, a token bridge and SSE parsing per
+**Rejected.** The agent calling the HTTP endpoint of its own host: a network round trip, a token bridge and SSE parsing per
 call for nothing. The agent invoking tool methods itself: every gate would be duplicated in the loop.
 
 **Would change if.** The agent ran in another process or language than the tools; the executor would then sit

@@ -38,6 +38,22 @@ stale claim without content is taken back (`revertStaleReportDeliveryClaim()`). 
 model the contract per report channel; the purpose file belongs to the skills-and-purposes skill
 `ddd-module-agents-skills-and-purposes-specialist`. The run never sends a mail itself and never says it did or did not.
 
+- **What is bound.** `SendOwnerReportTool::bindReportSourceToCalls()` binds the text at once only on the forced closing
+  step (its call follows the final text it was forced after); every other call binds the text written after it, and the
+  call's answer says that text beside the call is not sent.
+- **The subject.** A report without a subject gets the schedule's label and the run day
+  (`AIConversationSchedule::composeReportEmailSubjectForRun()`).
+- **One delivery path.** The send tools a purpose blocks are dropped from the offer, named in the purpose's directive,
+  refused by the executor, and never named as callable in the answer of `load_skills` or in a stall signal
+  (`AIConversation::findBlockedToolNamesOfConversationTree()`, the root's purpose for a sub-agent).
+- **The claim is not proof of content.** `claimReportDelivery()` is a conditional update and the report a separate
+  insert, so a process killed between the two leaves the claim taken and no report. A taken claim counts as delivered
+  only when `AIConversationMessages::getNewestOwnerReportWithContentForRun()` finds a marked report with content; the
+  run's boundary is both the newest owner message and `reportOwedAt`, and every marked row is inspected. Every writer
+  of `reportOwedAt` uses the PHP clock, never the database's. A claim without content is taken back only when older
+  than `OWNER_REPORT_CLAIM_STALE_AFTER_SECONDS`; the same content check runs before `composeAndAppendOwedReport()`
+  composes and again right before its append.
+
 ## When the model does not report
 
 `armForcedOwnerReportCallIfOwed()`: an unattended EMAIL run whose own turn ends on a final text without the call, with
@@ -63,7 +79,10 @@ template in the entry skill `ddd-module-agents-specialist`) runs every few minut
    evaluation run's tree, this environment, oldest first (`OWED_CONVERSATIONS_BATCH_LIMIT` per pass);
 2. per conversation, as its account: `AIConversationAgentService::deliverOwedReportLate()` — claims, then
    `composeAndAppendOwedReport()`: a pending REPORT call is bound to the final text; a run that ended its own turn
-   without an outcome has its report text mailed (chosen by its place, never its wording); otherwise the template
+   without an outcome has its report text mailed, chosen by its place, never its wording
+   (`AIConversationMessages::getReportTextOfTurnWithoutOutcome()`: the turn's final text, or, when the forced step was
+   answered with text again, the text before the `SIGNAL_SOURCE_OWNER_REPORT_FORCED_CALL` note — so a final text that
+   only says "nothing new" without the call is mailed); otherwise the template
    report with the stop reason of the newest error row. Then the purpose closes when its goal is reached;
 3. on an error, `deferOwedReport()`.
 
@@ -88,7 +107,8 @@ the marked report, else the final text, else the template — `BODY_SOURCE_*`).
 `AgentTaskRunReportsMCPPackage` (skill `Assistant.TaskRunReports`, only under `Schedule.Run`, preloaded by it):
 `getPreviousTaskRunReports` returns the reports the earlier runs of the same schedule wrote — model-written ones only
 (`findModelWrittenOwnerReportOfRun()`), newest first, each with its widget blocks and whether the task changed since
-(`AIConversationEarlierRunReport`). The run keeps their structure and states what changed. Nothing is stored or
+(`AIConversationEarlierRunReport`; the comparison of the run's seed with the current task is
+`AIConversationSchedule::isCurrentTaskOfRunSeed()`). The run keeps their structure and states what changed. Nothing is stored or
 injected into the seed.
 
 ## Ineligible scopes

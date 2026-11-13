@@ -33,8 +33,11 @@ strategies. Refused together with the server-state wire arm (`AgentWireConfigura
 Otherwise the call continues the newest call's epoch. A new epoch starts after the newest model-call row (or at the
 cover edge if later), so nothing an earlier epoch recorded renders in it. The 30-minute rule is checked on every call:
 a step after a tool that ran 30 minutes opens an epoch mid-turn. Under `conversationAppend` the state epoch's start is
-handed to the prefix epoch: the old epoch's appended skills fold into the base set
-([prompt-cache-and-stable-prefix.md](prompt-cache-and-stable-prefix.md)).
+handed to the prefix epoch: the old epoch's appended skills join the base set
+([prompt-cache-and-stable-prefix.md](prompt-cache-and-stable-prefix.md)), and the conditional meta tools the old
+epoch appended (`AgentPrefixEpoch::$carriedConditionalMetaToolNames`) close the new epoch's top-level tools with their
+static schemas, in a fixed order, offered now or not: rows of the history still call them, and a call must never
+come before its tool's declaration.
 
 Every call records `RequestSnapshot::$stateEpochStartIndex`, `$stateEpochCause`, `$stateEpochCoverFingerprint`; a
 rebuild reads the recorded epoch (`AgentStateEpoch::readForRecordedCall()`), never re-derives it from timestamps.
@@ -54,6 +57,14 @@ The epoch's first call stores the values as of the start (`AgentConversationStat
 A value the run could not resolve is an unknown kind (`AgentConversationState::$unknownKinds`): the system content
 omits it, never shows a literal placeholder, and its first resolved value arrives as a note. The base values are
 resolved once per run (`AIConversation::findStateDeliveryBaseValues()`, memoized on the run).
+
+The tail-only values (the unconfirmed-zone note, the situation note) are null in a record
+(`AgentConversationState::buildEpochRecord()`), so the epoch's first call delivers them as notes. A call that renders
+no situation line treats the situation as unknown, never as "every value is confirmed".
+
+A rebuild of a recorded call whose epoch record is not in the context (an edit branch cut the epoch's first row)
+fills the template's placeholders with today's values (`AIConversation::fillStateDeliveryTemplateWithCurrentValues()`)
+and marks the input (`AgentModelInput::$stateEpochFilledFromCurrentValues`), so the composition view says so.
 
 ## 4. Notes
 

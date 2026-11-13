@@ -11,9 +11,21 @@ Contents
 
 ## Before you write the tool: dig the call chain
 
-One tool = parse the request → one domain call → render the result. Before mirroring an endpoint, read the whole
-chain it triggers (controller → service → entity → repository, remote call, dispatch) and write down what it really
-does:
+One tool = parse the request → one domain call → render the result:
+
+1. **Parse** on the request DTO. Everything that exists only because of a model's habits stays here: a remapped
+   nesting, `0` or `""` read as "not given", trimming, the instructive error for a missing value. The conversion is a
+   method of the request DTO, never a factory on a domain object — the domain does not import the presentation layer.
+2. **Call one domain operation** that returns a typed outcome. Limits, caps, state decisions, model calls and every
+   rule that holds for every caller (REST, admin, a console command) live behind it.
+3. **Render** in the response DTO. The model-facing wording (instructions, refusal texts, notes) lives there or in
+   the outcome's own render method; a domain exception carries its reason and its numbers, the tool words it.
+
+A rule that only one purpose needs is built neither into the tool nor into `MCPToolExecutorService`: it lives in that
+purpose's domain, and the tool asks it with one call.
+
+Before mirroring an endpoint, read the whole chain it triggers (controller → service → entity → repository, remote
+call, dispatch) and write down what it really does:
 
 - **A "read" that writes.** A getter whose cold path persists a suggestion, starts a job or refreshes a connection is
   a write for the agent. A read tool must be side-effect free: strip the persist or the dispatch, or declare the tool
@@ -25,11 +37,30 @@ does:
   differently in the repository or the remote call. Call the tool with the exact parameters a real client sends and
   count what comes back before you document a filter.
 - **One capability, one focused package**, delineated against the tools of other skills that share a word.
+- **A write that takes a list validates up front and reports per item.** Reject a malformed item before anything is
+  stored and return the rejects with a readable reason per item (and the cap when one applies); one bad item never
+  fails the call. A replace whose valid items come to zero never clears the stored set.
+- **Heavy context assembly is a latency trap.** An eager expand or a nested lazy load in a tool path (or in what the
+  prompt is built from) costs time on every call for data the answer may never use; load what the result renders.
 
 ## Traps that only bite in the agent loop
 
 The loop runs many tool calls in ONE process, often in a long-running worker. What one request on the HTTP path
 forgets, the loop keeps:
+
+- **A repeated delete is read from the call history, not from the error.** A tool that declares
+  `MCPToolEffect(MCPToolEffect::DELETE)` and is called with the same arguments as an earlier call is usually refused
+  before it runs, as an identical write (`AIConversationToolCallHistory::getEarlierCompletedIdenticalWriteIndex()`).
+  When it does run — it declares `identicalRepeatDoesNewWork`, or another call of the same tool with different
+  arguments completed in an earlier turn — and FAILS, the dispatch asks
+  `AIConversationToolCallHistory::hasEarlierCompletedCallWithIdenticalArguments()`. That is a COMPLETED call of the
+  same tool with the same normalized arguments (`ToolCall::getNormalizedIdentityKey()`, without `outputFormat` and
+  `noCache`), not refused as a duplicate and not declaring `outcome: incomplete`. If there is one and the failure was
+  no gate refusal, the result text is replaced by "already COMPLETED … the target is gone because YOU deleted it.
+  Treat this as SUCCESS", and the call is recorded COMPLETED instead of FAILED
+  (`AgentToolCallDispatchService::dispatchToolCall()`; a forked call gets the same rule in
+  `AgentToolCallForkJoinService::adoptForkedToolCallOutcome()`). So a delete tool may simply answer "not found" with
+  a 4xx exception; it needs no memory of its own. Without the DELETE effect the rule never applies.
 
 - **Default query options are static per class and leak** into the next call. A tool that changes them takes a
   snapshot and restores it: `setDefaultQueryOptionsSnapshot()` … `finally { restoreDefaultQueryOptionsSnapshot(); }` on

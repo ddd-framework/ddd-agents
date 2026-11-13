@@ -160,7 +160,9 @@ owner's resume of a platform-paused row and of a row whose scope is not eligible
 ## Time zones
 
 The cron digits are local time of the schedule's own `timezone` (`getCronTimezoneIdentifier()`, UTC when empty). The
-next occurrence, the backoff and `countCronFiringsWithinDays()` all use it; a repeated autumn hour fires once. A new
+next occurrence, the backoff and `countCronFiringsWithinDays()` all use it; a repeated autumn hour fires once
+(`isRepeatedLocalOccurrence()`), and a local time inside the skipped spring hour fires once at the next existing local
+time, as the cron library places it (02:30 fires at 03:30 on that day). A new
 schedule takes its zone from `AgentSpacesService::findTimezoneForNewSchedule()`. How the run's clock is shown to the
 model belongs to the context skill `ddd-module-agents-context-specialist`.
 

@@ -44,6 +44,13 @@ request DTO it fills normally. The placeholder rule below runs for request DTOs 
   that mirrors the arguments into query, body and route attributes and as JSON body, exposes scalar arguments as
   headers (without overriding real ones), and calls `RequestDto::setPropertiesFromRequest()`. A property declared
   `in: PATH` therefore fills over MCP too — reuse the controller's own request DTO instead of writing a second one.
+  A focused DTO for the tool is justified in two cases only, each named in its docblock: a **whole-entity write
+  body** (the controller's DTO carries the whole entity — whitelist the fields the agent may edit, map them onto the
+  entity and call the same upsert), and **several near-identical actions** merged into one tool with a selector
+  argument. A heavy or cyclic controller response gets a focused response DTO that carries only what the agent needs.
+- **An id the model mangles becomes an opaque token.** A structured, path-shaped id is shortened or cut by the model
+  ("only the meaningful tail"), and the next call fails as not found. Expose one opaque token instead, decode it at
+  EVERY input site that takes the id, let the raw form pass through unchanged, and lock both forms in a test.
 - **Nothing else of the client's request reaches the tool.** Over HTTP, `MCPController::handleMcpRequest()` hands the
   executor a new request whose only header is `Authorization` (the bearer, or a token minted for the account); the
   client's other headers, its cookies and uploaded files are gone. In the agent loop there is no request at all. A
@@ -104,7 +111,10 @@ itself; on the HTTP path no zone is set.
   tool's schema with their name and type; only their explanation is shared — the per-tool property carries no
   description, and `SharedRequestParametersSyntax` explains them once (agent system context, HTTP `initialize`).
   `outputFormat` is the exception: it is left out of the MCP schema entirely, so the model cannot switch a tool to the
-  structured shape.
+  structured shape. Do not mark a property of a host DTO `SharedRequestParameter`: the schema drops its description,
+  but the shared block lists only the marked properties of `RequestDto` and `DtoQueryOptionsTrait`
+  (`SharedRequestParametersSyntax`), so the model would see the parameter with no explanation at all. A parameter
+  that is genuinely universal belongs on the framework's `RequestDto` — a change of `mgamadeus/ddd`.
 - Narrow per tool with `MCPHiddenQueryOptions`, for every consumer of a DTO with `DtoQueryOptions(expose: …)`.
 
 ## The output side

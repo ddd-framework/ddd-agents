@@ -66,6 +66,22 @@ The strategy is stamped at creation (`ContextRetentionSettings::buildForNewConve
   (`AIConversationPurpose::buildContextRetentionSettingsForConversationWithoutAgentWireProfile()`) and the wire-API
   default — the swap on Chat Completions. The developer sees it in the trace line `purpose.agentWireProfile.fellBack`
   (purpose, model, reason) and in `AIConversationPurposeStartSettings::$agentWireProfileRejectionReason`.
+- A stored conversation without a stamped strategy or delivery is stamped at its first run start
+  (`AIConversationsService::stampCreationSettingsOfUnstampedConversation()`): one that already made a model call gets
+  `systemPromptSwap` and `everyCall` (the shape its history already has), one without a model call its stored value or
+  the current default for its wire API. A later change of the default never moves a running conversation.
+
+**Where the combination is checked.** At creation (a bad request, nothing stored); at every run start
+(`AIConversationAgentService` fails the run with an error row and the owner report of a service error); when an
+override of the run settings is applied (`AIConversationsService::applyAdminRunSettingsOverride()`, a bad request); and
+in a model call made outside a run (`AIConversationModelCallsService::performModelCall()` throws
+`AIModelCallFailedException`).
+
+**The Responses answer.** `AgentResponsesResponse` reads the answer: the calls in the Chat Completions shape, the
+reasoning items and the usage including the tokens written to the cache (`AgentResponsesUsage`). An answer the provider refused or cut off (status
+incomplete) that carries neither text nor a call fails the call on the provider-error path with the outcome
+`responsesAnswerUnusable` (the error row, the report, the failed run), never as an empty answer the loop would treat
+as a stall.
 
 ## 4. Append-only loading and prefix epochs
 
@@ -88,8 +104,17 @@ Under `conversationAppend` (`AIConversation::buildPrefixEpoch()` → `AgentPrefi
   sections; a situation change (`AgentPrefixEpoch::isStartedAnewBySituationOf()`) starts a new epoch whose system
   content carries every skill loaded so far, at the cost of one cache miss after the base prompt. With `false` a
   change appends a `# Situation` entry instead.
-- **Nothing unloads** inside an epoch; a step that narrows its offer keeps the whole list on the wire and the dispatch
-  refuses a held-back tool.
+- **Nothing unloads** inside an epoch; a step that narrows its offer (`AgentStepToolRestriction`) keeps the whole list
+  on the wire and the dispatch refuses a held-back tool; a step left without any tool sends `tool_choice: none`, which
+  keeps the cached prefix. The package never sends allowed_tools: that list renders into the prompt.
+- **Base set before the first raw row** is read from the stored chain
+  (`AIConversationMessagesService::findLoadedCapabilitiesBeforeIndex()`), memoized per run and start index.
+- **No repeats.** A recorded appended item never repeats a skill or a tool the epoch's base set or top-level tools
+  already carry (possible when a compaction edge falls between a load row and the call that recorded it).
+- **A discarded step keeps its record.** When a step's response is discarded (a stall, a bounce, a retry, a
+  budget-closing stall, the injection re-drive), the signal row that carries its usage carries the call's slim
+  snapshot too (`RequestSnapshot::buildRecordForRowOfDiscardedResponse()`, no debug payload), so later calls place its
+  appended items where it sent them.
 
 The appended items are wire items recorded on request snapshots, never rows: the loop's newest-row checks and the
 compaction summarizer never see them.
@@ -101,7 +126,10 @@ compaction summarizer never see them.
 `AgentPreviousReasoningCut` keeps the previous steps' reasoning items until their sum exceeds
 `previousReasoningCapTokens` (1000), then drops all but the newest `KEPT_NEWEST_STEPS_AT_A_CUT` (2) steps' items in one
 block and records the cut index (`RequestSnapshot::$previousReasoningCutFromMessageIndex`): a sawtooth with a stable
-prefix between two crossings. A provider error naming one of `AgentWireConfiguration::CARRIED_REASONING_REJECTION_ERROR_TEXTS`
+prefix between two crossings. A step's reasoning size is the provider's count (`RequestSnapshot::$wireReasoningTokens`),
+else an estimate from the items' JSON (`AgentPreviousReasoningCut::ESTIMATED_REASONING_ITEMS_JSON_OVERHEAD_BYTES`,
+1,600 bytes, plus `ESTIMATED_REASONING_ITEMS_JSON_BYTES_PER_TOKEN`, 13 bytes per token);
+`RequestSnapshot::$previousReasoningSentTokens` is the carried size of the call. A provider error naming one of `AgentWireConfiguration::CARRIED_REASONING_REJECTION_ERROR_TEXTS`
 makes the call retry without carried items (`withoutPreviousReasoningCarryOver()`).
 
 ## 6. The cached base prompt

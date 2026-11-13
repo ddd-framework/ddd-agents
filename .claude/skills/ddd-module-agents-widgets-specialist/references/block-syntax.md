@@ -88,8 +88,12 @@ a bare `widget {…}` line counts as visible prose there.
 ## What the model reads back
 
 The model never sees `emittedBy`: tool-written rows are not on the model's wire, and the two model-facing readers of
-stored rows render through `WidgetBlocks::buildMarkdownWithoutEmittedBy()`. A `ComposedView` block is folded back to
+stored rows render through `WidgetBlocks::buildMarkdownWithoutEmittedBy()`. A `ComposedView` block is turned back into
 what the model wrote — resolved `$from` snapshots removed — by `WidgetBlocks::buildModelFacingText()`.
+
+Older stored `ComposedView` fences may carry a field `WidgetBlock::LEGACY_WRITTEN_SYNTAX_FIELD` (`writtenSyntax`) that
+nothing writes any more: the source budget (`ComposedViewTreeReading::measureSourceBytes()`) and the model-facing text
+drop it, every other reader ignores it as an unknown field. Never give a widget a field of that name.
 
 ## The prose rule
 

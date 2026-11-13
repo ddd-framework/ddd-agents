@@ -16,7 +16,7 @@ conversation; the protocol endpoint, the agent card, the wire serialization and 
 | the device bracket of each request row | `OwnerDevice::externalAgent()` (`KIND_EXTERNAL_AGENT`, rendered "via external agent") |
 | the rows of one task | `AIConversation::findTaskSliceMessages()` |
 | push registrations | `AIConversationTaskPushNotificationConfig` (entity, own table), `AIConversationTaskPushNotificationConfigsService` |
-| the push seam | `AIConversationRealtimeSignalService::publishChangeSignal()` → `dispatchTaskPushNotification()` |
+| the push entry | `AIConversationRealtimeSignalService::publishChangeSignal()` → `dispatchTaskPushNotification()` |
 
 ## The conversation an external agent creates
 

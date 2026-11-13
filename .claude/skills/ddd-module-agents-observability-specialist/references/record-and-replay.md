@@ -2,11 +2,11 @@
 
 **Reader:** host developer and package maintainer
 
-Contents: what it proves · the three seams · what a recording holds · the pieces of a harness · a complete harness · reading a comparison · limits · for the package maintainer · full class names
+Contents: what it proves · the three recording points · what a recording holds · the pieces of a harness · a complete harness · reading a comparison · limits · for the package maintainer · full class names
 
 Record a run of the agent on one build, replay it on the next, and compare: the rows written, the messages
 dispatched and the requests sent to the model must be the same after normalization. It is the identity proof of a
-refactor of the loop. The package ships the seams and the comparison; the harness — a console command that records
+refactor of the loop. The package ships the recording points and the comparison; the harness — a console command that records
 or replays one run — is the host's.
 
 ## What it proves
@@ -17,9 +17,9 @@ body as the recorded call that answered it. A replay never calls a model, never 
 clock or the random generator at the switched sites. A difference is a change of behaviour — or a non-determinism
 the normalization does not cover yet.
 
-## The three seams
+## The three recording points
 
-| Seam | Where | Record | Replay |
+| Recording point | Where | Record | Replay |
 |---|---|---|---|
 | Argus calls | `DDD\Domain\Base\Repo\Argus\Utils\ArgusApiOperations::$transportRecording`, holding a `DDD\Domain\Base\Repo\Argus\Utils\ArgusTransportRecording` (ddd-argus) | `ArgusTransportRecording::forRecording()`: every Argus call goes to the network and is kept (endpoint, body, response, its kind, its turn, whether it ran inside a tool) | `ArgusTransportRecording::forPlaying($entries)`: every call is answered from the recording — same turn and kind, the identical body first, else the oldest unused one; a call with no answer left fails |
 | Tool results | `DDD\Presentation\Mcp\Services\MCPToolExecutorService::$toolResultRecording`, holding a `DDD\Domain\AI\Entities\MCPPackages\ToolResultRecording` | `ToolResultRecording::forRecording()`: each tool result with its arguments and the AI costs the tool booked | `ToolResultRecording::forPlaying($entries)`: the tool does not run; the same tool with the same arguments first, else the oldest unused result of that tool; its recorded costs are booked again |
@@ -385,7 +385,7 @@ never compared.
   test data, not in the repository when it holds customer data.
 - Runtime code must not change while a recording or replay runs: one run, one build.
 
-The reference kernel's `ReferenceScriptedModelTransport` is a hand-written player of the same Argus seam: it extends
+The reference kernel's `ReferenceScriptedModelTransport` is a hand-written player of the same Argus recording point: it extends
 `ArgusTransportRecording` and picks an answer by what the request says instead of its position — a way to run a host
 without a model provider, not a comparison.
 

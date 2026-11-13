@@ -71,8 +71,11 @@ truncated (`truncatedAt`) under the message-index lock, and every sub-agent conv
 every level. Nothing is deleted; every read leaves truncated rows out. The admin drive with `$truncateFromIndex`
 truncates, reloads the compaction cover and the tail without the registry cache, clears a task plan the cut reaches,
 then appends the new owner message and drives — "edit this message" is a truncate from its index plus a new message;
-"delete from here" is the truncate alone. A host's inspector can still show truncated rows by reading them on
-purpose; the metrics and the integrity report treat them as gone or mark them.
+"delete from here" is the truncate alone. The truncate is one set-based `UPDATE` per conversation, not an entity
+update, so it needs no switch. Every entity read of the message repository filters `truncatedAt IS NULL` (also with
+the rights off); a host's inspector that must show truncated rows sets `DBAIConversationMessage::$includeTruncated`
+to true for its read and back in a `finally` (the worker state resetter clears it for every job). The metrics and the
+integrity report treat truncated rows as gone or mark them.
 
 ## The admin's run settings
 
@@ -85,8 +88,11 @@ it and when; `driveConversation()` accepts one with the drive. What each switch 
 
 - The panel finders are raw SQL over the package's tables; a figure that needs a host table goes through an
   `AgentApplicationSqlFilter` the host's repository returns, never a host table name in the package.
-- A new admin-only seam of the drive is gated on the ADMIN scope or an admin session
+- A new admin-only option of the drive is gated on the ADMIN scope or an admin session
   (`AuthService::isCurrentSessionAdmin()`) and is stored on the conversation when the worker must honour it.
+- The docblocks of `DBAIConversationMessage::$includeTruncated` and of its read filter still say the truncate sets the
+  flag while it writes the marker; the truncate writes by one `UPDATE` and never sets it. Only a host's own read sets
+  it today.
 
 ## Full class names
 
@@ -99,4 +105,5 @@ The classes this reference names, with their namespace (for the `use` lines of a
 `DDD\Domain\AI\Entities\Conversations\Scopes\AgentApplicationSqlFilter` ·
 `DDD\Domain\AI\Entities\Conversations\ControlPanel\AgentControlPanelStatistics` ·
 `DDD\Infrastructure\Services\AuthService` · `DDD\Domain\AI\Entities\Conversations\Messages\OwnerDevice` ·
-`DDD\Domain\AI\Entities\Conversations\Messages\RunSettingsOverride`
+`DDD\Domain\AI\Entities\Conversations\Messages\RunSettingsOverride` ·
+`DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessage`

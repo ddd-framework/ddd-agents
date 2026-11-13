@@ -155,7 +155,22 @@ differs. `ComposedViewNodeSchema::SCHEMA_FILE_RELATIVE_PATH` names one applicati
 from the schema — the node lines, `ComposedViewKitSpec::JSON_FENCE_SPEC`, and one field line per widget with
 `IS_WRITABLE_WITHOUT_A_SKILL` (a public field's docblock sentence IS its model-facing contract). Its e-mail variant
 keeps the node lines, inputs included, replaces the form rule by a line that forbids inputs, and lists only the
-`EMAIL_RENDERABLE` widgets. On which calls it is taught — every root conversation in the chat or an in-app call and every
+`EMAIL_RENDERABLE` widgets. What a host's class contributes to that text:
+
+- A node line lists the required props, the text prop, the `source` prop, the event props, an input's `value` and the
+  optional props named in `ComposedViewKitSpec::KEY_OPTIONAL_PROPS_BY_NODE_TYPE`; every other optional prop stays
+  unlisted. The item shape of a list or object prop (`[{"field","label"}]`, `{"label","lat","lng"}`) is read from its
+  `description`, so write it there in that form.
+- The render-report codes are listed with the codes that share their first word grouped (`INVALID_*`).
+- A widget written without a skill gets one line: its `SUMMARY` — only its first sentence, and only when that sentence
+  fits `ComposedViewKitSpec::MAX_WIDGET_SUMMARY_LENGTH`, else no summary — and its public fields (`*` when not
+  nullable, the field's docblock sentence up to `ComposedViewKitSpec::MAX_FIELD_DESCRIPTION_LENGTH`). A class with an
+  `EXAMPLE_INTRO_LINE` also shows the example answer `ConversationWidget::buildExampleAnswer()` renders from
+  `EXAMPLE_FIELDS`, so the model answers in one response with a line and the block.
+- A second example after `JSON_FENCE_SPEC`, `ComposedViewKitSpec::INLINE_VALUES_EXAMPLE_FIELDS` with its intro line,
+  shows researched values written inline with a `source` (a KPI tile grid and a line chart); it reads without a finding.
+
+On which calls it is taught — every root conversation in the chat or an in-app call and every
 scheduled run, never a sub-agent or the phone line (`AgentModelInput::teachesComposedViewKit()`) — and how it stays in
 the cached prefix is `ddd-module-agents-context-specialist`.
 

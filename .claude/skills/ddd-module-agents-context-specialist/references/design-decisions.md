@@ -3,7 +3,7 @@
 **Reader:** package maintainer
 
 Contents: volatile values ride the tail · chars / 4 instead of a tokenizer · footprint before routing · an absolute
-compaction threshold · a tree of summaries with fan-in five · facts preserved by code · tool results stubbed on the
+compaction threshold · a tree of summaries, five children per node · facts preserved by code · tool results stubbed on the
 wire · skill-granular unloading once per owner turn · pins separate from initial residency · append-only skill loading
 · appended items and notes are recorded wire items · volatile context once per change · reasoning carry-over capped ·
 one clock at the tool boundary · the conversation owns no zone · presence per call, device per message · hybrid search
@@ -71,7 +71,7 @@ small to tile).
 
 **Would change if.** A model's measured reliable length moved, which changes its catalog value, not the rule.
 
-## A tree of summaries with fan-in five
+## A tree of summaries, five children per node
 
 **Rule.** Leaves summarize raw rows; a roll-up summarizes five child summaries, never raw rows; the cover tiles the
 history coarsest first, and the newest share stays verbatim.
@@ -83,7 +83,7 @@ history. Nodes are immutable and append-only, which makes rounds idempotent and 
 **Rejected.** One rolling summary rewritten every round (erodes old facts, rewrites the cached summary every time);
 re-summarizing from raw rows at each level (cost grows with the history).
 
-**Would change if.** The summarizer's compression ratio changed materially; the fan-in follows it.
+**Would change if.** The summarizer's compression ratio changed materially; the number of children per roll-up follows it.
 
 ## Facts preserved by code
 
@@ -117,7 +117,7 @@ Stubbing at build time keeps them restorable and inspectable; turn anchoring kee
 once at the start of an owner turn; the hard cap is the only size lever.
 
 **Reason.** Removing one cooled tool at any step changed the tools array mid-turn and cost the cached prefix on a large
-share of calls; a sibling tool leaving alone also forced extra `load_tool` hops. One mutation per turn keeps all steps
+share of calls; a sibling tool leaving alone also forced extra `load_tool` calls. One mutation per turn keeps all steps
 of a turn on one prefix.
 
 **Rejected.** The per-tool cost-benefit score after every step (kept as the `tool` granularity for comparison); a soft

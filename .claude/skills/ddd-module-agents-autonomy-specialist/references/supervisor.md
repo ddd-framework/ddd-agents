@@ -55,7 +55,13 @@ Two kinds (`SupervisorCheckpointBriefingHeader::BEAT_STEP`, `BEAT_SETTLED`):
 The loop only calls `wakeSupervisorTandem()`: it finds or creates the tandem, copies account, space, budget bypass and
 both overrides, and resumes it asynchronously. Which beat is owed the tandem decides itself
 (`AIConversation::getSupervisorBeat()`, `SupervisorCheckpointTrigger::buildOwed()`). The synchronous paths (console,
-evaluation) run the settled beat inline after the turn.
+evaluation) run the settled beat inline after the turn
+(`SupervisorCheckpointRunsService::runSupervisorSettledBeatAfterSyncTurn()`).
+
+**Drive supervised owner turns on the worker path.** An owner turn driven inline (synchronously) holds no run claim.
+A step beat during it wakes the tandem as usual, and an accepted intervention resumes the supervised conversation
+asynchronously — a worker then claims it and runs a second agent run beside the inline one. A host's evaluation or
+console path that supervises dispatches the owner turns to the workers and waits for them.
 
 ## The tandem turn
 
@@ -73,6 +79,13 @@ markers, widgets), then the delta since the last checkpoint (owner rows, the age
 questions, widgets, the write ledger, the task plan, platform signals). A step beat adds the facts section; a settled
 beat adds all owner rows, outward actions, the agent space's state and the purpose's audit criteria. The facts, the
 state and the record kinds come from the purpose's `SupervisorPolicy` (`AIConversationPurpose::buildSupervisorPolicy()`).
+
+The briefing reads the loaded window of the supervised conversation. For the earlier range that context reduction
+replaced it reads only what the cover nodes keep: their counts of completed tool calls, closing the briefing as its
+totals (`SupervisorCheckpointService` over `AIConversationCompactionCover::buildToolTelemetryBefore()`). An early write
+that was reduced away therefore appears only as a count there, never with its arguments or result; a policy fact that
+needs more must read it from stored state, not from the window (context reduction: context skill
+`ddd-module-agents-context-specialist`).
 
 ## The decision
 

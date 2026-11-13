@@ -39,6 +39,11 @@ try {
 - **A conversation without an id** takes no lock.
 - **Engines:** MariaDB holds the lock on the session (GET_LOCK). PostgreSQL holds it for one transaction: a writer
   without an open transaction gets a read-committed one from the hold, and the unlock commits it.
+- **A cluster with several writable nodes:** a MariaDB named lock exists only on the database node it was taken on.
+  Behind a proxy that may route a new session to another node, the lock is exclusive only when the proxy routes the
+  lock functions to one writer node; otherwise two writers both hold it. The strict insert of section 5 stays the
+  guarantee either way: the lock only makes collisions rare, and a fenced write that fails at the insert or at the
+  commit fails as a whole, never as a merge.
 
 **Lock order:** the message-index lock first, then row locks. The fenced write, the sub-agent run-end notifier and the
 hand-over of waiting signals all take the index lock before any row lock, so no lock cycle forms.
@@ -109,7 +114,9 @@ provider rejects the next request.
 
 A refused insert is written again above the larger of the persisted newest index (a plain `findNewestMessageIndex()`)
 and the refused index, up to `NEW_ROW_INDEX_COLLISION_ATTEMPTS`. No locking read is made: the winner committed after
-this transaction's snapshot and is invisible to it, so the refused index itself is the anchor. On PostgreSQL a refused insert ends the transaction, so
+this transaction's snapshot and is invisible to it, so the refused index itself is the anchor; a locking read of the
+winner's row would fail on MariaDB with error 1020 ("record has changed since last read") under snapshot isolation.
+On MariaDB the refused statement alone is undone and the transaction stays usable for the retry. On PostgreSQL a refused insert ends the transaction, so
 there is no second attempt (`canWriteAgainAfterARefusedInsert()`); its exclusive lock and read-committed writers make
 the collision unexpected there. A collision that survives every attempt under a claim is turned into
 `AgentRunClaimLostException` by `persistMessageUnderRun()` (a concurrent drive); without a claim it is rethrown as the

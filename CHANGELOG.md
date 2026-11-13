@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.7
+
+Documentation only; no source class changes.
+
+- The developer skills carry the remaining generic facts about the agent core (43 skill files extended); descriptions
+  and the source-ownership manifest are unchanged.
+
 ## 0.1.0-alpha.6
 
 Documentation only; no source class changes.

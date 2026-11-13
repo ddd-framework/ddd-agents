@@ -41,7 +41,7 @@ for that site, a non-positive timeout is `DEFAULT_TIMEOUT_SECONDS`, a non-positi
 |---|---|---|
 | `mode` | `off`, `shadow`, `on` | `off` |
 | `sites` | site → `off` / `shadow` / `on` (`cohort` for `skillPreload`); `planDynamics` → its two switches | none listed |
-| `turnClosingMode` | `deterministicCounter`, `decisionModel`, `counterThenDecisionModel` | `deterministicCounter` |
+| `turnClosingMode` | `deterministicCounter`, `decisionModel`, `counterThenDecisionModel` — recorded, but no value changes the order of the checked stop today (see `turnClosing`) | `deterministicCounter` |
 | `timeoutSeconds` | the per-call timeout | 2.0 |
 | `breakerSeconds` | how long the breaker stays open after a transport failure | 60 |
 
@@ -204,7 +204,7 @@ A parallel child of the turn-start batch: see [injection defence](injection-defe
   `AgentFinalTextAcceptanceService::bounceCandidateTextIfTheCheckedStopAsks()`. The pure gate
   `AgentCheckedStopPolicy::shouldAskTurnClosingDecision()` asks only when a plan has open items that owe evidence and
   none blocked on the owner's action, the bounce cap is not reached, no item was resolved this turn, no work tool ran,
-  the turn is not a fold turn reading sub-agent results, and the answer text is not empty. Every other conversation
+  the turn does not read sub-agent results, and the answer text is not empty. Every other conversation
   runs the deterministic counter alone.
 - **Returns:** two probabilities — the text announces work instead of delivering it; the text reports changes as made.
 - **Consequence:** a bounce when the first reaches `AgentTurnClosingDecision::MINIMUM_ANNOUNCE_PROBABILITY`. Where the

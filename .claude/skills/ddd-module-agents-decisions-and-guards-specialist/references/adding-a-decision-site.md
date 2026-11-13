@@ -7,7 +7,7 @@ Contents: before you add one · the steps · the decision class · the call · w
 ## Before you add one
 
 A decision site earns its place when the loop takes a judgment that needs a reading of text or intent and that the
-chat model gets wrong inside its own generation. If a counter, a fold over persisted messages or a field the code
+chat model gets wrong inside its own generation. If a counter, a pass over persisted messages or a field the code
 already holds can decide it, write that instead — the package does so for the plan-item preload and the checked-stop
 counter. Name the boundary (when the question is asked) and the ONE consequence the loop or the tool would take.
 
@@ -213,12 +213,29 @@ the same cases. The rules:
 - **Declare an abstention** (`none`, `other`, `undecidable`) or the model cannot abstain.
 - **Read literally.** The model answers the question you wrote; state the scope positively, put a negated case into the
   false branch.
+- **The whole question goes into `instructions`.** The questions are sent as the site writes them
+  (`buildQuestionsForRequest()` becomes the `questions` of the payload), keyed by a question name. The name is a key for reading the answer
+  back, never part of the question: do not rely on it to carry meaning. Everything it must know — the question, the state paths it judges —
+  stands in `instructions` (which may itself be an object: the question in one field, supporting data in others,
+  referred to by backticks).
+- **Examples are a field, not prose.** A few trap cases for a branch go into the list examples under that branch of
+  `criteria` (for the true branch: criteria.true.examples), kept in code beside the question; more than a handful only
+  adds latency. The package's own questions carry none.
 - **Keep lists short:** about eight to ten named items per list-shaped state field.
-- **Thresholds per action.** `noul` answers are probabilities quantised to 0.01; `choice` confidence is a distribution
-  statistic, not a second opinion. Start conservative, refit on recorded labels, and validate a reported distribution
-  with `AgentDecisionAnswerProbabilities::fromReported()`.
-- **Customer-written text in the state is adversarial input.** Design the consequence so the worst answer is harmless
-  (raise-only, demote-only, fail closed where a wrong yes is dangerous).
+- **Thresholds per action and per answer kind.** `noul` answers are probabilities quantised to 0.01 and run
+  under-confident; `choice` answers run over-confident, and their confidence is a distribution statistic, not a second
+  opinion. So a floor is set per question kind and per action, never one global threshold: start conservative, refit
+  on recorded labels, and validate a reported distribution with `AgentDecisionAnswerProbabilities::fromReported()`.
+- **Enforce the closed answer set yourself.** Read a `choice` with `readChoiceFrom()` or
+  `readChoiceWithProbabilitiesFrom()`: an answer outside the allowed choices becomes the fallback choice you pass —
+  give the question an `other` option and pass `other`, as the reply-language questions do.
+- **Check the criteria before you trust a result.** Wrong criteria can score below chance on the very cases they were
+  written for; a measured number is evidence about the model only after the criteria wording was checked against the
+  cases.
+- **Measure per language.** Accuracy is not the same in every language the owners write in; probe and read the shadow
+  results per language before the site goes `on`.
+- **Owner-written and third-party text in the state is adversarial input.** Design the consequence so the worst answer
+  is harmless (raise-only, demote-only, fail closed where a wrong yes is dangerous).
 
 ## Probing before wiring
 

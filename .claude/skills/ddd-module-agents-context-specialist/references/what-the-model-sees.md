@@ -66,12 +66,23 @@ starting after the compaction cover's edge. How a row renders:
 - a tool result older than the retention boundary, or one the token budget could not fit, is replaced by a stub
   (`ToolResultRetention`, [context-reduction.md](context-reduction.md)); a result shorter than `ToolCall::MIN_RESULT_CHARS_TO_STUB` is never
   stubbed;
-- pictures ride inside their tool result, at most `ContextRetentionSettings::getMaxToolCallImagesOnWire()` pictures per
-  call, newest first (`AgentModelInput::selectToolCallImagesForWire()`); a dropped or blind-model picture leaves a
-  one-line marker in the result;
+- pictures ride inside their tool result (see "Tool pictures" below);
 - an owner row the injection check blocked renders as `AIConversationMessage::SECURITY_FILTER_NOTICE`;
-- under append-only loading or `onceWhenChanged`, recorded appended items and state notes are folded in at the
+- under append-only loading or `onceWhenChanged`, recorded appended items and state notes are placed at the
   positions the calls that sent them recorded; they are wire items, never rows.
+
+**Tool pictures.** `AIConversationModelCallsService::resolveToolCallImages()` runs where the wire is composed, the one
+point where both the resolved model and the pictures are known. Candidates are the completed tool results in the
+context that carried pictures (`ToolCall::$imageReferences`) and still ride in full; a stubbed result carries none.
+The bytes come from what the current worker invocation captured (`AIConversation::$transientToolCallImages`), or, for
+a durable picture, are re-resolved on every call through the loaded package that implements `ToolCallImageStore`. An
+inline picture (a browser viewport) is gone once its invocation ended. The cap counts pictures, not results
+(`ContextRetentionSettings::getMaxToolCallImagesOnWire()`, default 2, a purpose's `contextRetention:` map can raise
+it): newest results first and whole, the newest result always rides, truncated to the cap
+(`AgentModelInput::selectToolCallImagesForWire()`). A candidate that does not ride is listed in
+`AgentModelInput::$droppedImageToolCallIds` and its result gets a "no longer on the wire" marker; on a model without
+vision no bytes ride (`AgentModelInput::$blindCapturedToolCallIds`) and every candidate gets the downgrade note. The
+read reuse counts the pictures that still ride ([tool-call-efficiency.md](tool-call-efficiency.md)).
 
 ## 4. The volatile tail
 

@@ -3,7 +3,8 @@
 **Reader:** host developer and package maintainer
 
 Contents: 1. The conversation tree · 2. Entry points · 3. The drive · 4. The worker resume · 5. The step loop ·
-6. Why the loop stopped · 7. Chunks, budgets and the yield · 8. After the loop · 9. Sync paths · 10. Changing the loop
+6. Why the loop stopped · 7. Chunks, budgets and the yield · 8. After the loop · 9. Sync paths · 10. Cost of a turn ·
+11. Changing the loop
 
 ## 1. The conversation tree
 
@@ -180,6 +181,11 @@ In `generateAgentReply()`, best-effort and never for a delegation child: compact
 (`AIConversation::isDisplaySummaryStale()` → `AIConversationsService::generateAndPersistSummary()`, async through
 `AIConversationSummarizeMessage` on the worker path). The summary writes the `summary` column alone.
 
+`AIConversation::$summary` is a lazy-loaded value object of the Argus repository backed by that column: reading the
+property when no summary is stored GENERATES one with a model call. A reader that only shows the summary uses
+`AIConversation::getSummaryWithoutGenerating()`; the staleness check tests the property with a single-level `isset`,
+which never fires the load.
+
 After an answered root turn that re-fired nothing, `AIConversationTurnEndFollowUpsService::runFollowUpsOfAnsweredTurn()`
 runs: the schedule's completed firing (not caught), memory curation, the supervisor checkpoint, the purpose-goal close
 and the `AIConversationSettledOwnerTurnListener` services — each best-effort.
@@ -195,7 +201,35 @@ The console, an evaluation harness and the ADMIN "wait for the reply" call `gene
 writes still take the index lock and the transaction; only the claim check is skipped. A conversation without an id
 (an ephemeral evaluation run) is written in memory only, with transient ids from `AgentTransientMessageIds`.
 
-## 10. Changing the loop
+Two pieces of process state still sit outside `AgentRun`: a resume the handler did not start (a `sync://` job, an
+inline evaluation drive) reads the receipt of the LAST job the handler received in the process
+(`AIConversationAgentService::$lastWorkerJobReceipt`), and the options for rows written outside a run stay on the
+service instance (`turnOptionsOutsideARun()`) — the last entry's options, sticky for the life of the instance. Do not
+build on either.
+
+## 10. Cost of a turn
+
+N = messages of the conversation, S = steps of the turn, C = loaded skills, T = tools offered in a step, K = nodes per
+compaction roll-up.
+
+| Phase | Method | Cost |
+|---|---|---|
+| Cover load (once per invocation) | `AIConversation::findCompactionCoverNodes()` → `ConversationCompactionNodesService::findCoverNodesForConversation()` | O(log_K N) indexed reads: the recency-graded cover, never every node |
+| Tail load (once per invocation) | `AIConversationMessagesService::findContextTailMessages()` | one query: the raw tail past the cover edge |
+| Memory directives | `AIConversation::findMemoryDirectivesBlock()` | one indexed query per memo key, again only after a memory write |
+| Context build | `AgentModelInput::buildSystemSegments()` / `buildTailEntries()` | O(segments + C + tail), in memory |
+| Offer | `AIConversation::buildOfferedTools()` → `AgentOfferedTools::buildFor()` | O(T), every step |
+| Model call | `AIConversationModelCallsService::performModelCallOfStep()` | one model call (two with a forced re-drive) |
+| Tool calls | `appendTurn()` → dispatch or fork-join | per call one execution and two persists |
+
+A turn costs a few indexed queries, S model calls and its tool work; the model input is bounded by the cover and the
+tail, not by N. The resume's claim is one conditional UPDATE and the derive walks the loaded tail from its end, both
+independent of N. A sub-agent run end is one transaction over three rows; its notifier reads the parent's sub-agent
+records once (`AIConversationMessagesService::findSubAgentRecordsOfConversation()`, default limit
+`SUB_AGENT_RECORDS_DEFAULT_LIMIT`). Each background dispatch carries an id only; nothing in the background scales with N
+on the turn's thread.
+
+## 11. Changing the loop
 
 - A new step concern goes into its own service, called with the `AgentRun` as a parameter; the agent service keeps the
   drive, the worker entry, the loop and the release ([service-map](service-map.md)).

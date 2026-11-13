@@ -58,17 +58,35 @@ overhead (the newest stamped system content plus tool schemas):
 | raw recent tail | `RAW_RECENT_SHARE` 0.40 × history budget, kept verbatim |
 | summary budget | the rest |
 | leaf span | max(`MIN_LEAF_SEGMENT_TOKENS` 256, raw tail / `FINE_NODES_PER_LEVEL` 4) |
-| roll-up fan-in | `ROLLUP_FAN_IN` 5 = 1 / `SUMMARY_COMPRESSION_RATIO` 0.20 |
+| children per roll-up | `ROLLUP_FAN_IN` 5 = 1 / `SUMMARY_COMPRESSION_RATIO` 0.20 |
 
 A history budget below 4 × 256 tokens is **degenerate**: the round falls back to the message-count knobs of
 `CompactionSettings` (`DEFAULT_KEEP_RECENT_MESSAGES` 12, `DEFAULT_SEGMENT_MESSAGES` 20, `DEFAULT_TIER_FAN_IN` 4,
 `DEFAULT_LEVEL_RETENTION` 2). A large loaded skill set raises the overhead and can make the budget degenerate.
 
+**Leaf sizing is counted by the model, not re-tokenized** (`AIConversation::buildMessageFootprints()`): an assistant
+reply's footprint is the growth of its `inputTokens` over the previous reply's; an owner or tool row counts 0 (its cost
+is in the next reply's growth); the first measured reply counts only its `outputTokens`, so the fixed overhead stays
+out of the history; a non-positive growth (a compaction just shrank the prompt) falls back to the reply's
+`outputTokens`, a deliberate lower bound. A conversation without any measured reply uses the estimated token count of
+each row. A node's `summaryTokens` comes from the summarizer's output tokens.
+
+**Debugging a deep tree.** A low `CompactionSettings::$triggerTokens` only makes the budget degenerate (the overhead
+alone exceeds it). Set `CompactionSettings::$debugLeafSegmentTokensOverride` instead: it forces small leaves, keeps at
+least one leaf of raw tail, and is independent of the threshold.
+
+**Per-model defaults** of `effectiveContextTokens` for a model without its own value come from the model catalog of
+`mgamadeus/ddd-ai` (by window size, capped at 80 % of the window): `ddd-module-ai-specialist`.
+
+**Cost with prompt caching.** A call costs roughly the cached price of the prefix plus the full price of the tail, plus
+a cache write at each compaction. A lower threshold shrinks a prefix that is already discounted but brings the next
+compaction sooner, so cost alone never argues for the leanest threshold; accuracy sets it.
+
 ## 5. The compaction tree
 
 Nodes (`AIConversationCompactionNode`, set `AIConversationCompactionNodes`) are append-only and immutable:
 
-- **Level 0 leaf**: the summary of a contiguous settled range of raw rows (`AIConversation::buildLeafCompactionInput()`:
+- **Level 0 leaf**: the summary of a contiguous range of raw rows that no running turn still needs (`AIConversation::buildLeafCompactionInput()`:
   the identifiers block plus the transcript, errors dropped, tool results capped).
 - **Roll-up**: a level-L+1 node summarizes the oldest 5 contiguous exposed nodes of level L once at least
   `fineNodesPerLevel` (4) newer nodes stay fine after it (9 exposed nodes at the level) (`AIConversationCompactionExposedNodesByLevel::buildNextRollUpGroupAtLevel()`).
@@ -80,6 +98,15 @@ Nodes (`AIConversationCompactionNode`, set `AIConversationCompactionNodes`) are 
 - Each node gets an embedding of its summary for the search ([recall-and-search.md](recall-and-search.md)); a failed embedding stores the
   zero vector and the node is left out of the vector search until repaired.
 - A duplicate insert (redelivery, concurrent round) hits the unique index and is skipped.
+- **Where a round must stop.** Every leaf planner, the threshold round and the completion pass alike, ends its range
+  below `AIConversation::getCompactionSettleFloorIndex()`, the lower of two floors: the unfinished turn
+  (`getUnfinishedTurnFloorIndex()`: while a turn is open, only earlier turns may be covered, so the running task keeps
+  its tool results verbatim and its owner message) and the oldest unanswered inbound message
+  (`getUnansweredInboundFloorIndex()`: the oldest owner message or injected signal no final assistant text answered;
+  a covered owner message would look answered to a retry). A range also stops below the oldest delegate whose result
+  has not arrived yet: that result lands later and must never be summarized away.
+- **Leaves before roll-ups.** Within a round leaves are written first, so a child's `created` time always precedes its
+  parent's and the point-in-time read of the cover stays correct.
 
 ## 6. Preserved facts
 
@@ -136,7 +163,15 @@ delegation sub-task) so the summary is anchored in it; the prompt is `AgentAIPro
 - The cover read for a call (`findCoverNodesForConversation()`) issues one single-row query per cover node, walking
   from index 0 to the edge.
 - The roll-up frontier is computed once per round and updated incrementally after each roll-up.
+- Memos collapse the repeated work of one context build or round: `AIConversationMessages::getRowsSortedByIndex()`
+  (keyed on the row count and the last row) and `AIConversationCompactionNodes::buildCover()` (keyed on the point in time and
+  the node count); the preserved facts are extracted once per leaf for both the summarizer input and the node; the
+  summary refresh reuses the round's tree and tail in memory.
 - Summaries cost one cheap model call per leaf and per roll-up.
+- A point-in-time inspection of a past call legitimately loads the full node set and every message
+  (`AIConversationMessagesService::findAllMessagesForConversationInOrder()` without a limit: keyset windows of
+  `CONTEXT_MESSAGE_WINDOW` (100), at most `MAX_CONTEXT_WINDOWS` (50), so 5,000 rows): the rows of a past tail are
+  covered now, and the present cover and tail cannot rebuild it.
 
 ## 9. Settings and symptoms
 

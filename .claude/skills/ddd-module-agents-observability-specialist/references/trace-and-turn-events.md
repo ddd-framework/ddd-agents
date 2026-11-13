@@ -2,14 +2,14 @@
 
 **Reader:** host developer and package maintainer
 
-Contents: three channels · turn events · the kinds · reading turn events · trace events · who wrote a row · retention · for the package maintainer · full class names
+Contents: three records · turn events · the kinds · the turn-start timings · reading turn events · trace events · who wrote a row · retention · for the package maintainer · full class names
 
 What happened around a turn that the message rows do not hold: the decisions taken, a chunk that ran, how a turn
 ended, a voice call's events. The task plan's own trace is read with the plan: `ddd-module-agents-loop-specialist`.
 
-## Three channels
+## Three records
 
-| Channel | Persisted | Written by | Read by |
+| Record | Persisted | Written by | Read by |
 |---|---|---|---|
 | trace log lines (`AITraceLogTrait`) | no, the logger at INFO, only with `AGENT_TRACE` on | every service and handler at its async boundaries | a developer running a worker in the foreground ([debugging-a-turn](debugging-a-turn.md)) |
 | turn events (`AIConversationTurnEvent`) | yes, always | the loop, the decision sites, the release | the admin inspector, the decision statistics, the integrity report |
@@ -48,6 +48,29 @@ turn), `evaluationMessageIndex`, `kind`, `site`, `subject`, `requestId`, `runTok
 `turnEnd` row exists only for a turn started by the owner's text or a submitted form in a root conversation — a turn
 started by a signal, a sub-agent's turn and a supervisor turn have none. One row per attempt (the subject is the run
 token); the newest wins.
+
+## The turn-start timings
+
+The `turnEnd` payload carries `turnStartMs` (`AIConversationTurnTimings::buildTurnStartStampsForEvent()`): where a
+worker turn spent its time before step 1, in milliseconds. It is null when no worker resume stamped the turn (a
+synchronous console or admin drive). Each phase is the time since the previous stamp, in this order:
+
+| Phase | Ends when |
+|---|---|
+| `handlerLoad`, `claim`, `agentSpaceLoad`, `messagesLoad`, `prepare` | the job was received and the resume entered; the run was claimed; the space, then the context tail were loaded; the turn was prepared |
+| `systemPrompt` | the system prompt was built |
+| `decisionsSent` | the turn-start decision request went out (after the system prompt, so a slow prompt build never eats the decision timeout) |
+| `preFirstStep` | everything before the first model call, the answers of that request included |
+
+`preFirstStepParts` splits the work by what was done, in milliseconds summed per part, in this order:
+`unusedSkillCleanup` (before the prompt), `decisionInputs` (the questions built) and `decisionSend` (the request
+sent) — both inside the phase `decisionsSent` —, then `mandateSweep` (the work that runs while the answers travel),
+`decisionWait` (the time still spent waiting for the answers after that work), `decisionApply` (the answers applied),
+`variants`, `purposeNotice`, `planLeaves`, `signals`. A large `decisionWait` means the decision model, not the loop,
+held the turn. Beside the phases: `ownerMessageToJob` (the owner row's created time to the job
+received; database clock against worker clock, so about one second of bias), `apiAppendToSend`, `sendToJob`, and from
+the dispatching process's microsecond stamp `ownerRowToSend` and `ownerRowToJob`. The sites themselves:
+`ddd-module-agents-decisions-and-guards-specialist`.
 
 ## Reading turn events
 
@@ -115,4 +138,5 @@ The classes this reference names, with their namespace (for the `use` lines of a
 `DDD\Domain\AI\Entities\Conversations\TurnEvents\AIConversationTurnEvent` ·
 `DDD\Domain\AI\Entities\Conversations\TurnEvents\AIConversationTurnEventSnapshot` ·
 `DDD\Domain\AI\Services\Conversations\TurnEvents\AIConversationTurnEventsService` ·
-`DDD\Domain\AI\Traits\Conversations\AITraceLogTrait`
+`DDD\Domain\AI\Traits\Conversations\AITraceLogTrait` ·
+`DDD\Domain\AI\Entities\Conversations\Agent\Turns\AIConversationTurnTimings`

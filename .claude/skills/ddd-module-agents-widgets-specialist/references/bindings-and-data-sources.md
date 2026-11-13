@@ -47,7 +47,7 @@ When a later row stores the call's result (or a later step starts), `findRowsRes
 turn's pending bindings and the caller writes those rows again in the same claim-fenced write. A block written by the
 model is always resolved fresh: a `state`, `value` or `entity` the model typed is dropped first, so it cannot forge a
 resolved snapshot. A stored block keeps its snapshots; a replay reads them and resolves nothing again. The model reads
-the block folded back to what it wrote (`ComposedViewBindingResolution::foldSnapshotsForTheModel()`).
+the block turned back into what it wrote (`ComposedViewBindingResolution::foldSnapshotsForTheModel()`).
 
 The path is a small JSONPath subset (`ComposedViewToolResultPath`): it starts with `$`; `.name`, `['name']` or
 `["name"]` select a key, `[3]` a list element (zero-based), `[*]` or `.*` every element — the path then selects a list.

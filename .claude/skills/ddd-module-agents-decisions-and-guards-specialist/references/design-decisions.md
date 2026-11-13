@@ -6,7 +6,7 @@ Contents: a second model class at the loop's boundaries · the model answers fac
 
 ## A second model class at the loop's boundaries
 
-**Rule.** The loop's judgments that are neither the answer nor the customer's work — the reply language, whether a
+**Rule.** The loop's judgments that are neither the answer nor the owner's work — the reply language, whether a
 final text delivers or announces, which skill to load, which move gets a stalled model unstuck — are asked of a
 decision model: typed answers with probabilities over a small state, no text output, never on the wire the chat model
 sees.
@@ -89,14 +89,14 @@ the file and the row.
 ## One batch per boundary, one runner
 
 **Rule.** All decision calls of one loop boundary go into one `ArgusAgentDecisions` batch (the turn start folds its
-sites into one request; other children run in parallel under settle mode), and every turn-path call goes through
+sites into one request; other children run in parallel, a rejected child never voiding its siblings), and every turn-path call goes through
 `AgentDecisionCallsService`, which checks the breaker, runs, classifies and trips. The background tool-result screen
 is the one call outside it: it loads its batch directly, off the turn path, and keeps its outcome on the call row.
 
 **Reason.** The boundary pays the latency once. One runner means one classification and one breaker rule; hand-written
 copies of the mapping drifted apart before.
 
-**Rejected.** One call per site: latency multiplies. Driving the Argus operations by hand: the settle mode, the timeout
+**Rejected.** One call per site: latency multiplies. Driving the Argus operations by hand: the keep-siblings mode, the timeout
 and the breaker would be re-implemented per site.
 
 **Would change if.** Sites at one boundary needed different models or endpoints that cannot share a batch.
@@ -144,7 +144,7 @@ drift. A response that cannot be read still cost money.
 
 ## Deterministic first
 
-**Rule.** A judgment a counter, a fold over persisted rows or a field in memory can make stays deterministic: the
+**Rule.** A judgment a counter, a pass over persisted rows or a field in memory can make stays deterministic: the
 plan-item preload, the checked-stop counter, the effort precondition. The decision model takes what needs a reading of
 text or intent.
 
@@ -157,7 +157,7 @@ can separate.
 
 ## Detection is the lowest tier
 
-**Rule.** The injection screens are a best-effort filter. The load-bearing controls are structural: rights scoped by
+**Rule.** The injection screens are a best-effort filter. The controls everything rests on are structural: rights scoped by
 agent space, owner consent on irreversible steps, mandates for outward actions, and no write path that trusts text
 from a tool result.
 

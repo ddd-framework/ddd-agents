@@ -19,6 +19,12 @@ Two data patterns exist and the class does not care which one a type uses:
   id it reads by is usually the agent space's key (`$widgetSelfHydrationKey`, below). Preferred whenever such an
   endpoint exists: nothing is copied, nothing goes stale.
 
+The tool behind a data-complete widget returns its response DTO WITHOUT `LlmMarkdownRenderable`: the executor then
+hands the model the structured result (`MCPToolExecutorService`), and the model copies fields instead of rebuilding
+JSON from prose. It caps its list to what the widget shows (the package's classes document their caps: at most 30
+sources, at most 20 conversation groups). Titles and labels the model writes into a block are in the owner's language;
+the instruction that teaches the widget stays English. The tool side of such a result is `ddd-module-agents-tools-specialist`.
+
 ## The wire name
 
 - `ConversationWidget::WIDGET_TYPE` is the wire name and the frontend registry name of the same component. It is

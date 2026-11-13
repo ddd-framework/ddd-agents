@@ -45,7 +45,7 @@ All live in `DDD\Domain\AI\Entities\MCPPackages`. They are read by reflection, n
 | Attribute | Target | At run time |
 |---|---|---|
 | `MCPToolSummary(summary)` | method | The level-1 line of the `load_tool` catalog while the tool is available but not loaded. Without it the catalog falls back to the whole docblock. Write what the tool does and when to reach for it, in one or two sentences. |
-| `MCPToolAlwaysLoad(reason)` | method or class | The tool loads with its skill even in lazy tool loading — no `load_tool` hop. It stays evictable. |
+| `MCPToolAlwaysLoad(reason)` | method or class | The tool loads with its skill even in lazy tool loading — no `load_tool` call first. It stays evictable. |
 | `MCPToolNoEviction(reason)` | method or class | A pin: once loaded the per-turn sweep never evicts it. Keep the pinned set few and small. Residency and eviction are the context skill's (`ddd-module-agents-context-specialist`). |
 | `MCPToolNewestResultIsNeverStubbed(reason)` | method | The newest result of this tool always rides whole on the wire; older ones are stubbed as usual. Declare it on the lookup whose ids a later write takes, not on the write. Read by `ArgusAIAgentConversation` through `MCPToolAttributeCatalog`. |
 | `MCPToolEmbeddableWidget(...widgetTypes)` | method | Under a COMPLETED result of any effect the model is told which embeddable widget shows this data inside a `ComposedView` (only where the model is taught the kit, never for a widget the result already dictates). Widgets are the widgets skill's (`ddd-module-agents-widgets-specialist`). |

@@ -23,14 +23,17 @@ The unit of a hit is always a MESSAGE (`SemanticSearchHit`); a compaction summar
 ## 2. The pipeline
 
 1. Embed the query (`AITextEmbeddingsService`); no vector = the vector legs find nothing, the keyword leg still runs.
-2. Four candidate rankings, each over-fetched (`OVERFETCH_FACTOR` 8 × limit):
+2. Four candidate rankings, each over-fetched (`OVERFETCH_FACTOR` 8 × limit — wide on purpose: a recall question
+   such as "what did we discuss about X" is a question about the conversation, so the message that answers it often
+   ranks far down by raw vector distance; the wide window keeps it in reach of the rerank, which can only order what
+   it receives):
    - dense: cosine distance over the message embedding rows;
    - node expansion: compaction nodes nearest to the query, each resolved to its best `MESSAGES_PER_NODE` (2) messages
      in its covered range — recalls a compacted topic no raw message matches;
    - keyword: full-text match over the message text (needs no embedding, covers un-embedded rows);
    - recency: newest first over the union.
 3. Reciprocal rank fusion (`k` = 60) over the four lists.
-4. Across conversations: drop eval runs without seeded history and conversations hidden from the customer.
+4. Across conversations: drop eval runs without seeded history and conversations hidden from the owner (the platform's own runs).
 5. Rerank (`ArgusSearchRerank`, a cheap fast model, prompt `AgentAIPromptNames::APP_AI_SEARCH_RERANK`): at most
    `MAX_RERANK_CANDIDATES` (40) candidates, each cut to `RERANK_CANDIDATE_CHARS` (400) around the query. A parseable
    verdict is honoured exactly — omitted candidates are dropped, an empty verdict is an empty result. Only a failed or
@@ -101,6 +104,21 @@ skill describes how); the episodic history segment points the model at them by `
 One cross-conversation search is two model calls (query embedding, rerank) plus the vector queries over messages and
 nodes, one message query per matched node, and the keyword query (ids ranked first, rows loaded in a second query).
 The node expansion is the part that grows with the number of matched nodes.
+
+What keeps the reads small:
+
+- A message hit is loaded with the partial select `AIConversationMessage::SEARCH_HIT_LOAD_COLUMNS`, a node with
+  `DBConversationCompactionNodes::SEARCH_HIT_LOAD_COLUMNS` (id, conversation, covered range): a node row also carries
+  its summary, its preserved facts and a vector of 1536 floats, none of which the search reads.
+- The keyword leg ranks message ids only, then loads those rows in a second query: a full-text query with many
+  matches sorts every matching row, and with the message text in the row that sort moves a large volume.
+- That second query sets `setMaxResults()` to the number of ranked ids: a query without its own limit is cut by the
+  default page size of the query options (50).
+- A result group takes the conversation's title from `AIConversation::getSummaryWithoutGenerating()`: reading the
+  summary property of a conversation that has none starts the summary generator, a model call per result. Such a
+  group has no title.
+- When measuring a search, a repeated identical query may be answered by the database's query cache: measure the
+  first run of a query, or vary it.
 
 ## 7. Symptoms
 

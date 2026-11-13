@@ -2,7 +2,7 @@
 
 **Reader:** host developer
 
-The package ships the seam of a durable memory, not the memory store: `AgentMemoriesService` answers "no memory" in
+The package ships the interface of a durable memory, not the memory store: `AgentMemoriesService` answers "no memory" in
 every method until a host puts a same-path subclass under its own root namespace. This reference says what the core
 asks of that subclass and where its answers land in the model input.
 
@@ -14,12 +14,12 @@ structured data (settings, records a tool edits) is edited there through its too
 copy drifts from the source of truth. Standing directives are the one kind the core injects on every call; the rest is
 searched on demand.
 
-## 2. The seam
+## 2. What the core asks of the host
 
 | Method of `AgentMemoriesService` | Called | Default |
 |---|---|---|
 | `findStandingDirectivesForAgentSpace($accountId, $agentSpace)` | while building the model input (phase J), once per conversation object, again only after a call of a tool named `remember`, `updateMemory` or `forget` completed | null |
-| `curateConversationAfterTurn($conversation, $async)` | after a fully settled owner turn of a root (`AIConversationTurnEndFollowUpsService`), with `$async = true`; a failure is swallowed | nothing |
+| `curateConversationAfterTurn($conversation, $async)` | after an owner turn of a root that ended with nothing new arriving during it (`AIConversationTurnEndFollowUpsService`), with `$async = true`; a failure is swallowed | nothing |
 | `findSimilarMemories($query, $accountId, $agentSpace, $limit)` | by `SemanticSearchService::searchMemory()` | empty `AgentMemoryHits` |
 | `getEmbeddingRepairTargets()` | by the embedding repair ([recall-and-search.md](recall-and-search.md)) | empty `AgentEmbeddingRepairTargets` |
 
@@ -70,7 +70,9 @@ A memory that records when something was said keeps the instant and the zone it 
 ## 6. Host checklist
 
 1. Same-path subclass of `AgentMemoriesService` (template in [SKILL.md](../SKILL.md)).
-2. The memory tools the model calls, in a skill of the host (tools and skills-and-purposes skills); only the names
+2. The memory tools the model calls, in a skill of the host that loads on demand, not as tools offered on every call
+   (tools and skills-and-purposes skills): an always-offered tool's schema is sent and billed again on every call, and a
+   long flat tool list weakens a cheap model's tool choice, while memory operations are rare. Only the names
    `remember`, `updateMemory` and `forget` refresh the directives within a run.
 3. An embedding provider (`AITextEmbeddingsService` subclass) if `findSimilarMemories()` is vector-based, and the
    memory table in `getEmbeddingRepairTargets()`.

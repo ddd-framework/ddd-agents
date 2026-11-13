@@ -2,7 +2,7 @@
 
 **Reader:** host developer
 
-Contents: three ways a widget reaches the chat · the one writer and its delivery · writing from a tool · writing as the platform · dictating a block · what a written row is · the shown-widget view · reading an answer · the generic rule · an answerable class · form widgets · applying an edit at turn open · traps
+Contents: three ways a widget reaches the chat · the one writer and its delivery · writing from a tool · writing as the platform · a widget for a capability the agent space has not unlocked · dictating a block · what a written row is · the shown-widget view · reading an answer · the generic rule · an answerable class · form widgets · applying an edit at turn open · traps
 
 ## Three ways a widget reaches the chat
 
@@ -68,6 +68,17 @@ A purpose that wants a widget at the start of a turn returns an `AIConversationP
 `AIConversationPurpose::buildWidgetAtTurnOpen()`: the widget, the platform reason and the signal text. The turn-signal
 service writes it through `appendPlatformWidget()` and, only when it was written, appends that text as a signal of the
 source `PLATFORM_WIDGET_EMITTED`, which owes no work. Purposes are `ddd-module-agents-skills-and-purposes-specialist`.
+
+## A widget for a capability the agent space has not unlocked
+
+A tool that is locked by a flag is not offered and a skill that is locked never loads, so neither can teach a widget
+whose trigger is the missing capability (an upgrade offer). Its home is the plan block: the host's
+`AIConversationEntitlementsService::buildProductAwareness()` renders the text of the `PRODUCT_CAPABILITIES` segment
+(`AgentProductAwareness::$productCapabilities`, empty by default), and the widget's block and rule go inside the part
+of that text the host renders only when an upgrade exists — so the widget is taught exactly when it can be used. A
+capability locked by a right of this user (the `RESTRICTED_CAPABILITIES` segment) is never offered as an upgrade
+widget: the account's administrator grants a right, nobody buys it. Entitlements and the segments are
+`ddd-module-agents-specialist` (override points) and `ddd-module-agents-context-specialist`.
 
 ## Dictating a block
 

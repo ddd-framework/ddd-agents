@@ -73,7 +73,8 @@ call, dispatch), never from the name — a `get…` may append a widget or warm 
 
 A WRITE may declare it only when every row it writes is its own — own-table rows set-level, on a shared row strictly
 its own columns through a partial write, a shared JSON column under the host's per-space lock. A READ must be
-idempotent. An argument that flips the verdict (a flag that also imports, or that pauses the run) disqualifies the
+idempotent. A READ that upserts a cache row of its OWN result (a remote call's cache row in the database) stays
+admissible only when that upsert is idempotent and keyed by the request — say so in the `reason`. An argument that flips the verdict (a flag that also imports, or that pauses the run) disqualifies the
 tool unless the tool forces the flag. The `reason` names what was audited ("one external look-up, reads only"). The
 package's own `listMandates` and `getPreviousTaskRunReports` carry it.
 
@@ -115,8 +116,8 @@ What breaks without it: nothing — the calls run one after another and a batch 
 
 - `startChildrenOfFork()` settles the in-flight realtime signal first (a child must not inherit a live connection),
   starts one `Process` per call with the tool's own ceiling plus `PARENT_TIMEOUT_GRACE_SECONDS` (10 s), and writes one
-  `AIConversationToolCallBatch` row for the inspector (count, deadline, run token); `recordBatchFinished()` stamps it
-  settled and consumed.
+  `AIConversationToolCallBatch` row for the inspector (count, deadline, run token); `recordBatchFinished()` stamps its
+  `settledAt` and `consumedAt`.
 - `waitForAllChildrenOfFork()` waits for every child before the first adoption — a parent persist while a child still
   writes its row fails.
 - `waitForOutcome()` reads the row's `toolCall` column with one raw statement (a locking read inside an open
