@@ -29,6 +29,9 @@ class AgentModelInputTailEntry extends ValueObject
     /** The `[SIGNAL:widget]` line of the turn's decided direct widget. */
     public const string KIND_DIRECT_WIDGET = 'DIRECT_WIDGET';
 
+    /** The `[SIGNAL:skills]` line of a turn's first model call: the skills loaded right now. */
+    public const string KIND_LOADED_SKILLS = 'LOADED_SKILLS';
+
     /** The answer contract of a turn that completed writes or received pictures. */
     public const string KIND_ANSWER_CONTRACT = 'ANSWER_CONTRACT';
 

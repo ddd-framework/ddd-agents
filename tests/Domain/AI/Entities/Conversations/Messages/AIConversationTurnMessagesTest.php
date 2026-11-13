@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DDD\Tests\Agents\Domain\AI\Entities\Conversations\Messages;
 
+use DDD\Domain\AI\Entities\Conversations\Agent\Tools\LoadSkillsTool;
 use DDD\Domain\AI\Entities\Conversations\Agent\Tools\LoadToolTool;
 use DDD\Domain\AI\Entities\Conversations\Agent\Tools\SetTaskStatusTool;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
@@ -50,6 +51,23 @@ class AIConversationTurnMessagesTest extends UnitTestCase
         self::assertSame(1, $turn->countInjectionRemovedSignals());
         self::assertSame([$pendingRead], $turn->getCallRowsWithPendingInjectionScreening());
         self::assertNull($turn->getInitiatorWhenOwnerFormSubmit(), 'a text initiator is no form submit');
+    }
+
+    public function testALoadCallThatLoadedNothingOrWasAnsweredByTheRepeatGuardIsNoLoadOfTheTurn(): void
+    {
+        $owner = $this->text(AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, 'which model fits?', 0);
+        $loadOfALoadedSkill = $this->call(LoadSkillsTool::NAME, AIConversationMessage::STATUS_COMPLETED, 1, ['skill_names' => ['Images']]);
+        $loadOfALoadedSkill->toolCall->loadSkillsCallLoadedNothing = true;
+        $repeatAnsweredByTheGuard = $this->call(LoadSkillsTool::NAME, AIConversationMessage::STATUS_COMPLETED, 2, ['skill_names' => ['Images']]);
+        $repeatAnsweredByTheGuard->toolCall->wasRefusedAsDuplicate = true;
+
+        self::assertFalse(
+            $this->messages($owner, $loadOfALoadedSkill, $repeatAnsweredByTheGuard)->buildCurrentTurn()->hasSkillOrToolLoadCall(),
+            'neither call loaded a skill: the answer after them is a reply, no stall'
+        );
+
+        $loadThatLoaded = $this->call(LoadSkillsTool::NAME, AIConversationMessage::STATUS_COMPLETED, 3, ['skill_names' => ['Posts']]);
+        self::assertTrue($this->messages($owner, $loadOfALoadedSkill, $repeatAnsweredByTheGuard, $loadThatLoaded)->buildCurrentTurn()->hasSkillOrToolLoadCall());
     }
 
     public function testWithoutAnInitiatorTheWholeSetIsTheTurnAndAnIndexLessInitiatorCounts(): void

@@ -1139,6 +1139,36 @@ class AgentModelInput extends ValueObject
         return $directWidgetSignal !== '' ? $directWidgetSignal : null;
     }
 
+    /**
+     * The `[SIGNAL:skills]` tail entry of a turn's FIRST model call: the skills loaded right now, by name. The skill
+     * catalog and the `load_skills` enum go on naming a loaded skill (under append-only loading both stay the same
+     * for the whole epoch) and the "Currently loaded" line sits far up in the system content — a model opened the
+     * turn with `load_skills` for a skill it already held: one model call spent, a loop when it repeated the call.
+     * Only before the turn's first tool call: from there the tool results are the model's view. Null without a loaded
+     * skill. Volatile wire-tail contract like the other hints: never persisted, cache-neutral.
+     */
+    public function loadedSkillsTailHint(): ?string
+    {
+        $loadedSkillNames = $this->loadedCapabilities?->getLoadedSkillNames() ?? [];
+        if ($loadedSkillNames === []) {
+            return null;
+        }
+        for ($i = count($this->messages) - 1; $i >= 0; $i--) {
+            $candidate = $this->messages[$i];
+            if (isset($candidate->toolCall) && $candidate->toolCall !== null) {
+                return null;
+            }
+            $isOwnerSignal = ($candidate->messageType ?? null) === AIConversationMessage::MESSAGE_SIGNAL
+                && $candidate->isOwnerAuthoredInbound();
+            if ($isOwnerSignal
+                || ($candidate->isOwnerOrOrchestratorTaskText() && trim((string)($candidate->message ?? '')) !== '')) {
+                break;
+            }
+        }
+        return '[SIGNAL:skills] Loaded right now: ' . implode(', ', $loadedSkillNames) . ' — their tools are in your tool'
+            . ' list. load_skills is only for a skill that is not named here.';
+    }
+
     public function taskPlanTailHint(): ?string
     {
         $tailHintText = $this->taskPlan?->toTailHintText() ?? '';
@@ -1415,6 +1445,13 @@ class AgentModelInput extends ValueObject
         $directWidgetSignalTailHint = $this->directWidgetSignalTailHint();
         if ($directWidgetSignalTailHint !== null) {
             $agentModelInputTailEntry = AgentModelInputTailEntry::ofText(AgentModelInputTailEntry::KIND_DIRECT_WIDGET, AgentContextSegmentType::SIGNAL, $directWidgetSignalTailHint);
+            $agentModelInputTailEntries->add($agentModelInputTailEntry);
+        }
+        // Loaded skills: on the turn's first model call, the skills held right now — against a `load_skills` call
+        // for a skill that is loaded already.
+        $loadedSkillsTailHint = $this->loadedSkillsTailHint();
+        if ($loadedSkillsTailHint !== null) {
+            $agentModelInputTailEntry = AgentModelInputTailEntry::ofText(AgentModelInputTailEntry::KIND_LOADED_SKILLS, AgentContextSegmentType::SIGNAL, $loadedSkillsTailHint);
             $agentModelInputTailEntries->add($agentModelInputTailEntry);
         }
         // Answer contract for a write-carrying turn (the language-reflex class): names the turn's

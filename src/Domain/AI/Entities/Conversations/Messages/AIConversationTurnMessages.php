@@ -508,12 +508,18 @@ class AIConversationTurnMessages extends ValueObject
      * …") and must NOT be forced into a spurious work-tool call. Per-turn scope mirrors {@see hasCompletedWorkToolCall()}.
      * A `load_skills` call that loaded nothing ({@see ToolCall::$loadSkillsCallLoadedNothing}, the "Already loaded"
      * answer) is no load: the skills were carried forward, so the prose after it is a reply (both strategies).
+     * A load call the repeat guard answered instead of running ({@see ToolCall::$wasRefusedAsDuplicate}) is no load
+     * either: the guard forces a tool-less answer step after it, and counted as a load that very answer was nudged as
+     * a stall — the model loaded again, was answered by the guard again, and the turn ran to its step budget.
      */
     public function hasSkillOrToolLoadCall(): bool
     {
         foreach ($this->rows as $message) {
             $toolCall = isset($message->toolCall) ? $message->toolCall : null;
             if (($toolCall?->name) === LoadSkillsTool::NAME && $toolCall->loadSkillsCallLoadedNothing) {
+                continue;
+            }
+            if ($toolCall !== null && $toolCall->wasRefusedAsDuplicate) {
                 continue;
             }
             // a `load_tool` call is the same signal: it may bring a sub-skill with the tool; so is a `findWidgets` call
