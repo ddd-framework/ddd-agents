@@ -57,7 +57,7 @@ class CustomVisualizationConversationWidget extends ConversationWidget
     /** @var string|null The styles. */
     public ?string $css = null;
 
-    /** @var string|null The JavaScript, reading `window.RC_VISUALIZATION.data`. */
+    /** @var string|null The JavaScript, reading `window.AGENTS_VISUALIZATION.data`. */
     public ?string $script = null;
 
     /** @var mixed[]|null `d3` only ({@see ALLOWED_LIBRARY_NAMES}); the block may name anything, the frontend loads only the allowed ones. */
