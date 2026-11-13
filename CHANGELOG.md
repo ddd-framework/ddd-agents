@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0-alpha.4
+
+- The answer contract names what the final answer contains, not that it is due: a part of the owner's request that
+  is still open is worked first.
+- The plan directives that ask for a plan are no longer sent once the turn changed the plan; the plan-creating
+  directive names sub-steps and variants as subtasks; the direct band asks for every call the request needs.
+- The result text of an unchanged plan resend orders no work: the next open item, or the answer when the owner asked
+  to be asked first (`TaskPlan::buildUnchangedResendResultText()`).
+- A load call the repeat guard answered counts as no load for the stall check.
+- A turn's first model call names the skills loaded right now (`[SIGNAL:skills]`, tail entry kind `LOADED_SKILLS`).
+
 ## 0.1.0-alpha.3
 
 - The grant result of a standing mandate (time window or unlimited) asks the model to tell the customer in one
