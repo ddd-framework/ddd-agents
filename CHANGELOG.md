@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.3
+
+- The grant result of a standing mandate (time window or unlimited) asks the model to tell the customer in one
+  sentence what it may now do on its own, until when, and that a word from them stops it.
+- System prompt: a plan item is `done` only when its result exists; a load, create or publish item whose call could
+  not deliver is `blocked`. A blocker is reported together with the alternative that is available.
+
 ## 0.1.0-alpha.2
 
 - The answer contract owes the outcomes of the writes since the owner's newest input: their text or, newer than it,
