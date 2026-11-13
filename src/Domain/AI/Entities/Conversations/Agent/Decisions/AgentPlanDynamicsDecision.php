@@ -209,7 +209,7 @@ class AgentPlanDynamicsDecision extends AgentDecision
         return match ($this->band) {
             self::BAND_REQUIRED => '[SIGNAL:plan] This request needs a working plan: several separately accountable changes or '
                 . 'deliverables, or work that must survive a pause. Create it with update_task_plan as your FIRST call (one '
-                . 'item per part), then work the items; tick each once its result is in your context, with the call for the next item or with your answer.' . $earlierPlanNote . $finishedNote,
+                . 'item per part, its sub-steps or variants as subtasks), then work the items; tick each once its result is in your context, with the call for the next item or with your answer.' . $earlierPlanNote . $finishedNote,
             self::BAND_DIRECT => '[SIGNAL:plan] Answer this directly — no task plan: it is a question, one action with its '
                 . 'check, a preference, a follow-up or one deliverable. Read what you need, do what it asks — every call '
                 . 'it needs —, then answer.' . $finishedNote,

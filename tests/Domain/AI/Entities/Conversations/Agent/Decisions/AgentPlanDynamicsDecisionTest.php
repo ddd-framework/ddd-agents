@@ -80,7 +80,7 @@ class AgentPlanDynamicsDecisionTest extends UnitTestCase
         $decision->band = AgentPlanDynamicsDecision::BAND_REQUIRED;
         self::assertSame(
             '[SIGNAL:plan] This request needs a working plan: several separately accountable changes or deliverables, or work that must survive a pause.'
-                . ' Create it with update_task_plan as your FIRST call (one item per part), then work the items; tick each once its result is in your context,'
+                . ' Create it with update_task_plan as your FIRST call (one item per part, its sub-steps or variants as subtasks), then work the items; tick each once its result is in your context,'
                 . ' with the call for the next item or with your answer. A plan from an earlier task still stands: in that same update_task_plan call drop each of its items by its key'
                 . ' (for item 3: {"key": "3", "remove": true}) and add the new items.',
             $decision->toDirectiveText(0, '3')
