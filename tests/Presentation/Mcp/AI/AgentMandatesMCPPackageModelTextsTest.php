@@ -48,7 +48,7 @@ class AgentMandatesMCPPackageModelTextsTest extends UnitTestCase
         $supersededMandate->id = 16;
         $responseDto = AgentMandateMcpResponseDto::forGrantOutcome(AgentMandateGrantOutcome::forGranted($this->buildMandate(AgentMandate::SCOPE_UNLIMITED), [$supersededMandate]), null);
         self::assertSame(
-            "Mandate granted. Evidence: Ja, veröffentlichen.\nThe grant alone changes nothing: call the tool that was refused for this permission again NOW, and tell the customer only what that call returned.\nIt REPLACES the previous mandate(s) below (now SUPERSEDED — tell the customer the old permission no longer applies):\n"
+            "Mandate granted. Evidence: Ja, veröffentlichen.\nThe grant alone changes nothing: call the tool that was refused for this permission again NOW, and tell the customer only what that call returned.\nThis is a STANDING permission: once that call has returned, your answer ALSO tells the customer in ONE sentence what you may now do on your own, until when, and that a word from them stops it at once.\nIt REPLACES the previous mandate(s) below (now SUPERSEDED — tell the customer the old permission no longer applies):\n"
             . trim($supersededMandate->toLlmMarkdownInZone(null)),
             $responseDto->note
         );

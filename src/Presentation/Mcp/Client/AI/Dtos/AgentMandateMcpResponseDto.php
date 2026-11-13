@@ -48,6 +48,10 @@ class AgentMandateMcpResponseDto extends RestResponseDto implements LlmMarkdownR
                 . ' call of the customer\'s current request through the tool you use first (and the tools of the '
                 . 'same intent) — run the whole batch through it now and do NOT grant again until the customer '
                 . 'asks for something new. A different action of this class needs the customer\'s own consent.';
+        } else {
+            // a standing permission is confirmed to the customer: what, until when, and how it stops
+            $responseDto->note .= "\nThis is a STANDING permission: once that call has returned, your answer ALSO tells the "
+                . 'customer in ONE sentence what you may now do on your own, until when, and that a word from them stops it at once.';
         }
         if ($agentMandateGrantOutcome->supersededMandates !== []) {
             $supersededLines = array_map(
