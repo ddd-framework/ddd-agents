@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0-alpha.22
+
+- `#[MCPExposedFilterProperties]`: the executor reads the model's raw `filters` and `orderBy` strings before the
+  arguments are hydrated, right after the eligibility gate and before the mandate gate
+  (`MCPToolExecutorService::refuseRawQueryOptionArgumentsOutsideExposedFilterProperties()`). A property outside the
+  tool's list is answered with the tool's allowed properties on the first call, also when the entity does not know
+  the property or an `orderBy` entry is empty (named `(empty entry)` in the refusal). A `filters` string that does not
+  parse or validate leaves the call to hydration, which reports the error as before; a filter inside `expand` is answered
+  by hydration as before. The check on the hydrated request objects stays; both build their refusal in
+  `refusePropertyNamesOutsideExposedFilterProperties()`. Tools without the attribute are unchanged.
+
 ## 0.1.0-alpha.21
 
 - Release workflow: the npm publish step logs verbosely. No code change.

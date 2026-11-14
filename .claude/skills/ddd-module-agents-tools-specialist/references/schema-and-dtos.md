@@ -63,8 +63,9 @@ request DTO it fills normally. The placeholder rule below runs for request DTOs 
   An eval-harness call keeps its arguments as they are.
 - In the agent loop, before the gates and the hydration, the arguments the conversation's space fills are added
   (call-context-and-agent-space-defaults.md).
-- A list tool that declares `MCPExposedFilterProperties` is refused when its hydrated `filters` or `orderBy` names
-  another property.
+- A list tool that declares `MCPExposedFilterProperties` is refused when its `filters` or `orderBy` names another
+  property: the raw arguments are checked before the hydration and the refusal lists the tool's properties; the
+  hydrated request objects are checked once more.
 
 ## Properties and their docblocks
 

@@ -88,6 +88,9 @@ use DDD\Domain\AI\Entities\MCPPackages\MCPToolCallServiceThrowErrorsSnapshot;
  */
 class MCPToolExecutorService extends Service
 {
+    /** The name an empty entry of a raw `orderBy` argument carries in the refusal of a property outside the allow-list */
+    public const string EMPTY_ORDER_BY_ENTRY_LABEL = '(empty entry)';
+
     /**
      * The tool→loop fields a markdown-rendered result keeps in its control-only `structuredContent`
      * (every key {@see \DDD\Domain\AI\Entities\Conversations\Agent\AgentDelegationRequestFromToolResult} reads).
@@ -729,6 +732,16 @@ class MCPToolExecutorService extends Service
                     return $eligibilityRefusal;
                 }
 
+                // A list tool that names its filter properties (#[MCPExposedFilterProperties]) accepts ONLY those in
+                // `filters` and `orderBy`. The model's raw strings are read BEFORE hydration: hydration validates a
+                // filter against the entity's own definitions and its error lists every filterable property of the
+                // entity, names the tool never exposed. Placed before the mandate gate: the check reads only the method
+                // and the arguments, and a refusal here leaves no first-use mandate binding behind.
+                $rawQueryOptionArgumentsRefusal = $this->refuseRawQueryOptionArgumentsOutsideExposedFilterProperties($toolName, $method, $arguments);
+                if ($rawQueryOptionArgumentsRefusal !== null) {
+                    return $rawQueryOptionArgumentsRefusal;
+                }
+
                 // THE MANDATE GATE for consequential outward actions: a
                 // #[MCPToolRequiresMandate] tool executes in the agent loop ONLY under an ACTIVE mandate
                 // for its action class — granted from the customer's own verified statement, never a claim.
@@ -757,8 +770,7 @@ class MCPToolExecutorService extends Service
                     fn (): array => $this->buildMethodArguments($method, $arguments, $requestContext, $serverProvidedInput)
                 );
 
-                // A list tool that names its filter properties (#[MCPExposedFilterProperties]) accepts ONLY those in
-                // `filters` and `orderBy` — the schema shows no other, a guessed name is refused here.
+                // The same allow-list on the hydrated request objects, whatever filled their query options.
                 $exposedFilterPropertiesRefusal = $this->refuseQueryOptionsOutsideExposedFilterProperties($toolName, $method, $params);
                 if ($exposedFilterPropertiesRefusal !== null) {
                     return $exposedFilterPropertiesRefusal;
@@ -1500,12 +1512,10 @@ class MCPToolExecutorService extends Service
         \ReflectionMethod $reflectionMethod,
         array $methodArguments
     ): ?MCPToolResponse {
-        $exposedFilterPropertiesAttributes = $reflectionMethod->getAttributes(MCPExposedFilterProperties::class);
-        if ($exposedFilterPropertiesAttributes === []) {
+        $exposedFilterProperties = $this->findExposedFilterPropertiesOfToolMethod($reflectionMethod);
+        if ($exposedFilterProperties === null) {
             return null;
         }
-        /** @var MCPExposedFilterProperties $exposedFilterProperties */
-        $exposedFilterProperties = $exposedFilterPropertiesAttributes[0]->newInstance();
         $usedPropertyNames = [];
         foreach ($methodArguments as $methodArgument) {
             if (!$methodArgument instanceof RequestDto) {
@@ -1515,11 +1525,68 @@ class MCPToolExecutorService extends Service
                 $usedPropertyNames = array_merge($usedPropertyNames, $this->collectFilterPropertyNames($methodArgument->filters));
             }
             if (isset($methodArgument->orderBy) && $methodArgument->orderBy instanceof OrderByOptions) {
-                foreach ($methodArgument->orderBy->getElements() as $orderByOption) {
-                    $usedPropertyNames[] = (string)($orderByOption->propertyName ?? '');
-                }
+                $usedPropertyNames = array_merge($usedPropertyNames, $this->collectOrderByPropertyNames($methodArgument->orderBy));
             }
         }
+        return $this->refusePropertyNamesOutsideExposedFilterProperties($toolName, $exposedFilterProperties, $usedPropertyNames);
+    }
+
+    /**
+     * Refuses a call whose raw `filters` or `orderBy` argument names a property the tool does not expose
+     * ({@see MCPExposedFilterProperties}); null when the tool declares no allow-list or no name read from the two
+     * arguments lies outside it. An argument that is no string contributes no name and is left to hydration; a
+     * `filters` string that does not parse or does not validate leaves the whole call to hydration, which reports
+     * the error. An empty entry of an `orderBy` string that parses is refused under the name
+     * {@see self::EMPTY_ORDER_BY_ENTRY_LABEL}. Runs before the arguments are hydrated, so a property outside the
+     * allow-list is answered with the tool's allowed properties instead of the entity's full list of filterable
+     * properties that a failed hydration names.
+     *
+     * @param array<array-key, mixed> $arguments The model's arguments of the call, not yet hydrated
+     */
+    protected function refuseRawQueryOptionArgumentsOutsideExposedFilterProperties(
+        string $toolName,
+        ReflectionMethod $reflectionMethod,
+        array $arguments
+    ): ?MCPToolResponse {
+        $exposedFilterProperties = $this->findExposedFilterPropertiesOfToolMethod($reflectionMethod);
+        if ($exposedFilterProperties === null) {
+            return null;
+        }
+        $filterPropertyNames = $this->readPropertyNamesOfFiltersArgument($arguments['filters'] ?? null);
+        if ($filterPropertyNames === null) {
+            return null;
+        }
+        $usedPropertyNames = array_merge(
+            $filterPropertyNames,
+            $this->readPropertyNamesOfOrderByArgument($arguments['orderBy'] ?? null)
+        );
+        return $this->refusePropertyNamesOutsideExposedFilterProperties($toolName, $exposedFilterProperties, $usedPropertyNames);
+    }
+
+    /**
+     * The allow-list a tool method declares with {@see MCPExposedFilterProperties}; null when it declares none.
+     */
+    protected function findExposedFilterPropertiesOfToolMethod(ReflectionMethod $reflectionMethod): ?MCPExposedFilterProperties
+    {
+        $exposedFilterPropertiesAttributes = $reflectionMethod->getAttributes(MCPExposedFilterProperties::class);
+        if ($exposedFilterPropertiesAttributes === []) {
+            return null;
+        }
+        return $exposedFilterPropertiesAttributes[0]->newInstance();
+    }
+
+    /**
+     * The refusal of a call that filters or sorts on a property outside the tool's allow-list, naming the allowed
+     * properties so the model corrects the call instead of guessing again; null when every used name is allowed.
+     * Empty names are ignored (the raw `orderBy` reader names an empty entry {@see self::EMPTY_ORDER_BY_ENTRY_LABEL}).
+     *
+     * @param string[] $usedPropertyNames The property names the call's `filters` and `orderBy` compare or sort on
+     */
+    protected function refusePropertyNamesOutsideExposedFilterProperties(
+        string $toolName,
+        MCPExposedFilterProperties $exposedFilterProperties,
+        array $usedPropertyNames
+    ): ?MCPToolResponse {
         $refusedPropertyNames = array_values(array_unique(array_filter(
             $usedPropertyNames,
             static fn (string $usedPropertyName): bool => $usedPropertyName !== '' && !$exposedFilterProperties->exposes($usedPropertyName)
@@ -1531,6 +1598,65 @@ class MCPToolExecutorService extends Service
             "Tool '{$toolName}' does not filter or sort on " . implode(', ', $refusedPropertyNames)
             . ' — allowed properties: ' . implode(', ', $exposedFilterProperties->propertyNames) . ' (and id for sorting).'
         );
+    }
+
+    /**
+     * The property names a raw `filters` argument compares, operation nodes walked recursively, parsed with
+     * {@see FiltersOptions::fromString()}; empty when the value is no string or an empty one (`''`, `'0'`), null
+     * when the string does not parse or does not validate.
+     *
+     * @return string[]|null
+     */
+    protected function readPropertyNamesOfFiltersArgument(mixed $filtersArgument): ?array
+    {
+        if (!is_string($filtersArgument)) {
+            return [];
+        }
+        try {
+            $filtersOptions = FiltersOptions::fromString($filtersArgument);
+        } catch (Throwable) {
+            return null;
+        }
+        return $filtersOptions === null ? [] : $this->collectFilterPropertyNames($filtersOptions);
+    }
+
+    /**
+     * The property names a raw `orderBy` argument sorts on, parsed with {@see OrderByOptions::fromString()}, an empty
+     * entry named {@see self::EMPTY_ORDER_BY_ENTRY_LABEL}; empty when the value is no string or does not parse.
+     *
+     * @return string[]
+     */
+    protected function readPropertyNamesOfOrderByArgument(mixed $orderByArgument): array
+    {
+        if (!is_string($orderByArgument)) {
+            return [];
+        }
+        try {
+            $orderByOptions = OrderByOptions::fromString($orderByArgument);
+        } catch (Throwable) {
+            return [];
+        }
+        if ($orderByOptions === null) {
+            return [];
+        }
+        return array_map(
+            static fn (string $propertyName): string => $propertyName === '' ? self::EMPTY_ORDER_BY_ENTRY_LABEL : $propertyName,
+            $this->collectOrderByPropertyNames($orderByOptions)
+        );
+    }
+
+    /**
+     * The property names an order-by list sorts on, in order.
+     *
+     * @return string[]
+     */
+    protected function collectOrderByPropertyNames(OrderByOptions $orderByOptions): array
+    {
+        $propertyNames = [];
+        foreach ($orderByOptions->getElements() as $orderByOption) {
+            $propertyNames[] = (string)($orderByOption->propertyName ?? '');
+        }
+        return $propertyNames;
     }
 
     /**
