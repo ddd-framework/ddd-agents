@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.17
+
+- Package prompt defaults: the owner's formal or informal form of address is one rule in `Agentic.md` and
+  `Character.md` (recorded with a tool only when the conversation offers one); the recall passage names no
+  application skill.
+- `AIConversations::getSentenceOnReadingASessionInFull()`: the default says which tool reads a session and what to pass.
+
 ## 0.1.0-alpha.16
 
 - Task plan tick rules: an item whose read or call returned nothing usable is not done, it is blocked.

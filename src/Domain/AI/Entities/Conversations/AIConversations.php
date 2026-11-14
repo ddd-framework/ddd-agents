@@ -86,7 +86,7 @@ class AIConversations extends EntitySet
      */
     public function getSentenceOnReadingASessionInFull(): string
     {
-        return 'Where one of your skills has a recall tool, it reads any of these sessions in full by its #conversationId.';
+        return 'Where one of your skills has a recall tool, that tool reads any of these sessions in full: pass the session\'s #conversationId.';
     }
 
     /**

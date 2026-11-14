@@ -297,7 +297,7 @@ class ToolDeclarationsReadByTheLoopTest extends UnitTestCase
 
         $episodicHistoryText = $aIConversations->buildEpisodicHistoryText();
 
-        self::assertStringEndsWith("\n\nWhere one of your skills has a recall tool, it reads any of these sessions in full by its #conversationId.", $episodicHistoryText);
+        self::assertStringEndsWith("\n\nWhere one of your skills has a recall tool, that tool reads any of these sessions in full: pass the session's #conversationId.", $episodicHistoryText);
         self::assertStringContainsString('(#31)', $episodicHistoryText);
 
         $aIConversationsOfAnApplication = new class extends AIConversations {
