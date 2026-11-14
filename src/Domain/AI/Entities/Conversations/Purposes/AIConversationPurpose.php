@@ -405,7 +405,8 @@ class AIConversationPurpose extends Entity
     /**
      * @var string[] Tool names the executor REFUSES for every conversation of this purpose AND its whole delegation
      * tree (frontmatter `blockedToolNames`) — a structural guard, not a prompt: a build must never change the space's
-     * record to make its output fit. The refusal text names the requirement that owns the wish instead.
+     * record to make its output fit. The refusal text names the requirement that owns the wish instead. The names the
+     * purpose class blocks by what a tool declares ({@see getToolNamesBlockedByDeclaration()}) are part of this list.
      */
     public array $blockedToolNames = [];
 
@@ -916,6 +917,31 @@ class AIConversationPurpose extends Entity
     public function buildAnalysisContext(AIConversation $conversation): string
     {
         return "Purpose: {$this->name} — {$this->description}";
+    }
+
+    /**
+     * The tools this purpose blocks because of what they declare, whatever they are named in the application: none
+     * by default. A purpose class that blocks a kind of tool returns the names of the tools declaring that kind
+     * ({@see \DDD\Domain\AI\Entities\MCPPackages\MCPToolAttributeCatalog::getToolNamesDeclaringAttribute()}); the
+     * service that builds the purpose adds them to {@see $blockedToolNames} after the names of the purpose file.
+     *
+     * @return string[]
+     */
+    public function getToolNamesBlockedByDeclaration(): array
+    {
+        return [];
+    }
+
+    /**
+     * The blocked tool names of the purpose file followed by the names the purpose class blocks by what a tool
+     * declares ({@see getToolNamesBlockedByDeclaration()}), each name once: a tool the file names and the class
+     * blocks keeps its place in the file's order.
+     *
+     * @return string[]
+     */
+    public function buildBlockedToolNamesWithTheDeclaredOnes(): array
+    {
+        return array_values(array_unique(array_merge($this->blockedToolNames, $this->getToolNamesBlockedByDeclaration())));
     }
 
     /**

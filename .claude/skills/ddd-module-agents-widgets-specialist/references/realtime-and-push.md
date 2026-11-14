@@ -59,7 +59,7 @@ result.
 | Part | Class |
 |---|---|
 | the read | `AgentConversationReadsTrait::getAIConversationActivity()`, `GET /{aiConversationId}/activity` with `AIConversationActivityGetRequestDto` (`turnMessageId` pins the turn) → `AIConversationActivityGetResponseDto` (`turnMessageId`, `turnRunning`, `elements`) |
-| the elements | `AgentActivityLinesService::buildElementsForTurn()`: one `AgentActivityLine` per tool call of the turn, from the stored call rows; some tools are silent (the skill loads, the plan bookkeeping, `findWidgets`) |
+| the elements | `AgentActivityLinesService::buildElementsForTurn()`: one `AgentActivityLine` per tool call of the turn, from the stored call rows; some tools are silent (the skill loads, the plan bookkeeping, `findWidgets`, and every tool that declares `MCPToolShowsNoActivityLine`) |
 | the lines | ONE narrator call per batch (`AgentActivityLinesService::MAX_ELEMENTS_PER_NARRATOR_CALL`) through `ArgusAgentActivityLines` with the prompt `ActivityLines.md`, in the conversation's language; budget not enforced, usage scope `AgentAIUsageScope::AI_AGENT_NARRATE_ACTIVITY` |
 | the cache | lines cached per element and state; a lock per conversation keeps two tabs from narrating the same elements; hourly and per-conversation ceilings |
 | the push side | the client's read stamps a reader (`markReaderPresent()`, a few seconds); while a reader is stamped, every step of the turn (`recordStepForReaders()`) schedules one `AgentActivityLinesNarrateMessage` on the transport `ai_activity_lines`; `AgentActivityLinesNarrateHandler` narrates and writes the turn feed (`AgentActivityTurnFeed`) |

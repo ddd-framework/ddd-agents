@@ -24,8 +24,8 @@ tree · 6. Preserved facts · 7. When and where it runs · 8. Cost of the reads 
   fits `toolResultTokenBudget` (`CONTEXT_RETENTION_DEFAULT_TOOL_RESULT_TOKEN_BUDGET` = 24000); a result that does not
   fit is stubbed alone and the walk goes on, so a small older result behind two large ones stays.
 - **Never stubbed**: a result no model call has seen yet (after the newest model-call row), the single newest result,
-  a result shorter than `ToolCall::MIN_RESULT_CHARS_TO_STUB` (256 characters), and results of the names in
-  `AIConversation::BUDGET_EXEMPT_TOOL_RESULT_NAMES` while their turn is kept (exempt from the budget only).
+  a result shorter than `ToolCall::MIN_RESULT_CHARS_TO_STUB` (256 characters), and results of the tools declaring
+  `MCPToolResultIsNeverStubbedByTheBudget` while their turn is kept (exempt from the budget only).
 - A reused read whose earlier result was stubbed runs again ([tool-call-efficiency.md](tool-call-efficiency.md)).
 - `ContextRetentionSettings::$enabled = false` keeps every result.
 
@@ -185,4 +185,4 @@ delegation sub-task) so the summary is anchored in it; the prompt is `AgentAIPro
 | It fires but nothing lands | logged empty summarizer answers; a degenerate budget (huge overhead) |
 | A fact or id is gone after compaction | it was not under an identifier-named key of a tool argument or a top-level JSON result (section 6), nor a 2–80-character quoted phrase in the owner's own text: return it under such a key or have the owner quote it |
 | Old tool results vanish mid-task | the token budget by fit; raise `toolResultTokenBudget` for the purpose or shrink the results (tools skill) |
-| A long research turn loses its page reads | `AIConversation::BUDGET_EXEMPT_TOOL_RESULT_NAMES` lists the reads the budget never stubs inside the kept turns |
+| A long research turn loses its page reads | the read tools declare `MCPToolResultIsNeverStubbedByTheBudget`: the budget never stubs their results inside the kept turns |

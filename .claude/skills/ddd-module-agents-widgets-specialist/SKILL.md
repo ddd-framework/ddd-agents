@@ -65,7 +65,9 @@ The React components and the npm half of the package get their own skill when th
 ## Traps
 
 - A same-path subclass of a package widget under the host's `Domain/AI/Entities/Conversations/Widgets/` is NOT found;
-  an override sits in a domain widget folder with the same short name and extends the package class.
+  an override sits in a domain widget folder with the same short name and extends the package class. Such an override
+  may redeclare `SUMMARY` and `WHEN_TO_USE`: the package's texts name no tool of an application, so a host states its
+  own tool names there (`ConversationSearchResultsConversationWidget` is the case).
 - Registry build errors (two classes with one name, a wrong short name, a class that does not load) are logged and
   skipped in production and throw only under tests — keep a test that builds `ConversationWidgetClasses`.
 - A written widget row is invisible to the model: the tool's result must say that the widget is shown, or the model

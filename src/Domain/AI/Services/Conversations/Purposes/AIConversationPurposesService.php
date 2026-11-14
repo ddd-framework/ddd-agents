@@ -23,7 +23,9 @@ use DDD\Infrastructure\Services\Service;
  * (YAML frontmatter → the fields, body → the directive). Reuses {@see AISkillsService::splitFrontmatter()}.
  *
  * GRACEFUL DEGRADATION: a purpose whose `.md` is gone (renamed/removed after deploy) resolves to
- * null with a logged warning at the call site — never a throw in the context build.
+ * null with a logged warning at the call site — never a throw in the context build. A purpose class that blocks tools
+ * by what they declare ({@see AIConversationPurpose::getToolNamesBlockedByDeclaration()}) reads the tool catalog,
+ * which throws when a skill binds a class that does not exist.
  */
 class AIConversationPurposesService extends Service
 {
@@ -197,7 +199,7 @@ class AIConversationPurposesService extends Service
         $aIConversationPurpose->maxStepsPerTurn = isset($frontmatter['maxStepsPerTurn'])
             ? (int)$frontmatter['maxStepsPerTurn']
             : null;
-        $aIConversationPurpose->blockedToolNames = array_values(array_map('strval', (array)($frontmatter['blockedToolNames'] ?? [])));
+        $aIConversationPurpose->blockedToolNames = array_map('strval', (array)($frontmatter['blockedToolNames'] ?? []));
         $blockedToolsRefusalText = trim((string)($frontmatter['blockedToolsRefusalText'] ?? ''));
         $aIConversationPurpose->blockedToolsRefusalText = $blockedToolsRefusalText !== '' ? $blockedToolsRefusalText : null;
         $aIConversationPurpose->maxTurnCostUsd = isset($frontmatter['maxTurnCostUsd'])
@@ -275,6 +277,8 @@ class AIConversationPurposesService extends Service
         // the run settings a NEW conversation of this purpose starts with (a `runSettings:` map)
         $runSettingsMap = $frontmatter['runSettings'] ?? null;
         $aIConversationPurpose->runSettings = is_array($runSettingsMap) ? $this->buildPurposeRunSettingsFromFrontmatter($runSettingsMap) : null;
+        // asked last, so the purpose class reads a purpose whose fields are all set
+        $aIConversationPurpose->blockedToolNames = $aIConversationPurpose->buildBlockedToolNamesWithTheDeclaredOnes();
 
         return $aIConversationPurpose;
     }

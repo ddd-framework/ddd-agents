@@ -14,6 +14,8 @@ use DDD\Infrastructure\Services\DDDService;
 use DDD\Domain\Base\Repo\DB\Doctrine\EntityManagerFactory;
 use DDD\Infrastructure\Base\DateTime\DateTime;
 use DDD\Domain\AI\Entities\Conversations\Messages\ToolCall;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolAttributeCatalog;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolWritesAgentMemoryOnly;
 use DDD\Domain\AI\Entities\MCPPackages\ToolDefinitions;
 use DDD\Domain\AI\Traits\Conversations\AITraceLogTrait;
 use DDD\Domain\AI\Services\Conversations\Agent\AgentToolCallDispatchService;
@@ -57,9 +59,6 @@ class AgentToolCallForkJoinService extends Service
 
     /** The config name of the application's console command a child runs (`config/app/AI/agentToolCallChildProcess.php`). */
     public const string CHILD_PROCESS_CONFIG_NAME = 'AI.agentToolCallChildProcess';
-
-    /** Inline writers that touch conversation state only (memory rows), never a space row: they do not defer the children. */
-    public const array INLINE_WRITES_OF_CONVERSATION_STATE_ONLY = ['remember', 'updateMemory', 'forget'];
 
     /**
      * The recorded-run comparison runs every tool call in its own process: its Argus transport is recorded and
@@ -110,7 +109,8 @@ class AgentToolCallForkJoinService extends Service
 
     /**
      * Whether the response carries, BESIDE the forked calls, an inline call that may WRITE — any call that is not a
-     * meta tool, not forked, and not a read by the tool naming convention. The children must then start only after
+     * meta tool, not forked, not a read by the tool naming convention and not a writer of agent memory rows only
+     * ({@see MCPToolWritesAgentMemoryOnly}). The children must then start only after
      * the inline calls completed: a non-admitted writer may write a WHOLE row from
      * its own load, and run concurrently it would map a child's freshly written columns back to their old values.
      * Inline READS overlap the children as before.
@@ -129,7 +129,8 @@ class AgentToolCallForkJoinService extends Service
             if (in_array($toolName, AIConversationMessage::META_TOOL_NAMES, true) || $toolCall->isReadOnly()) {
                 continue;
             }
-            if (in_array($toolName, self::INLINE_WRITES_OF_CONVERSATION_STATE_ONLY, true)) {
+            // a writer of agent memory rows only never writes a row a forked call reads: it does not defer the children
+            if (MCPToolAttributeCatalog::hasAttributeOnToolName($toolName, MCPToolWritesAgentMemoryOnly::class)) {
                 continue;
             }
             return true;

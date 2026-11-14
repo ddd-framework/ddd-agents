@@ -92,12 +92,14 @@ with the schedule's `reportChannel`.
   `Assistant.TaskRunReports` and blocks the owner-messaging send tools of the host for the run and its sub-agents, so
   the report has one delivery path. How a purpose file declares preloads, blocked tools and variant sections belongs to
   the skills-and-purposes skill `ddd-module-agents-skills-and-purposes-specialist`.
-- **Tool names in the package's purpose file.** `config/app/AI/Purposes/Schedule/Run.md` blocks two tools by fixed
-  names — sendEmailToOwner and sendSmsToOwner — and its text names four schedule tools the run must not call
+- **Tools a run blocks, and tool names in the package's purpose file.** A run blocks every tool that declares
+  `MCPToolSendsMessageToOwner`, whatever the host names it (`ScheduleRunPurpose::getToolNamesBlockedByDeclaration()`);
+  a host send tool without the declaration stays callable inside a run and is a second delivery path. The text of
+  `config/app/AI/Purposes/Schedule/Run.md` names four schedule tools the run must not call
   (scheduleOneTimeTask, createRecurringTaskSchedule, updateTaskSchedule, deleteTaskSchedule); it also tells the model
-  to call `send_owner_report` and `getPreviousTaskRunReports`, which the package ships. None of the six host tools ships
-  with the package. A host whose send and schedule tools carry these names keeps the file; any other host replaces
-  the purpose file with its own at the same config path, or its send tools stay on the wire of every run.
+  to call `send_owner_report` and `getPreviousTaskRunReports`, which the package ships. None of the four schedule
+  tools ships with the package. A host whose schedule tools carry these names keeps the file; any other host replaces
+  the purpose file with its own at the same config path.
 - **The time zone** of the schedule is frozen on the run; its sub-agents inherit it.
 - **The run closes** once its report reached its channel: `ScheduleRunPurpose::shouldCloseConversationAfterSettledTurn()`
   holds for a CHAT run when the turn settled, for an EMAIL run once `reportDeliveredAt` is set (owner reports
@@ -251,9 +253,10 @@ use DDD\Infrastructure\Services\DDDService;
 
 **Tool names the package's run purpose expects.** `config/app/AI/Purposes/Schedule/Run.md` tells a scheduled run
 that the tools named scheduleOneTimeTask, createRecurringTaskSchedule, updateTaskSchedule and deleteTaskSchedule are
-refused inside a run, and blocks sendEmailToOwner and sendSmsToOwner. A host that names its tools so keeps the file;
-otherwise it replaces the purpose file (see "The run of a schedule"). The refusal itself is always the tool's own
-(step 1).
+refused inside a run. A host that names its tools so keeps the file; otherwise it replaces the purpose file (see "The
+run of a schedule"). The refusal itself is always the tool's own (step 1). The tools that send the owner a message
+are blocked by their declaration `MCPToolSendsMessageToOwner`, not by name: the host puts the attribute on each of
+its send tools.
 
 ## What a host provides
 

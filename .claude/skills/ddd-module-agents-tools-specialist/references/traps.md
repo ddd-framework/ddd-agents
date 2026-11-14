@@ -114,10 +114,13 @@ forgets, the loop keeps:
 
 ## Package maintainer traps
 
-- The core never names a tool of an application. A rule about a kind of tool is an attribute read by the catalog.
-  Today three names of tools the package does not ship are hard-coded: `ToolCall::buildExecutionArguments()` injects
-  the conversation id for "recallConversation", and `AgentToolCallForkJoinService::INLINE_WRITES_OF_CONVERSATION_STATE_ONLY`
-  lists "remember", "updateMemory", "forget". Move them behind a declaration before adding a fourth.
+- The core never names a tool of an application. A rule about a kind of tool is an attribute read by the catalog
+  (`MCPToolAttributeCatalog`): `MCPToolReceivesCurrentConversationId` (`ToolCall::buildExecutionArguments()` fills the
+  calling conversation's id), `MCPToolWritesAgentMemoryOnly` (runs inline beside forked calls; refreshes the standing
+  directives), `MCPToolResultIsNeverStubbedByTheBudget`, `MCPToolShowsNoActivityLine`, `MCPToolSendsMessageToOwner`
+  (blocked in a scheduled run). The catalog reads the method of the class the application binds, so a host that
+  declares a tool on its own package class repeats the attribute there. A new rule about a kind of tool gets its own
+  attribute, never a name list.
 - A new gate is enforced on the offer AND in `MCPToolExecutorService::dispatchTool()` from one rule object; a gate on
   the offer alone is bypassed by the HTTP path and by a tool that stayed resident through a downgrade.
 - `AgentToolCallDispatchService::dispatchToolCall()` never lets a tool exception abort the loop; only a lost run claim

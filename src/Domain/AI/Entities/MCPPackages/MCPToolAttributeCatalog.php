@@ -12,8 +12,12 @@ use ReflectionMethod;
  * The attributes every agent tool declares, by tool name — for the readers that hold only a STORED tool call (its name)
  * and ask what kind of tool it is: the run report's owner-facing subject ({@see MCPToolOwnerFacingSubject}), the
  * reasoning-effort precondition ({@see MCPToolProposesIdentityOrClass}), the wire's never-stubbed newest result
- * ({@see MCPToolNewestResultIsNeverStubbed}). The core asks the declaration; it never lists tool names of a feature
- * domain.
+ * ({@see MCPToolNewestResultIsNeverStubbed}) — for the loop itself, which asks around a call what the called tool
+ * declares ({@see MCPToolReceivesCurrentConversationId}, {@see MCPToolWritesAgentMemoryOnly},
+ * {@see MCPToolResultIsNeverStubbedByTheBudget}, {@see MCPToolShowsNoActivityLine}) — and for a purpose class that
+ * blocks a kind of tool when the purpose is built ({@see MCPToolSendsMessageToOwner}).
+ * The core asks the declaration; it never lists tool names of a feature domain. When two bound packages declare a tool
+ * of the same name, the first in catalog order is the one whose attributes are read.
  *
  * Built once per process from the `#[MCPTool]` methods of the packages every skill carries
  * ({@see AISkill::getPackageClassesBySkillName()}) — code metadata, the same in every process. This walk is the only one:
@@ -27,6 +31,9 @@ class MCPToolAttributeCatalog
 
     /** @var array<string, array<string, object|null>> tool name → attribute class → the declared instance, memoized */
     protected static array $attributesByToolName = [];
+
+    /** @var array<string, string[]> attribute class → the names of the tools declaring it, memoized */
+    protected static array $toolNamesByAttributeClass = [];
 
     /**
      * The attribute `$attributeClass` the named tool declares, or null when it declares none or the name is unknown.
@@ -55,18 +62,23 @@ class MCPToolAttributeCatalog
     }
 
     /**
-     * The names of every tool that declares `$attributeClass`, in catalog order (skill, package, method).
+     * The names of every tool that declares `$attributeClass`, in catalog order (skill, package, method). Computed once
+     * per process and attribute class: readers on the path of a model call ask it at every call.
      *
      * @return string[]
      */
     public static function getToolNamesDeclaringAttribute(string $attributeClass): array
     {
+        if (isset(self::$toolNamesByAttributeClass[$attributeClass])) {
+            return self::$toolNamesByAttributeClass[$attributeClass];
+        }
         $toolNames = [];
         foreach (array_keys(self::getToolMethodsByToolName()) as $toolName) {
             if (self::hasAttributeOnToolName($toolName, $attributeClass)) {
                 $toolNames[] = $toolName;
             }
         }
+        self::$toolNamesByAttributeClass[$attributeClass] = $toolNames;
 
         return $toolNames;
     }

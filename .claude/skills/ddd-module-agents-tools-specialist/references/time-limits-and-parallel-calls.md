@@ -52,7 +52,7 @@ when ALL of this holds:
 
 Calls the loop's guards would answer without executing (repeats, reused reads, an unloaded skill) are excluded by the
 caller before admission. When the response also carries an inline call that may write — not a meta tool, not forked,
-not a declared read, not one of `INLINE_WRITES_OF_CONVERSATION_STATE_ONLY` — the children start only after the inline
+not a declared read, not a tool declaring `MCPToolWritesAgentMemoryOnly` — the children start only after the inline
 calls completed (`responseHasInlineWriteBesideTheFork()`).
 
 ## Admission: when a tool may declare MCPToolParallelSafe

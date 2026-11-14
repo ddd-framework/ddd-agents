@@ -23,6 +23,7 @@ use DDD\Domain\AI\Entities\MCPPackages\MCPToolEmbeddableWidget;
 use DDD\Domain\AI\Entities\Conversations\Agent\Tools\FindWidgetsTool;
 use DDD\Domain\Base\Repo\Argus\Utils\ArgusApiOperations;
 use DDD\Infrastructure\Traits\Serializer\Attributes\HidePropertyOnSystemSerialization;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolReceivesCurrentConversationId;
 use DDD\Domain\AI\Entities\MCPPackages\ToolResult;
 use DDD\Domain\AI\Entities\MCPPackages\ToolResultImage;
 use DDD\Domain\AI\Entities\Skills\AISkill;
@@ -1126,16 +1127,19 @@ class ToolCall extends ValueObject
     }
 
     /**
-     * The arguments the executor receives: the model's, plus what the server supplies — `recallConversation` always
-     * searches the CURRENT conversation, so its id is injected rather than trusting the model to echo it back.
+     * The arguments the executor receives: the model's, plus what the server supplies — a tool that declares
+     * {@see MCPToolReceivesCurrentConversationId} reads the CURRENT conversation, so its id is filled in rather than
+     * trusting the model to echo it back.
      *
      * @return array<string, mixed>
      */
     public function buildExecutionArguments(AIConversation $conversation): array
     {
         $arguments = $this->arguments;
-        if (($this->name ?? '') === 'recallConversation' && !isset($arguments['conversationId'])) {
-            $arguments['conversationId'] = $conversation->id ?? null;
+        if (!isset($arguments[MCPToolReceivesCurrentConversationId::ARGUMENT_NAME])
+            && MCPToolAttributeCatalog::hasAttributeOnToolName((string)($this->name ?? ''), MCPToolReceivesCurrentConversationId::class)
+        ) {
+            $arguments[MCPToolReceivesCurrentConversationId::ARGUMENT_NAME] = $conversation->id ?? null;
         }
         return $arguments;
     }

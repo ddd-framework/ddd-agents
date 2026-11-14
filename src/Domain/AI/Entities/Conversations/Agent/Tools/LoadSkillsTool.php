@@ -99,8 +99,13 @@ class LoadSkillsTool extends ValueObject implements AgentMetaTool
             . implode(', ', $listedToolNames) . ($unlistedToolCount > 0 ? ' and ' . $unlistedToolCount . ' more' : '') . ').';
     }
 
-    /** The system-prompt catalog header — `renderCatalogBlock()` emits it, the composition labels it. */
-    public const string CATALOG_HEADER = "\n\n# Available skills — load with load_skills when a request needs them\n";
+    /**
+     * The system-prompt catalog header — `renderCatalogBlock()` emits it, the composition labels it. Its second line
+     * says what the list holds: the block lists loaded skills too, so that it stays the same for the whole
+     * conversation, and a model that reads only "load when a request needs them" loads a loaded skill again.
+     */
+    public const string CATALOG_HEADER = "\n\n# Available skills — load with load_skills when a request needs them\n"
+        . "This list names every skill, loaded or not. A skill that \"Loaded skills\" names is loaded: its tools are in your tool list — call them, never load that skill again.\n";
 
     /**
      * ONE catalog line: `- <name> — <description>` plus, for a ROOT, the sub-skills it unlocks (names only, no

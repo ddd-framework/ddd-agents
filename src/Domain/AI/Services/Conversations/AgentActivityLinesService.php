@@ -14,6 +14,8 @@ use DDD\Domain\AI\Entities\Conversations\AIConversations;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
 use DDD\Domain\AI\Entities\Conversations\Purposes\BackgroundMechanicalOperationPurpose;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolAttributeCatalog;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolShowsNoActivityLine;
 use DDD\Domain\AI\MessageHandlers\AgentActivityLinesNarrateMessage;
 use DDD\Domain\AI\Repo\Argus\Conversations\Agent\ArgusAgentActivityLines;
 use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
@@ -76,8 +78,8 @@ class AgentActivityLinesService extends Service
      */
     public const int NARRATOR_LOCK_TTL_SECONDS = 10;
 
-    /** Tools of the loop itself: no element, ever. */
-    protected const array SILENT_TOOL_NAMES = ['load_skills', 'load_tool', 'set_task_status', 'update_task_plan', 'get_task_plans', 'remember', 'check_delegations', 'send_owner_report', 'findWidgets'];
+    /** Tools of the loop itself: no element, ever. A tool of a skill is silent by declaration ({@see MCPToolShowsNoActivityLine}). */
+    protected const array SILENT_TOOL_NAMES = ['load_skills', 'load_tool', 'set_task_status', 'update_task_plan', 'get_task_plans', 'check_delegations', 'send_owner_report', 'findWidgets'];
 
     /**
      * Argument keys the customer never needs to see: plumbing. Ids are dropped by their name ({@see cutArguments()}: `id`
@@ -639,7 +641,9 @@ class AgentActivityLinesService extends Service
         }
         $toolCall = $message->toolCall;
         $toolName = (string)($toolCall->name ?? '');
-        if ($toolName === '' || in_array($toolName, self::SILENT_TOOL_NAMES, true)) {
+        if ($toolName === '' || in_array($toolName, self::SILENT_TOOL_NAMES, true)
+            || MCPToolAttributeCatalog::hasAttributeOnToolName($toolName, MCPToolShowsNoActivityLine::class)
+        ) {
             return null;
         }
         $element = new AgentActivityLine();

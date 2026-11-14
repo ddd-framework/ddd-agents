@@ -56,8 +56,10 @@ Not here: the conversation tree, run claims and the release of a child's run (lo
    watches an unattended run.
 8. **No report mail leaves without a host override** of `AgentOwnerReportEmailsService`: the default sends nothing.
 9. **A scheduled run is a `Schedule.Run` conversation** with one delivery path: the platform delivers the report; the
-   run never mails itself and never administers schedules. The package's purpose file names the host's send and
-   schedule tools by fixed names; a host whose tools are named otherwise replaces the file (schedules reference).
+   run never mails itself and never administers schedules. The run blocks every tool that declares
+   `MCPToolSendsMessageToOwner`: the host puts the attribute on its send tools. The package's purpose file names the
+   host's schedule tools by fixed names; a host whose tools are named otherwise replaces the file (schedules
+   reference).
 
 ## Traps
 

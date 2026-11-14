@@ -42,7 +42,8 @@ class AIConversations extends EntitySet
      * the RECENT WINDOW (first {@see EPISODIC_RECENT_WINDOW_SIZE} sessions with a usable summary) as fine lines
      * `[YYYY-MM-DD] {title} — {outcome, else text} (#conversationId)`, then the IMPORTANCE SURVIVORS
      * (importance ≥ {@see EPISODIC_SURVIVOR_MIN_IMPORTANCE} among the remainder, newest first, capped) under their
-     * own divider, then the one-line zoom pointer to the recall tools. '' when nothing is renderable. The FINE
+     * own divider, then the one closing line on reading a session in full
+     * ({@see getSentenceOnReadingASessionInFull()}). '' when nothing is renderable. The FINE
      * resolution near the present + importance-gated survival of older sessions is the owner's narrative model
      * (more recent ⇒ more detail, more important ⇒ more detail); episode/epoch lines are not part of it yet.
      * Pure over the loaded elements — no repo, container-less testable.
@@ -75,8 +76,17 @@ class AIConversations extends EntitySet
         if ($survivorLines !== []) {
             $narrative .= "\n\nImportant earlier sessions:\n" . implode("\n", $survivorLines);
         }
-        return $narrative
-            . "\n\nZoom into any session with recallConversation / searchConversations using its #conversationId.";
+        return $narrative . "\n\n" . $this->getSentenceOnReadingASessionInFull();
+    }
+
+    /**
+     * The closing line of the earlier-sessions text: how the model reads one of the listed sessions in full. The
+     * default names no tool, because which skill carries the recall tools is the application's binding; an application
+     * that binds them overrides this in its set class at the same path and names them.
+     */
+    public function getSentenceOnReadingASessionInFull(): string
+    {
+        return 'Where one of your skills has a recall tool, it reads any of these sessions in full by its #conversationId.';
     }
 
     /**

@@ -138,7 +138,9 @@ whose class was removed is dropped from the stored plan at the next run start un
 
 **Rule.** An unattended run (a scheduled run) is a purposed conversation. Its purpose declares the role statement, the
 delivery contract per channel (as variant sections) and the tools the run must not use (`blockedToolNames`, which also
-bind its delegation tree). The loop holds no tool name.
+bind its delegation tree): names in the purpose file, plus the tools the purpose class blocks by what they declare
+(`getToolNamesBlockedByDeclaration()`; a scheduled run blocks every tool declaring `MCPToolSendsMessageToOwner`). The
+loop holds no tool name.
 
 **Reason.** A delivery contract in a compactable user message is lost; a send tool left on the wire gives the model a
 second delivery path and duplicated reports. Declaring the tool surface on the purpose keeps the rule generic: the wire

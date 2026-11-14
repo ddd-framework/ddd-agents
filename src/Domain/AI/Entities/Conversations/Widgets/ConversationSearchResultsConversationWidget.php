@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace DDD\Domain\AI\Entities\Conversations\Widgets;
 
 /**
- * The result of `searchConversations` — data-complete: the query and the grouped hits the model copies; the widget
- * never re-runs the search.
+ * The result of a search across earlier conversations — data-complete: the query and the grouped hits the model
+ * copies; the widget never re-runs the search. The two catalog texts name no tool, because which skill carries the
+ * search is the application's binding; an application that binds one declares a subclass of the same
+ * {@see self::WIDGET_TYPE} that states both texts with its tool names.
  */
 class ConversationSearchResultsConversationWidget extends ConversationWidget
 {
     public const string WIDGET_TYPE = 'ConversationSearchResults';
 
-    public const string SUMMARY = 'Grouped cross-conversation recall results from `searchConversations`. DATA-COMPLETE; ≤5 groups inline, more → canvas.';
+    public const string SUMMARY = 'Grouped results of a search across earlier conversations. DATA-COMPLETE; ≤5 groups inline, more → canvas.';
 
-    public const string WHEN_TO_USE = 'After calling `searchConversations` — render the matches as this widget instead of re-listing them in prose. Few matches → they render inline; many → they open in the canvas side panel automatically (or set `display`). Skip for a single in-conversation recall (`recallConversation`) — that\'s the current chat, answer inline in prose.';
+    public const string WHEN_TO_USE = 'After a search across earlier conversations — render the matches as this widget instead of re-listing them in prose. Few matches → they render inline; many → they open in the canvas side panel automatically (or set `display`). Skip for a recall inside the current conversation — that\'s the current chat, answer inline in prose.';
 
     /** @var string The search query (at most 200 characters). */
     public string $query = '';

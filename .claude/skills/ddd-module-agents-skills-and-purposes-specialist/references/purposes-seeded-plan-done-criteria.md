@@ -62,7 +62,7 @@ misspelt key is silently ignored.
 | `requiredFeatureFlags` | flags a customer start needs; united with `AI.purposeRequirements` |
 | `startableViaApi` | default true; false = only the platform spawns it |
 | `completedConversationStaysSingleton` | a finished conversation stays the space's singleton and is reopened for reading |
-| `blockedToolNames`, `blockedToolsRefusalText` | tools refused for the conversation and its whole delegation tree, named in the directive block |
+| `blockedToolNames`, `blockedToolsRefusalText` | tools refused for the conversation and its whole delegation tree, named in the directive block. The purpose class adds the tools it blocks by what they declare (`AIConversationPurpose::getToolNamesBlockedByDeclaration()`, none by default) |
 | `maxStepsPerTurn` | the per-turn step cap, copied into the run settings at the start |
 | `maxTurnCostUsd` | read into `AIConversationPurpose::$maxTurnCostUsd`, but no start path copies it: a starter that wants a per-turn cost cap stamps `RunSettings::$maxTurnCostUsd` itself |
 | `contextBudgetTokens`, `contextRetention` | the working-context budget and the retention knobs (context skill) |
@@ -282,6 +282,7 @@ The package ships three, all `startableViaApi: false`: `Schedule.Run`, `Supervis
 unattended run's purpose: the seed message is the owner's mission only; the directive states the run's role (execute,
 never administer a schedule; nobody is present); the delivery contract is chosen by the variant dimension
 `reportChannel` (`## [reportChannel=EMAIL]` and `## [reportChannel=CHAT]` sections, resolved by `ScheduleRunPurpose`);
-the owner-messaging tools are `blockedToolNames`, so the report has one delivery path; `Assistant.TaskRunReports` is
+every tool that declares `MCPToolSendsMessageToOwner` is blocked (`ScheduleRunPurpose::getToolNamesBlockedByDeclaration()`),
+so the report has one delivery path; `Assistant.TaskRunReports` is
 preloaded; `ScheduleRunPurpose::shouldCloseConversationAfterSettledTurn()` closes the run once the report reached its
 channel. How a schedule fires and delivers belongs to `ddd-module-agents-autonomy-specialist`.

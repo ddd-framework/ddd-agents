@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace DDD\Domain\AI\Entities\Conversations\Purposes;
 
 use DDD\Domain\AI\Entities\Conversations\AIConversation;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolAttributeCatalog;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolSendsMessageToOwner;
 use DDD\Domain\AI\Entities\Conversations\Schedules\AIConversationSchedule;
 use DDD\Domain\AI\Entities\Conversations\Variants\AIConversationVariant;
 use DDD\Domain\AI\Entities\Conversations\Variants\AIConversationVariantDimension;
@@ -16,8 +18,8 @@ use DDD\Domain\AI\Entities\Conversations\Variants\AIConversationVariants;
  * {@see \DDD\Domain\AI\Services\Conversations\AIConversationSchedulesService::spawnRunConversationForClaimedSchedule()}
  * creates for an instant, timed or recurring task. The seed USER message stays the owner's mission (the task text plus
  * the previous run's result line); this purpose carries everything the RUN as such has to know: that it executes and
- * never administers a schedule, how its report reaches the owner, and that the owner-messaging send tools are not its
- * delivery path (`blockedToolNames` in `Purposes/Schedule/Run.md`).
+ * never administers a schedule, how its report reaches the owner, and that the tools which send the owner a message
+ * are not its delivery path ({@see getToolNamesBlockedByDeclaration()}).
  *
  * The delivery rules differ by report channel, so the directive carries one `## [reportChannel=…]` section per channel
  * and this class declares the ONE variant dimension that selects it: `reportChannel`, read from the conversation's own
@@ -44,6 +46,18 @@ class ScheduleRunPurpose extends AIConversationPurpose
         }
         $reportChannel = isset($conversation->reportChannel) ? strtoupper(trim((string)$conversation->reportChannel)) : '';
         return $reportChannel !== AIConversationSchedule::REPORT_CHANNEL_EMAIL || isset($conversation->reportDeliveredAt);
+    }
+
+    /**
+     * One delivery path per run: the platform carries the report over the schedule's report channel, so every tool
+     * that sends the owner a message itself ({@see MCPToolSendsMessageToOwner}) is blocked for the run and its
+     * delegation tree.
+     *
+     * @return string[]
+     */
+    public function getToolNamesBlockedByDeclaration(): array
+    {
+        return MCPToolAttributeCatalog::getToolNamesDeclaringAttribute(MCPToolSendsMessageToOwner::class);
     }
 
     public function getVariantDimensions(): AIConversationVariantDimensions

@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.0-alpha.13
+
+- **Host work required.** The code no longer names tools of an application. Five method attributes replace the name
+  lists: `MCPToolReceivesCurrentConversationId`, `MCPToolWritesAgentMemoryOnly`,
+  `MCPToolResultIsNeverStubbedByTheBudget`, `MCPToolShowsNoActivityLine`, `MCPToolSendsMessageToOwner`. A host
+  declares them on its tools: without the declaration the conversation id is not filled in, a memory write neither
+  runs inline beside forked calls nor refreshes the standing directives within a run, a research read is stubbed by
+  the budget, the memory tool shows an activity line, and a send tool stays callable inside a scheduled run.
+- Removed: `AIConversation::BUDGET_EXEMPT_TOOL_RESULT_NAMES`,
+  `AgentToolCallForkJoinService::INLINE_WRITES_OF_CONVERSATION_STATE_ONLY`, the `blockedToolNames` line of
+  `Purposes/Schedule/Run.md`.
+- `AIConversationPurpose::getToolNamesBlockedByDeclaration()`: a purpose class blocks tools by what they declare. A
+  purpose that inherits `Schedule.Run` keeps the block of send tools only when its class extends `ScheduleRunPurpose`.
+- The prompt files `Agentic.md` and `Character.md`, the closing line of the earlier-sessions text
+  (`AIConversations::getSentenceOnReadingASessionInFull()`, overridable) and the two catalog texts of the
+  `ConversationSearchResults` widget name no tool of an optional skill. A host that binds such tools states them in its
+  set class and in a subclass of the widget.
+- The header of the skill catalogue says that the list names loaded skills too and that a loaded skill is not loaded
+  again.
+
 ## 0.1.0-alpha.12
 
 - A `load_skills` call that names no skill is answered with the loaded skills and their callable tools by name when

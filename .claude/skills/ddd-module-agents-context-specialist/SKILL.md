@@ -93,9 +93,9 @@ the tools and their results to the tools skill.
   to the prompt calls it (or `bumpInputsVersionForAccountId()`), else the old text stays for up to one hour. This host
   duty is described in the entry skill `ddd-module-agents-specialist`; the mechanism is in
   [prompt-cache-and-stable-prefix.md](references/prompt-cache-and-stable-prefix.md).
-- **Standing directives refresh only after three fixed tool names.** `AIConversation::findMemoryDirectivesBlock()`
+- **Standing directives refresh only after a tool that declares it.** `AIConversation::findMemoryDirectivesBlock()`
   re-reads the host's directives within one conversation object only when the number of completed calls of tools
-  named `remember`, `updateMemory` or `forget` changes. A host memory tool with another name changes the directives
+  declaring `MCPToolWritesAgentMemoryOnly` changes. A host memory tool without the attribute changes the directives
   only for the next conversation object (the next run).
 
 ## Minimal template — standing directives from the host's own store
@@ -138,8 +138,8 @@ class AgentMemoriesService extends BaseAgentMemoriesService
 ```
 
 The directives are read once per conversation object and re-read only when the number of completed calls of tools
-named `remember`, `updateMemory` or `forget` changes (`AIConversation::findMemoryDirectivesBlock()`). The demo tool
-`addDemoNote` has another name: a note it adds reaches the directives at the next run, not within the running one.
+declaring `MCPToolWritesAgentMemoryOnly` changes (`AIConversation::findMemoryDirectivesBlock()`). The demo tool
+`addDemoNote` does not declare it: a note it adds reaches the directives at the next run, not within the running one.
 Keep the method a single indexed read.
 
 ## The knobs (`config/app/AI/contextRetention.php`)

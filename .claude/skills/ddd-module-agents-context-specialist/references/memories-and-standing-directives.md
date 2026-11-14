@@ -18,7 +18,7 @@ searched on demand.
 
 | Method of `AgentMemoriesService` | Called | Default |
 |---|---|---|
-| `findStandingDirectivesForAgentSpace($accountId, $agentSpace)` | while building the model input (phase J), once per conversation object, again only after a call of a tool named `remember`, `updateMemory` or `forget` completed | null |
+| `findStandingDirectivesForAgentSpace($accountId, $agentSpace)` | while building the model input (phase J), once per conversation object, again only after a call of a tool declaring `MCPToolWritesAgentMemoryOnly` completed | null |
 | `curateConversationAfterTurn($conversation, $async)` | after an owner turn of a root that ended with nothing new arriving during it (`AIConversationTurnEndFollowUpsService`), with `$async = true`; a failure is swallowed | nothing |
 | `findSimilarMemories($query, $accountId, $agentSpace, $limit)` | by `SemanticSearchService::searchMemory()` | empty `AgentMemoryHits` |
 | `getEmbeddingRepairTargets()` | by the embedding repair ([recall-and-search.md](recall-and-search.md)) | empty `AgentEmbeddingRepairTargets` |
@@ -31,10 +31,10 @@ searched on demand.
   the time rule and the owner presence, before the episodic history: the block carries its own leading separator and
   header.
 - `AIConversation::findMemoryDirectivesBlock()` memoizes the block on the conversation object under a key of account,
-  space and the number of completed calls of the tools named `remember`, `updateMemory` or `forget` — three fixed
-  names. **Trap:** a host memory tool with another name never refreshes the block within one conversation object; its
-  change reaches the model with the next conversation object (the next run). Name the host's tools so, or expect the
-  delay.
+  space and the number of completed calls of the tools declaring `MCPToolWritesAgentMemoryOnly`. **Trap:** a host
+  memory tool without the attribute never refreshes the block within one conversation object; its change reaches the
+  model with the next conversation object (the next run). Put the attribute on the host's memory tools (only on tools
+  whose sole writes are memory rows: the same attribute lets a call run inline beside forked calls).
 - Under `onceWhenChanged` the block is part of the epoch record; a change arrives once as a `standing-instructions`
   note that replaces the directives of the instructions ([volatile-context-once-per-change.md](volatile-context-once-per-change.md)). Under `everyCall` a
   change rewrites the prefix from that segment on.
@@ -58,8 +58,9 @@ EPISODIC_HISTORY segment for the whole conversation:
 
 It is never re-read during the conversation, so it never moves the prefix. A purpose that loads earlier sessions itself
 (`AIConversationPurpose::$loadsEarlierSessionsItself`) gets none; a delegation child never gets one. The pointer line
-names recall tools the package does not ship: a host without such tools replaces the text through a same-path subclass
-of `AIConversations`.
+names no tool: a host that binds recall tools states them by overriding
+`AIConversations::getSentenceOnReadingASessionInFull()` in its same-path subclass of `AIConversations`. The text is
+stored once per conversation, so a conversation that has it keeps the sentence it was written with.
 
 ## 5. Moments in memories
 
@@ -72,8 +73,8 @@ A memory that records when something was said keeps the instant and the zone it 
 1. Same-path subclass of `AgentMemoriesService` (template in [SKILL.md](../SKILL.md)).
 2. The memory tools the model calls, in a skill of the host that loads on demand, not as tools offered on every call
    (tools and skills-and-purposes skills): an always-offered tool's schema is sent and billed again on every call, and a
-   long flat tool list weakens a cheap model's tool choice, while memory operations are rare. Only the names
-   `remember`, `updateMemory` and `forget` refresh the directives within a run.
+   long flat tool list weakens a cheap model's tool choice, while memory operations are rare. Only tools declaring
+   `MCPToolWritesAgentMemoryOnly` refresh the directives within a run.
 3. An embedding provider (`AITextEmbeddingsService` subclass) if `findSimilarMemories()` is vector-based, and the
    memory table in `getEmbeddingRepairTargets()`.
 4. Curation off the critical path: `curateConversationAfterTurn()` is called with `$async = true`; dispatch a message,

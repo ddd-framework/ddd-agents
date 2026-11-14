@@ -77,6 +77,14 @@ All live in `DDD\Domain\AI\Entities\MCPPackages`. They are read by reflection, n
 | `MCPToolOwnerFacingSubject(subject)` | method | The run report's owner-facing name of what a WRITE saved (`AgentRunReport::ownerFacingTitleForWriteTool()`); without it the words of the tool name minus the verb. Tools that save the same thing share the subject. |
 | `MCPToolProposesIdentityOrClass(resultIsQuotedAsIdentityResolution)` | method | A call of it in the previous assistant turn makes the owner's short reply an identity reply for `AgentReasoningEffortDecisionsService`; with the flag the newest result is quoted to that decision. |
 | `MCPDeliversProductCapability(...keys)` | method or class | **No effect in the package**: the keys are copied onto `MCPTool::$productCapabilityKeys` (and so appear in the HTTP tool documentation), but nothing in the package reads them — a host's coverage check may. Never a gate. |
+| `MCPToolReceivesCurrentConversationId(reason)` | method | `ToolCall::buildExecutionArguments()` fills the argument `conversationId` with the calling conversation's id when the model passed none. For a tool that reads the conversation it is called from. |
+| `MCPToolWritesAgentMemoryOnly(reason)` | method | Two readers. The fork-join runs the call inline beside forked calls of the same model response (`AgentToolCallForkJoinService::responseHasInlineWriteBesideTheFork()` does not count it as a write). `AIConversation::findMemoryDirectivesBlock()` re-reads the standing directives when the number of completed calls of such tools changes. Only for a tool whose sole writes are the agent's memory rows. |
+| `MCPToolResultIsNeverStubbedByTheBudget(reason)` | method | The result is exempt from the tool-result budget while its turn is kept (`AIConversation::resolveToolResultRetention()`); a turn that leaves the kept window is stubbed as usual. For page reads and searches a long research turn works from. |
+| `MCPToolShowsNoActivityLine(reason)` | method | `AgentActivityLinesService::buildElement()` writes no activity line for the call. For a tool the owner does not need to see working. |
+| `MCPToolSendsMessageToOwner(reason)` | method | A scheduled run blocks the tool: `ScheduleRunPurpose::getToolNamesBlockedByDeclaration()` adds every declaring tool to the purpose's `blockedToolNames`, so the run's report has one delivery path. Declare it on every host tool that sends the owner an e-mail or a text message. |
+
+These five are read from the method of the class the application binds: a host that redeclares a package tool on its own
+package class repeats the attribute there.
 
 ## Schema shaping (method and property)
 

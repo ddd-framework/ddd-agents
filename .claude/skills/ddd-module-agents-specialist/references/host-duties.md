@@ -14,6 +14,7 @@ The package ships services and one console command so far, the finalize mark swe
 
 | Need | State in the package | Class | Start from |
 |---|---|---|---|
+| Declare on the host's tools what the loop reads from a tool | five method attributes exist (`MCPToolReceivesCurrentConversationId`, `MCPToolWritesAgentMemoryOnly`, `MCPToolResultIsNeverStubbedByTheBudget`, `MCPToolShowsNoActivityLine`, `MCPToolSendsMessageToOwner`); no host tool carries one by default | mandatory for a host with a tool that reads its own conversation, memory tools, research reads or tools that message the owner | tools skill `ddd-module-agents-tools-specialist`, references/tool-attributes.md |
 | Fire due schedules; sweep schedule state | services exist, no command | mandatory for unattended runs | `AgentSchedulesFireCommand`, `AgentSchedulesStateSweepCommand` templates + cron lines |
 | Deliver owed reports and resume owed turns | services exist, no command | mandatory | `AgentOwedWorkRecoveryCommand` template + cron line |
 | Reap runs whose worker died, time out sub-agent groups past their deadline, wake parents of settled groups, settle purposed conversations closed without an owner turn, re-send lost run-end notifications of parents that run no further turn (report delivery of a crashed run depends on it) | services exist, no command | mandatory | `AgentStuckRunsReapCommand` template + cron line |

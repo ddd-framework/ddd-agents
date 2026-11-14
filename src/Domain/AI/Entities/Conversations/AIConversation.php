@@ -13,6 +13,9 @@ use DDD\Domain\AI\Entities\Models\AIModel;
 use DDD\Domain\AI\Entities\Conversations\Compaction\AIConversationMessageFootprints;
 use DDD\Domain\AI\Entities\Conversations\Compaction\AIConversationCompactionLeafRanges;
 use DDD\Domain\AI\Entities\Conversations\Compaction\AIConversationCompactionLeafRange;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolAttributeCatalog;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolResultIsNeverStubbedByTheBudget;
+use DDD\Domain\AI\Entities\MCPPackages\MCPToolWritesAgentMemoryOnly;
 use DDD\Domain\AI\Entities\MCPPackages\ToolDefinitions;
 use DDD\Domain\AI\Entities\Conversations\Agent\AgentModelInput;
 use DDD\Domain\AI\Entities\Conversations\Agent\Wire\AgentPrefixEpoch;
@@ -351,8 +354,8 @@ class AIConversation extends Entity
 
     /**
      * @var string|null The key of the memoized memory-directives block ({@see findMemoryDirectivesBlock()}): the scope
-     *      plus the number of COMPLETED memory-tool rows (remember / updateMemory / forget) of this conversation object —
-     *      it moves exactly when a mutation landed. Null = nothing memoized yet. Never persisted; a new worker job holds
+     *      plus the number of COMPLETED rows of the tools that write agent memory
+     *      ({@see MCPToolWritesAgentMemoryOnly}) of this conversation object — it moves exactly when a mutation landed. Null = nothing memoized yet. Never persisted; a new worker job holds
      *      a new object.
      */
     #[DatabaseColumn(ignoreProperty: true)]
@@ -2883,7 +2886,8 @@ class AIConversation extends Entity
      * Phase J: the standing-instruction (DIRECTIVE) memories for this account ∪ agent space, rendered as the
      * system block — null without an account or without directives. Part of the per-account-STABLE prefix (cacheable).
      * The directives query runs once per memo key ({@see $memoryDirectivesMemoKey}): the scope plus the number of
-     * COMPLETED memory-tool rows (remember / updateMemory / forget) — the key moves exactly when a mutation landed.
+     * COMPLETED rows of the tools that write agent memory ({@see MCPToolWritesAgentMemoryOnly}) — the key moves
+     * exactly when a mutation landed.
      */
     public function findMemoryDirectivesBlock(): ?string
     {
@@ -2893,7 +2897,9 @@ class AIConversation extends Entity
         /** @var AgentMemoriesService $agentMemoriesService */
         $agentMemoriesService = DDDService::instance()->getService(AgentMemoriesService::class);
         $memoryDirectivesMemoKey = (int)$this->accountId . '|' . (int)($this->agentSpaceId ?? 0) . '|'
-            . $this->messages->buildToolCallHistory()->countCompletedToolCallsNamed(['remember', 'updateMemory', 'forget']);
+            . $this->messages->buildToolCallHistory()->countCompletedToolCallsNamed(
+                MCPToolAttributeCatalog::getToolNamesDeclaringAttribute(MCPToolWritesAgentMemoryOnly::class)
+            );
         if ($this->memoryDirectivesMemoKey !== $memoryDirectivesMemoKey) {
             $agentStandingDirectives = $agentMemoriesService->findStandingDirectivesForAgentSpace((int)$this->accountId, $this->agentSpace ?? null);
             $this->memoryDirectivesMemoKey = $memoryDirectivesMemoKey;
@@ -3036,11 +3042,11 @@ class AIConversation extends Entity
      * ones stays on the wire (the contiguous boundary evicted a 2.5k summary behind two 26k page reads although it
      * fit, and the model re-read it). Unseen results are never in the stubbed set.
      *
+     * The budget-by-fit rule never stubs, inside the kept turns, the result of a tool that declares
+     * {@see MCPToolResultIsNeverStubbedByTheBudget}: the reads a later draft or answer is composed from.
+     *
      * @param AIConversationMessage[] $tailMessages index-sorted ascending (the AgentModelInput's messages)
      */
-    /** Tool results the budget-by-fit rule never stubs inside the kept turns — the reads a later draft or answer is composed from (the search and its readings too). */
-    public const array BUDGET_EXEMPT_TOOL_RESULT_NAMES = ['getWebPageAsMarkdown', 'searchTheWeb', 'extractInformationFromWebPagesWithFastLLM'];
-
     public function resolveToolResultRetention(array $tailMessages): ToolResultRetention
     {
         $settings = $this->contextRetentionSettings ?? null;
@@ -3099,7 +3105,7 @@ class AIConversation extends Entity
                     $resultChars = $message->toolResultChars ?? mb_strlen($toolCall->result);
                     // A page read is the research a later write rests on: never stubbed by the budget while its turn is
                     // kept (what an early read found was cleared before the write and reported as "none found").
-                    $budgetExempt = in_array((string)($toolCall->name ?? ''), self::BUDGET_EXEMPT_TOOL_RESULT_NAMES, true);
+                    $budgetExempt = MCPToolAttributeCatalog::hasAttributeOnToolName((string)($toolCall->name ?? ''), MCPToolResultIsNeverStubbedByTheBudget::class);
                     if (!$budgetExempt && $accumulatedChars > 0 && (int)(($accumulatedChars + $resultChars) / 4) > $tokenBudget) {
                         // BUDGET BY FIT: this result does not fit — it is stubbed by itself; an older, smaller one
                         // may still fit, so the walk goes on. The newest result is always kept.

@@ -5,11 +5,11 @@ startableViaApi: false
 # The earlier reports of this run's own task: the run reads them itself, so its
 # report keeps the structure of the earlier ones and states what changed.
 preloadSkillNames: [Assistant.TaskRunReports]
-# One delivery path per run: the platform carries the report over the schedule's report channel. The owner-messaging
-# send tools would be a second path — asked "is the mail out?", the model mailed the report twice or, with the mail
-# tool gone, fell back to text messages. Blocked for the run AND its delegation tree; the loop also drops
-# their schemas from the wire, and the directive below names them so the model never reaches for them.
-blockedToolNames: [sendEmailToOwner, sendSmsToOwner]
+# One delivery path per run: the platform carries the report over the schedule's report channel. A tool that sends
+# the owner a message itself is a second path: the report then goes out twice. The purpose class blocks every tool
+# that declares
+# MCPToolSendsMessageToOwner, for the run AND its delegation tree; the loop also drops their schemas from the wire,
+# and the directive names them so the model never reaches for them. This text is what a refused call is told.
 blockedToolsRefusalText: "the platform delivers this run's report over the schedule's report channel; a run never sends an email or a text message itself. In an email run, state the outcome with send_owner_report; in a chat run, your final answer is the report."
 ---
 # Scheduled run
