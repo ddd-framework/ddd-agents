@@ -58,7 +58,7 @@ shape. The shapes are tested in this order; a later shape fires only when no ear
 | Shape | Fires when | Exempted by |
 |---|---|---|
 | EMPTY | neither a tool call nor visible prose (fenced blocks do not count as prose) | a writable block only — not `askOwner`, not an awaiting widget, not the one-time exemption |
-| PROSE-AFTER-LOAD-SKILLS | prose, the turn loaded a skill or tool, no work tool ran (a refused or failed call counts as ran), work tools are offered; skills carried over from an earlier turn never fire it | an awaiting widget, a writable block, the one-time exemption |
+| PROSE-AFTER-LOAD-SKILLS | prose, the turn loaded a skill or tool, no work tool ran (a refused or failed call counts as ran), the step was sent with tools the model may call (a step the loop sends with tool choice `none` never fires it); skills carried over from an earlier turn never fire it | an awaiting widget, a writable block, the one-time exemption |
 | PRE-CALL | the prose carries the `AIConversationMessage::PRE_CALL_MESSAGE_MARKER` sentinel or a tool call leaked into the text | an awaiting widget; for a leaked call only a recorded `askOwner` question |
 | DICTATED-BLOCK-MISSING | a work-tool result of the turn dictates a widget (`ToolCall::$dictatedWidgetType`), or the newest call is a `delegate` that started nothing, and the answer has no block at all | an awaiting widget, the one-time exemption, a delegation child, the nudge already spent this turn |
 | DIRECT-WIDGET-MISSING | the turn start decided a direct widget and the answer lacks its closed, valid block | an awaiting widget, a work tool that ran, the one-time exemption, a delegation child, the nudge already spent |

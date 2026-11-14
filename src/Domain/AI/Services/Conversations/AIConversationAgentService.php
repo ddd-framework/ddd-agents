@@ -2170,6 +2170,7 @@ class AIConversationAgentService extends Service implements AgentModelCallRunner
             // their measured reasons are on {@see AgentStallClassification}. `$noToolCall` stays a local: a forced
             // re-drive below replaces the response.
             $noToolCall = $toolCalls === null || $toolCalls->isEmpty();
+            $turnHasSkillOrToolLoadCall = $conversation->messages->buildCurrentTurn()->hasSkillOrToolLoadCall();
             $stallClassification = AgentStallClassification::buildFor(
                 $conversation,
                 (string)($modelResponse->text ?? ''),
@@ -2179,9 +2180,12 @@ class AIConversationAgentService extends Service implements AgentModelCallRunner
                 // sees it). A model-written consent block exempts nothing: no tool asks for one.
                 turnRecordedOwnerQuestion: $conversation->messages->buildCurrentTurn()->getNewestCompletedToolCallNamedSinceOwnerInbound(AskOwnerTool::NAME) !== null,
                 workToolRan: $workToolRan,
-                workToolsOffered: !$workTools->isEmpty(),
+                // a step the loop ran without tools (the answer step after a refused repeat, an owner-gate refusal, a
+                // result that ends the purpose) offered the model no tool to call: its text is the answer that step
+                // asks for, never text in place of a tool call
+                workToolsOffered: $firstStepToolChoice->offersWorkToolsToCall($workTools),
                 proseStallExemptionApplies: $proseStallExemptionApplies,
-                turnHasSkillOrToolLoadCall: $conversation->messages->buildCurrentTurn()->hasSkillOrToolLoadCall(),
+                turnHasSkillOrToolLoadCall: $turnHasSkillOrToolLoadCall,
                 visibleProseCarriesLeakedToolCall: $modelResponse->visibleProseCarriesLeakedToolCall(),
                 visibleProseCarriesPreCallToken: $modelResponse->visibleProseCarriesPreCallToken(),
                 dictatedBlockNudgeSpentThisTurn: $loopCorrectionState->dictatedBlockNudgeSpentThisTurn,
@@ -2189,6 +2193,19 @@ class AIConversationAgentService extends Service implements AgentModelCallRunner
                 widgetTreeFindingsSpentThisTurn: $loopCorrectionState->widgetTreeFindingsSpentThisTurn,
                 codeOrFormulaNudgeSpentThisTurn: $loopCorrectionState->codeOrFormulaNudgeSpentThisTurn
             );
+            if ($noToolCall && !$stallClassification->emittedNoText && !$stallClassification->isStall
+                && !$stallClassification->turnWidgetAwaitsTheOwnerOrEndsThePurpose
+                && !$workToolRan && !$workTools->isEmpty() && $turnHasSkillOrToolLoadCall
+                && !$firstStepToolChoice->letsTheModelCallTools()
+            ) {
+                // the text of a step that ran without tools, on a turn that loaded a skill or a tool and ran no work
+                // tool, is not judged as a stall — counted here; a later check of the final text may still send it back
+                $this->aiTrace('turn.stall.textOfStepWithoutToolsNotJudged', [
+                    'conversationId' => $conversation->id ?? null,
+                    'step' => $agentRun->invocationStep + 1,
+                    'budgetClosingStep' => $loopCorrectionState->budgetClosingStep,
+                ]);
+            }
 
             // Post-send landing: an EMPTY turn in a run whose report is
             // claimed-and-delivered is NEVER a stall — the delivered OWNER_REPORT message IS the final answer.

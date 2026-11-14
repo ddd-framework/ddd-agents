@@ -107,6 +107,25 @@ class AgentStepToolChoice extends ValueObject
     }
 
     /**
+     * Whether the model can call a tool on this step: every mode but `none`. A step sent with `none` owes text — its
+     * text is the answer the loop asked for, never text written in place of a tool call.
+     */
+    public function letsTheModelCallTools(): bool
+    {
+        return $this->mode !== self::MODE_NONE;
+    }
+
+    /**
+     * Whether this step offers the model work tools to call: there are some and the step lets the model call tools.
+     * Text on a step that offers none is the answer that step asks for, so it is never judged as text written in
+     * place of a tool call.
+     */
+    public function offersWorkToolsToCall(AgentOfferedTools $workTools): bool
+    {
+        return !$workTools->isEmpty() && $this->letsTheModelCallTools();
+    }
+
+    /**
      * The value the model call sends as `tool_choice`: null for the provider's default, the mode string for `none` /
      * `required`, the function object for one named tool.
      *

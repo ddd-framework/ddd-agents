@@ -3,7 +3,7 @@
     "description": "The agentic loop for mgamadeus/ddd: conversations, messages, compaction, the task plan, skills and MCP metadata, purposes and criteria, widgets and signal sources, delegation, the supervisor and run claims",
     "minimum-stability": "stable",
     "license": "MIT",
-    "version": "0.1.0-alpha.18",
+    "version": "0.1.0-alpha.19",
     "authors": [
         {
             "name": "Marius-Eugen Gerdan",

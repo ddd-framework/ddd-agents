@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-alpha.19
+
+- Stall classification: text of a step the loop sent with tool choice `none` (the answer step after a refused repeat,
+  an owner-gate refusal, a result that ends the purpose, the step before the budget closes) is no longer judged as
+  "text after a skill load" and is delivered instead of nudged and discarded; the checks of a final text still run on
+  it. `AgentStepToolChoice::letsTheModelCallTools()` / `offersWorkToolsToCall()`; trace
+  `turn.stall.textOfStepWithoutToolsNotJudged`. Steps sent with tools are unchanged.
+
 ## 0.1.0-alpha.18
 
 - The module ships its plain console commands (`DDD\Symfony\Commands\Agents\`, 20 with the mark command) and the
