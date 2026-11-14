@@ -66,7 +66,7 @@ class TaskPlan extends ValueObject
     {
         return 'Tick an item via set_task_status (its key, a statusNote) once its result is in your context — together with'
             . ' the call for the next item or with your answer text, never before its call has returned and never as a step of its own;'
-            . ' done: what you produced; blocked: the obstacle (requiresUserAction when only the owner can lift it; once it is lifted,'
+            . ' done: what you produced — an item whose read or call returned nothing usable is not done, it is blocked; blocked: the obstacle (requiresUserAction when only the owner can lift it; once it is lifted,'
             . ' work the item and tick it done); not_applicable: why it does not apply to this ' . AgentApplicationWording::current()->agentSpaceContextSubjectName . '. An item that waits for the'
             . ' owner\'s answer stays open and your answer asks for it — never done before the answer is in your context, never blocked'
             . ' in place of asking. An item the platform closes from the record (a completed call it names, a'

@@ -94,7 +94,8 @@ class AgentCheckedStopPolicy extends ValueObject
                 . ' — do their work now (the call, the widget or the answer the item names); never tick them done.';
         }
         return $bounceText . ' An item only the owner\'s reply can resolve: resolve every other item first, then end with the ONE question that unblocks it. '
-            . 'Then give your final answer, reporting the result of every item — it is accepted as it is.';
+            . 'When the owner asked you to stop after a part and check back with them: report that part and end with that ONE question — the items after it stay open. '
+    . 'Then give your final answer, reporting the result of every item — it is accepted as it is.';
     }
 
     /**

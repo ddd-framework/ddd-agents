@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-alpha.16
+
+- Task plan tick rules: an item whose read or call returned nothing usable is not done, it is blocked.
+- Checked-stop bounce: when the owner asked to stop after a part and check back, the answer reports that part and ends
+  with the one question; the later items stay open.
+- Package prompt defaults: an answer without a widget withholds nothing; no promise to remember a personal statement;
+  a limit on the text is counted before it is claimed (`Agentic.md`); the example question in "Drive" is described,
+  not quoted (`Character.md`).
+
 ## 0.1.0-alpha.15
 
 - A spec of the frontend writes its deeply nested JSON text directly: `JSON.stringify` exhausted the call stack on
