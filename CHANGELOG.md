@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-alpha.21
+
+- Release workflow: the npm publish step logs verbosely. No code change.
+
 ## 0.1.0-alpha.20
 
 - `delegate`: a `toolName` written with the namespace of the model's function list (`functions.<tool>`) names the

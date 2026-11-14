@@ -80,4 +80,4 @@ jobs:
             echo "@mgamadeus/ddd-agents@${VERSION} is already on npm, nothing to publish"
             exit 0
           fi
-          npm publish "$(ls "$RUNNER_TEMP"/mgamadeus-ddd-agents-*.tgz)" --provenance --tag "$DIST_TAG" --access public --registry https://registry.npmjs.org
+          npm publish "$(ls "$RUNNER_TEMP"/mgamadeus-ddd-agents-*.tgz)" --provenance --tag "$DIST_TAG" --access public --registry https://registry.npmjs.org --loglevel verbose
