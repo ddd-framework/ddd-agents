@@ -1,7 +1,20 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.11
 
+- Console commands: the package ships its first command, `app:ai-conversation:mark-finalized`, and the groundwork
+  every later command builds on: the abstract `AgentConsoleCommand` (default account, whole-run rights lift, budget
+  bypass by `--ignore-budget`, run-level usage envelope, space by `--agentSpaceId` or the application's own options;
+  the tear-down runs each step once, also after a failure), `AgentConsoleProgressReporter`, `AgentEvalArmOptionsTrait`
+  (every arm option needs a value) and `ContextRetentionSettingsOptionsTrait`. An application replaces a command with
+  a subclass that repeats `#[AsCommand]` with the same name.
+- Value objects `ContextRetentionSettingsOverride` and `CompactionSettingsOverride` (`applyTo()` returns a merged copy;
+  a value that is no whole number, below the knob's minimum or too large is refused with
+  `SettingsOverrideValueRefusedException`), `AgentEvalArms`, the interface `AgentRecordedRunSessionInterface`.
+- `AgentSpacesService::getConsoleScopeOptions()` (an `AgentSpaceConsoleScopeOptions` set, empty by default) and
+  `findAgentSpaceForConsoleScopeOptionValues()` (null by default): override points for naming a space on the console.
+- `AgentAIUsageScope`: `ENVELOPE_AI_CONVERSATION_SEARCH`, `ENVELOPE_AI_AGENT_EVALUATION`, `AI_AGENT_SIMULATE_OWNER`,
+  `AI_AGENT_JUDGE_EVALUATION`.
 - Design-decision references of the context, autonomy and decisions-and-guards skills: six reasons now argue from the
   mechanism, and where a measurement decided they name what a host measures itself.
 

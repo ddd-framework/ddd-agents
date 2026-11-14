@@ -27,8 +27,9 @@ their DTOs, the naming, wording, persona and egress configs, and `examples/`. Th
 
 ## Rules that always hold
 
-1. **The package ships no console command.** Firing schedules, recovering owed turns and reports, reaping dead
-   workers and stale sub-agent groups, finalizing conversations and purging the event tables are host commands.
+1. **The package ships one console command so far** (the finalize mark sweep `AgentMarkFinalizedConversationsCommand`,
+   on the shared base `AgentConsoleCommand`). Firing schedules, recovering owed turns and reports, reaping dead
+   workers and stale sub-agent groups, reducing finalized conversations and purging the event tables are host commands.
    Without them unattended work never runs, a crashed turn never answers and the event tables grow without bound. Templates: `templates/`; contracts: [references/host-duties.md](references/host-duties.md).
 2. **The host provides the envelope middleware.** Every agent message that makes model calls declares its usage scope
    with `WithAIEnvelope` (all but `AIConversationReportEmailSendMessage`);

@@ -6,6 +6,7 @@ namespace DDD\Domain\AI\Services\AgentSpaces;
 
 use DDD\Domain\AI\Entities\AgentSpaces\AgentOwnerAddressingArguments;
 use DDD\Domain\AI\Entities\AgentSpaces\AgentSpace;
+use DDD\Domain\AI\Entities\AgentSpaces\AgentSpaceConsoleScopeOptions;
 use DDD\Domain\AI\Entities\AgentSpaces\AgentSpaces;
 use DDD\Domain\AI\Entities\AgentSpaces\AgentSpaceTimezone;
 use DDD\Domain\AI\Entities\Conversations\Agent\AgentToolCallProvenance;
@@ -220,6 +221,37 @@ class AgentSpacesService extends EntitiesService
     public function findOwnerAccountOfAgentSpace(AgentSpace $agentSpace): ?Account
     {
         return $agentSpace->findOwnerAccount();
+    }
+
+    /**
+     * The console options by which an application names the space of a console command in its own words (the id of
+     * its own entity a space stands for), declared on every package command that takes a space beside the package's
+     * own `--agentSpaceId`. Each option takes a value; the command passes the values given to
+     * {@see self::findAgentSpaceForConsoleScopeOptionValues()}. The default declares none.
+     *
+     * @return AgentSpaceConsoleScopeOptions
+     */
+    public function getConsoleScopeOptions(): AgentSpaceConsoleScopeOptions
+    {
+        return new AgentSpaceConsoleScopeOptions();
+    }
+
+    /**
+     * The space the values of the application's console options name ({@see self::getConsoleScopeOptions()}). Asked
+     * only when at least one of those options has a value and `--agentSpaceId` has none. A space that does not exist
+     * yet is not created here: null makes the command refuse the values. The default declares no option and answers
+     * null.
+     *
+     * @param array<string, string> $optionValuesByName the non-empty values, by option name
+     * @return AgentSpace|null null = no space for these values
+     * @throws BadRequestException
+     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function findAgentSpaceForConsoleScopeOptionValues(array $optionValuesByName): ?AgentSpace
+    {
+        return null;
     }
 
     /**

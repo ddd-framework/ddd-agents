@@ -9,14 +9,15 @@ cron list.
 
 ## The table
 
-The package ships services, no console command. Every row is a duty of the host until the package ships it.
+The package ships services and one console command so far, the finalize mark sweep
+`AgentMarkFinalizedConversationsCommand`. Every other row is a duty of the host until the package ships it.
 
 | Need | State in the package | Class | Start from |
 |---|---|---|---|
 | Fire due schedules; sweep schedule state | services exist, no command | mandatory for unattended runs | `AgentSchedulesFireCommand`, `AgentSchedulesStateSweepCommand` templates + cron lines |
 | Deliver owed reports and resume owed turns | services exist, no command | mandatory | `AgentOwedWorkRecoveryCommand` template + cron line |
 | Reap runs whose worker died, time out sub-agent groups past their deadline, wake parents of settled groups, settle purposed conversations closed without an owner turn, re-send lost run-end notifications of parents that run no further turn (report delivery of a crashed run depends on it) | services exist, no command | mandatory | `AgentStuckRunsReapCommand` template + cron line |
-| Mark and reduce finalized conversations | services exist, no command | mandatory | `AgentFinalizedConversationsReduceCommand` template + cron line |
+| Mark and reduce finalized conversations | the mark is a package command (`AgentMarkFinalizedConversationsCommand`, the host adds its cron line); the reduce: services exist, no command | mandatory | the package command + `AgentFinalizedConversationsReduceCommand` template (its reduce half) + cron lines |
 | Workers: six transports, nine message classes, retry policies, a stop grace that lets a turn finish, resetters for the host's process state | constants and handlers exist, the host configures | mandatory | transport block template |
 | The usage envelope middleware for consumed messages | no package ships one | mandatory for a host that gates budgets or attributes usage | middleware template |
 | The overhead-costs middleware | no package ships one; with ddd-ai's defaults there is nothing to book | needed only together with a host cost recorder | middleware template |

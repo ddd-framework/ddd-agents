@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * The console command that executes ONE persisted tool call in a process of its own — read as
  * `Config::get('AI.agentToolCallChildProcess')` by
- * {@see \DDD\Domain\AI\Services\Conversations\AgentToolCallForkJoinService}. The module ships no console command:
+ * {@see \DDD\Domain\AI\Services\Conversations\AgentToolCallForkJoinService}. The module ships no command for it:
  * establishing the account a tool runs under and accounting its usage is the application's. An application that
  * wants the parallel-safe tool calls of one model response to run concurrently replaces this file whole with its own
  * `config/app/AI/agentToolCallChildProcess.php` (keys are never merged). The package default declares none, and every

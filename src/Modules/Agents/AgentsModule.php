@@ -27,13 +27,17 @@ use DDD\Infrastructure\Modules\DDDModule;
  *   `…\Services\Eval\`, `…\Services\Mandates\`,
  *   `…\Services\Skills\`, `…\Services\SystemPrompts\`, `…\Services\Texts\Embeddings\`;
  * - `DDD\Modules\Agents\`, `DDD\Presentation\Api\Agents\`, `DDD\Presentation\Mcp\` (the MCP / JSON-RPC wire DTOs,
- *   the tool executor, the console printer and the JSON-RPC base controller).
+ *   the tool executor, the console printer and the JSON-RPC base controller);
+ * - `DDD\Symfony\Commands\Agents\` (the console commands of the module, their shared base, the option traits and the
+ *   progress reporter).
  *
  * Every `Services` namespace of the module is public ({@see getPublicServiceNamespaces()}). What is no service lives
  * outside them and stays private: the recorded-run clock and id sources (a static library, `Libs\RecordedRuns`), the
  * listener interfaces and the transaction listener (`Listeners\Conversations`), the worker state resetter
  * (`Messenger\Conversations`, reached through its tag), the console stream (`Presentation\Mcp\Agent`, built with
- * `new`) and the trace log trait (`Traits\Conversations`).
+ * `new`), the trace log trait (`Traits\Conversations`) and the console commands (`Symfony\Commands\Agents`, reached
+ * through the console tag their `#[AsCommand]` attribute gives them; an application command of the same name
+ * replaces one, as for every command below `DDD\Symfony\Commands\`).
  *
  * An application overrides a class by a same-path subclass under its own root namespace.
  */
@@ -78,6 +82,7 @@ class AgentsModule extends DDDModule
         'DDD\\Modules\\Agents\\',
         'DDD\\Presentation\\Api\\Agents\\',
         'DDD\\Presentation\\Mcp\\',
+        'DDD\\Symfony\\Commands\\Agents\\',
     ];
 
     public static function getSourcePath(): string

@@ -11,6 +11,7 @@ use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
 use DDD\Domain\AI\Entities\Conversations\Messages\OwnerDevice;
 use DDD\Domain\AI\Entities\Conversations\Messages\RunSettingsOverride;
 use DDD\Domain\AI\Entities\Conversations\SignalSources\ConversationSignalSources;
+use DDD\Domain\AI\Entities\Conversations\Usage\AgentAIUsageScope;
 use DDD\Domain\AI\Entities\UsageLogs\AIUsageEnvelopeContext;
 use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
 use DDD\Domain\AI\Services\AIUsageEnvelopesService;
@@ -38,7 +39,7 @@ use DDD\Presentation\Api\Agents\Conversations\Dtos\AIConversationStartWithMessag
 trait AgentConversationControllerHooksTrait
 {
     /** @var string The usage-envelope scope of the conversation searches (a routed trait method opens it when none is open). */
-    public const string AGENT_CONVERSATION_SEARCH_ENVELOPE_SCOPE = 'ENVELOPE.AI.CONVERSATION.SEARCH';
+    public const string AGENT_CONVERSATION_SEARCH_ENVELOPE_SCOPE = AgentAIUsageScope::ENVELOPE_AI_CONVERSATION_SEARCH;
 
     /**
      * The application's access gate of the chat surface (a product flag, a user right), called first by every routed

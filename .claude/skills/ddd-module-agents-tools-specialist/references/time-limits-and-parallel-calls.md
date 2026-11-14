@@ -83,8 +83,8 @@ something only the parent process holds does not reach it.
 
 ## The host's child-process command (optional host duty)
 
-The package ships no console command: establishing the account a tool runs under and accounting its usage is the
-host's. A host that wants parallel calls replaces `config/app/AI/agentToolCallChildProcess.php` whole (keys are never
+The package ships no command for the child process: establishing the account a tool runs under and accounting its
+usage is the host's. A host that wants parallel calls replaces `config/app/AI/agentToolCallChildProcess.php` whole (keys are never
 merged) and names `consoleScript` (relative to the kernel project directory, e.g. bin/console) and `commandName`.
 The package default declares neither, so every call runs inline.
 

@@ -10,9 +10,12 @@ metadata:
 # Agents Observability Specialist
 
 How to see what a run of the agent did and what the model saw, how to reproduce it, and how to measure and evaluate
-the agent — on top of the services and value objects the package ships. The package ships **no console command**:
-every inspect, diagnose, chat, replay or evaluation command is a console command of the host, built on the contracts
-below.
+the agent — on top of the services and value objects the package ships. The package ships the base of its console
+commands (`AgentConsoleCommand`: the account of a run, lifted rights, the budget option, the usage envelope, the
+progress reporter `AgentConsoleProgressReporter`, the space options), the option traits
+`ContextRetentionSettingsOptionsTrait` and `AgentEvalArmOptionsTrait`, the arms object `AgentEvalArms` and the
+recording-session contract `AgentRecordedRunSessionInterface`, but **no inspect, diagnose, chat, replay or evaluation
+command yet**: those are console commands of the host, built on the contracts below.
 
 > Installation, transports, workers and the full host-duty table: `ddd-module-agents-specialist`. How a turn runs,
 > is claimed, released and recovered: `ddd-module-agents-loop-specialist`.

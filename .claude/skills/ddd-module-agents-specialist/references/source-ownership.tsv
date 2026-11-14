@@ -26,6 +26,7 @@ src/Domain/AI/MessageHandlers/AIConversationScorecard*	observability
 src/Domain/AI/Interfaces/AIConversationProgressReporterInterface.php	observability
 src/Domain/AI/Traits/**	observability
 src/Presentation/Mcp/Agent/**	observability
+src/Symfony/Commands/Agents/**	observability
 src/Presentation/Api/Agents/Conversations/Dtos/AIConversationMessageSentPayload*	observability
 config/app/AI/evalOutboundRecipients.php	observability
 # decisions-and-guards (ddd-module-agents-decisions-and-guards-specialist): decision layer, owner consent, injection screening
@@ -126,6 +127,7 @@ src/Domain/AI/Entities/Conversations/Languages/**	context
 src/Domain/AI/Entities/Conversations/Messages/Loaded*	context
 src/Domain/AI/Entities/Conversations/Messages/PersistedLoadedCapabilitiesState.php	context
 src/Domain/AI/Entities/Conversations/Messages/ContextRetentionSettings.php	context
+src/Domain/AI/Entities/Conversations/Messages/ContextRetentionSettingsOverride.php	context
 src/Domain/AI/Entities/Conversations/Messages/OwnerDevice*	context
 src/Domain/AI/Entities/Conversations/Messages/ToolResultRetention.php	context
 src/Domain/AI/Entities/Conversations/Messages/AIConversationMessageWindow.php	context

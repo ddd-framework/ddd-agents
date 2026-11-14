@@ -29,7 +29,7 @@ use Throwable;
 /**
  * Runs the parallel-safe tool calls of ONE model response concurrently, each in its own short-lived console process,
  * while the turn worker keeps its claim and runs the rest of the response inline (the fork-join design). The module
- * ships no console command: the application declares its console script and the command that executes one persisted
+ * ships no command for the child process: the application declares its console script and the command that executes one persisted
  * tool call in `config/app/AI/agentToolCallChildProcess.php` (the arguments and exit codes are listed there). An
  * application that declares none forks nothing and every call runs inline. The child claims its call row's
  * `toolCall` column with a lease, executes the call exactly as the inline path does, writes the outcome into the

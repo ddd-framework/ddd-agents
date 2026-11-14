@@ -20,8 +20,9 @@ the module compiler pass registers them.
 configuration; under another root namespace the host maps every class it overrides in its `services.yaml`. The lookup
 order and the folder scans it does not cover: [override-points.md](override-points.md).
 
-The package ships no console command, no route of its own for starting a conversation, no transport configuration
-and no envelope middleware. The host provides them: [host-duties.md](host-duties.md).
+The package ships one console command so far (the finalize mark sweep `AgentMarkFinalizedConversationsCommand`), no
+route of its own for starting a conversation, no transport configuration and no envelope middleware. The host
+provides the rest: [host-duties.md](host-duties.md).
 
 ## The checklist
 

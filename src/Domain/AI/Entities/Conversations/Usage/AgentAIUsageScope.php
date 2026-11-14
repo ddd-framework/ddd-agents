@@ -17,8 +17,14 @@ class AgentAIUsageScope
     /** Agent — a TYPED decision at a turn boundary (the reply-language decision), asked of a System One decision model; counted against the usage cap like every op. */
     public const string AI_AGENT_DECIDE_TURN = 'AI.AGENT.DECIDE.TURN';
 
+    /** Testing the assistant: the verdict on an evaluation run (never billed to you). */
+    public const string AI_AGENT_JUDGE_EVALUATION = 'AI.AGENT.JUDGE.EVALUATION';
+
     /** Telling you what the assistant is doing while it works (one line per tool call, while you watch). */
     public const string AI_AGENT_NARRATE_ACTIVITY = 'AI.AGENT.NARRATE.ACTIVITY';
+
+    /** Testing the assistant: the simulated owner's message in an evaluation run (never billed to you). */
+    public const string AI_AGENT_SIMULATE_OWNER = 'AI.AGENT.SIMULATE.OWNER';
 
     /** Reviewing a finished assistant chat to improve the assistant (quality analysis, never billed to you). */
     public const string AI_CONVERSATION_ANALYZE = 'AI.CONVERSATION.ANALYZE.QUALITY';
@@ -47,6 +53,9 @@ class AgentAIUsageScope
     /** Safety check on assistant input. */
     public const string AI_SECURITY_DETECT_INJECTION = 'AI.SECURITY.DETECT.INJECTION';
 
+    /** Testing the assistant: the model calls an evaluation run makes besides the assistant's own (never billed to you). */
+    public const string ENVELOPE_AI_AGENT_EVALUATION = 'ENVELOPE.AI.AGENT.EVALUATION';
+
     /** Telling you what the assistant is doing while it works. */
     public const string ENVELOPE_AI_CONVERSATION_ACTIVITY = 'ENVELOPE.AI.CONVERSATION.ACTIVITY';
 
@@ -55,6 +64,9 @@ class AgentAIUsageScope
 
     /** Preparing assistant chats for search. */
     public const string ENVELOPE_AI_CONVERSATION_EMBEDDING = 'ENVELOPE.AI.CONVERSATION.EMBEDDING';
+
+    /** Searching your assistant chats. */
+    public const string ENVELOPE_AI_CONVERSATION_SEARCH = 'ENVELOPE.AI.CONVERSATION.SEARCH';
 
     /** Assistant chat title and summary. */
     public const string ENVELOPE_AI_CONVERSATION_SUMMARIZE = 'ENVELOPE.AI.CONVERSATION.SUMMARIZE';
