@@ -28,6 +28,7 @@
     "src/entries/client-testing.ts",
     "src/entries/chat.ts",
     "src/entries/preview.ts",
-    "src/entries/image-render.ts"
+    "src/entries/image-render.ts",
+    "src/entries/provider.ts"
   ]
 }

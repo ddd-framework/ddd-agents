@@ -22,3 +22,5 @@ export {
 export { installWidgetPreviewRequests, isPendingResponse, widgetPreviewRequestKey } from "../preview/widget-preview-requests";
 export { installWidgetPreviewHydration } from "../preview/widget-preview-hydration";
 export { buildPreviewComposedViewComponents } from "../preview/preview-stub-components";
+// A package fixture as the app reads it, with the app's own agent space key field.
+export { mapFixtureToDeclaredAgentSpaceKeyFieldName } from "../renderer/_agent-space/declared-agent-space-key-field-name";

@@ -129,3 +129,17 @@ export const registerConversationWidgets = (widgets: readonly ConversationWidget
   conversationWidgetRegistry.widgets.push(...widgets);
   registryRevision += 1;
 };
+
+/**
+ * Puts `widgets` in place of every registered entry and returns the entries the registry held, so a spec renders
+ * against widgets of its own and puts the registry back afterwards (`installTestConversationWidgets`, the
+ * `client/testing` subpath). Fills the same array in place, so a reader that holds it sees the swap; moves the revision.
+ */
+export const replaceConversationWidgetRegistryEntries = (
+  widgets: readonly ConversationWidgetEntry[],
+): ConversationWidgetEntry[] => {
+  assertUniqueConversationWidgetNames(widgets);
+  const previousWidgets = conversationWidgetRegistry.widgets.splice(0, conversationWidgetRegistry.widgets.length, ...widgets);
+  registryRevision += 1;
+  return previousWidgets;
+};

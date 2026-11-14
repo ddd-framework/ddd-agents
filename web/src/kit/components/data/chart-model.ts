@@ -416,7 +416,8 @@ export const buildChartModel = (input: ChartModelInput): ChartModelResult => {
       horizontalAlign: "center",
       fontSize: "13px",
       labels: { colors: palette.axisTextColor },
-      markers: { radius: 12 },
+      // ApexCharts before 3.45 rounds legend markers with `radius`, later versions with `shape`; the peer range spans both
+      markers: { radius: 12, shape: "circle" } as ApexLegend["markers"],
       itemMargin: { horizontal: 8, vertical: 4 },
     },
     grid: {

@@ -33,3 +33,33 @@ export { normalizeServerMessageToMarkdown } from "../chat/normalize-server-messa
 // The widget provider bound to the chat store (the chat-free callbacks are in `./renderer`) and the canvas restore.
 export { ConversationWidgetProvider, type ConversationWidgetProviderProps } from "../renderer/ConversationWidgetContext";
 export { CanvasRestoreOnMount, type CanvasRestoreOnMountProps } from "../renderer/canvas/CanvasRestoreOnMount";
+// The building blocks a host composes its own chat surface from: the canvas pane, the message list, the message rows,
+// the input with its attachment shapes, and the activity ticker an app's own activity face paces itself by.
+export { CanvasPane } from "../chat/CanvasPane/CanvasPane";
+export { ConversationMessageList } from "../chat/ConversationMessageList/ConversationMessageList";
+export {
+  ConversationMessageUser,
+  type ConversationMessageUserProps,
+  type ConversationMessageUserTheme,
+} from "../chat/ConversationMessage/ConversationMessageUser/ConversationMessageUser";
+export {
+  ConversationMessageWidgets,
+  type ConversationMessageWidgetsProps,
+} from "../chat/ConversationMessage/ConversationMessageWidgets/ConversationMessageWidgets";
+export {
+  ConversationMessageSystem,
+  type ConversationMessageSystemProps,
+} from "../chat/ConversationMessage/ConversationMessageSystem/ConversationMessageSystem";
+export {
+  ConversationMessageInput,
+  MAX_MESSAGE_LENGTH,
+  type ConversationMessageInputHandle,
+  type ConversationMessageInputProps,
+} from "../chat/ConversationMessageInput/ConversationMessageInput";
+export type {
+  ConversationMessageInputAttachmentPreview,
+  ConversationMessageInputAttachmentUploadStatus,
+} from "../chat/ConversationMessageInput/ConversationMessageInputAttachments/ConversationMessageInputAttachmentPreviewCard";
+export type { AssistantServerMessagePayload } from "../chat/normalize-server-message-to-markdown";
+export { useActivityTicker, SUCCESS_BEAT_MS } from "../chat/controller/use-activity-ticker";
+export { formatElapsedClock, isStepStillRunning, type ActivityTickerLine } from "../chat/controller/activity-ticker";

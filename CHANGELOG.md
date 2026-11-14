@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.1.0-alpha.23
+
+- Chart legend markers: `radius` and `shape` are both set, so the peer range of ApexCharts (`^3.35`) type-checks and renders round markers before and after 3.45.
+- npm package (`web/`): an application builds its screens on the published entries alone, without the package's
+  source files. New entry `@mgamadeus/ddd-agents/provider` (the provider without the registrations and the
+  stylesheet); the root entry and `./provider` also export the prop types of every replaceable component
+  (`AgentsComponents`, `AgentsTextProps`, …). The existing entries export the components and helpers an application
+  composes from: `./chat` (`CanvasPane`, `ConversationMessageList`, `ConversationMessageInput`, the message rows, the
+  activity ticker), `./kit` (`ModelText`, `EmbeddedConversationWidget`, `ApexChart`, `useChartPalette`,
+  `useNumberLocale`, the entity-detail body contract), `./renderer` (`ConversationWidgetRenderContext`,
+  `ConversationWidgetActions`, the agent-space frame, header and hooks, the canvas anchor hooks and reducers, the render
+  report signal, the deep-link allow-list, `unregisterWidgetHydrator`), `./widgets` (`WidgetLabel`, `CardFooter`,
+  `DonePill`, the skeleton shapes, payload validation, the concept explainer parts), `./preview`
+  (`mapFixtureToDeclaredAgentSpaceKeyFieldName`) and the root entry (the definition types and folder readers of the
+  entity-detail and concept-explainer registrations, `ComposedViewDataSourceFetcher`). Internals stay unexported.
+- `./client/testing` adds the stand-ins a spec uses instead of mocking package modules:
+  `installWidgetHydrationStandIns` (hydration answered by data, a failure or a pending read) and
+  `installTestConversationWidgets` (a registry of test widgets); both return an object whose `restore()` undoes them.
+- Non-code files an application reads are published under `dist/files/` and exported one subpath per file, at their
+  path below `src`: the widget documentation (`*.md`), every `*.preview-fixtures.json`, the widget contracts, the node
+  schema (`renderer/widget-tree/composed-node-schema.json`), the sandbox frame page, the conversation tokens
+  (`chat/_conversation-tokens.scss`) and three SCSS modules; the SCSS partials they import are published beside them.
+  `exports` is the one list the build copies from.
+- `scripts/check-package.mjs` fails the build when an export target is missing or outside `files`, when a built entry
+  is no declared subpath, or when a built entry lacks a name `public-api.json` declares for it (the new file lists the
+  values and types of every code subpath; `--write-public-api` rewrites it after a deliberate change).
+
 ## 0.1.0-alpha.22
 
 - `#[MCPExposedFilterProperties]`: the executor reads the model's raw `filters` and `orderBy` strings before the
