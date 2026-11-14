@@ -213,8 +213,8 @@ storage); a user- or browser-level zone (an unattended run has no browser).
 **Rule.** A conversation reads its space's zone at every model request and tool call; only a schedule run and its
 tree freeze the schedule's zone.
 
-**Reason.** A first-run conversation starts on a country default and must switch the moment an address is saved.
-Freezing the zone and following changes needed signals, locks and compare-and-set machinery that never converged.
+**Reason.** The zone of a space can change while a conversation runs (for example from an unverified default to the
+exact zone once the host stores it), and the conversation must follow that change at once. Freezing the zone and following changes needed signals, locks and compare-and-set machinery that never converged.
 
 **Rejected.** A zone frozen at creation that follows the space through signals; a zone computed on the fly from
 stored facts with no stored column.

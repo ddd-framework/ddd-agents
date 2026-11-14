@@ -145,8 +145,8 @@ the only lock that survives a crash between claim and spawn without a stuck lock
 through the tool it is first used with and the tools sharing its binding key. The check is a comparison of ids
 (root conversation, owner message); nothing is consumed per call. The next owner request needs its own consent.
 
-**Reason.** Per call, one request of "delete my 13 drafts" cost 14 grants and forced confirmations. Per request, the
-owner's words are the evidence and a redelivered call passes again. The owner's next message has a new id, so coverage
+**Reason.** Per call, one owner request that touches many records (for example "delete these twelve items") would
+need one grant per call and a confirmation for each. Per request, the owner's words are the evidence and a redelivered call passes again. The owner's next message has a new id, so coverage
 ends by construction.
 
 **Rejected.** Widening the boundary to N messages, N turns or N steps (a later, different order would ride an old
@@ -189,8 +189,10 @@ request it was given in).
 **Rule.** Supervision has one switch, `enabled` in `supervisor.php`, false in the package; no environment variable
 overrides it; a mistyped value means off. A conversation can be armed alone by a run-cap override.
 
-**Reason.** Measured on real runs, the supervisor's steers did not improve outcomes a deterministic gate would not have
-produced, and some added noise. A host turns it on knowingly, per purpose with a cadence.
+**Reason.** A supervisor adds a second agent's model calls to every supervised conversation. Whether its steers improve
+outcomes beyond what the deterministic gates already enforce depends on the host's purposes, and a steer can also add
+noise, so its benefit has to be shown per host before it runs. A host turns it on knowingly, per purpose with a
+cadence.
 
 **Rejected.** On by default. An environment switch (a deployment detail deciding product behaviour).
 

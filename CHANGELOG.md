@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Design-decision references of the context, autonomy and decisions-and-guards skills: six reasons now argue from the
+  mechanism, and where a measurement decided they name what a host measures itself.
+
 ## 0.1.0-alpha.10
 
 - The tool-less step after a refused identical write is forced only when the loop already refused that call once in

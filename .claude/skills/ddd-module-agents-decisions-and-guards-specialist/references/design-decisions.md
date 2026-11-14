@@ -177,8 +177,9 @@ action is an attack when embedded in untrusted content, attributed to a third pa
 destination.
 
 **Reason.** A screen trained to block "change, delete, export" blocks the owner's legitimate self-service and does the
-authorization layer's job badly; separating by provenance brought false alarms on real owner messages to zero without
-opening attack holes.
+authorization layer's job badly; separating by provenance lets the owner's own requests pass whatever their verb, while
+an instruction embedded in untrusted content, attributed to a third party or aimed at a foreign destination is still
+caught.
 
 **Rejected.** Blocking by action verb. A judgement of provenance by the chat model itself.
 
@@ -193,8 +194,8 @@ the step re-driven once. The turn never waits for a screening verdict.
 **Reason.** The owner should not be refused or alarmed by a false positive; the model must not act on the payload.
 Waiting for the background screen would add its latency to every tool call that fetches content.
 
-**Rejected.** A middle tier with a caution signal to the model: measured, it changed nothing. Gating write tools on a
-model-side judgement of provenance. Waiting for the verdict before the next step.
+**Rejected.** A middle tier with a caution signal to the model: it leaves the decision to the very model the payload is
+aimed at, so it adds text to the request without adding protection. Gating write tools on a model-side judgement of provenance. Waiting for the verdict before the next step.
 
 **Would change if.** Screening became fast enough to run inside the tool call at no measurable cost.
 
@@ -219,10 +220,12 @@ the platform wrote, or a filtered row) and a request the tool built from what it
 assistant named exactly this step, the owner agreed afterwards — must reach one threshold for every kind of step.
 
 **Reason.** The model cannot write a consent into its own arguments, and a yes to another target or value is no yes to
-this step. A probe of recorded dialogues put one threshold above every trap and below every genuine consent.
+this step. One threshold for every kind of step keeps the rule predictable and testable; a host confirms it on labelled
+dialogues of its own, traps and genuine consents alike, before it relies on the gate.
 
 **Rejected.** A consent widget the owner clicks: a widget answer can be dictated and does not carry the explained
-consequence. A higher threshold for deletions: it refused clear yeses.
+consequence. A higher threshold for deletions: an owner's yes to a deletion is no
+less explicit than a yes to any other step, so a stricter floor only refuses genuine consents.
 
 **Would change if.** A channel appeared where the owner's words are not stored as rows.
 
