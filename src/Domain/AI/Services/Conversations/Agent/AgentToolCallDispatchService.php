@@ -144,7 +144,10 @@ class AgentToolCallDispatchService extends Service
         // A repeated `load_skills` never ABORTS the turn: the call executes nothing (a held-back act, an already
         // loaded skill answer deterministically and cost nothing), so the abort only produced a pause report the
         // owner had to answer with "continue" — and the model mirrored that word's language afterwards. The third
-        // identical call still gets the corrective and the forced tool-less step; the step budget bounds the rest.
+        // identical call still gets the corrective and the forced tool-less step — except the first step of a turn
+        // whose repeated `load_skills` meets callable tools of loaded skills (the corrective branch below): it is
+        // answered with those tools and followed by ONE step that keeps its tools; the next repeated `load_skills`
+        // of the turn gets the tool-less step.
         $repeatGuardVerdict = $repeatedCallCheck->verdictForRepeatGuard();
 
         // the work this call asks for — resolved first, because the catch arms below ask it too: a plan-tool call that
@@ -164,7 +167,19 @@ class AgentToolCallDispatchService extends Service
                 // saved nothing gets the notice that says so — "the work IS done" made the model tell the owner a
                 // refused goal was recorded.
                 $earlierUnsavedCall = $repeatedCallCheck->findEarlierUnsavedIdenticalCallInTurn();
-                $resultContent = $earlierUnsavedCall !== null ? $repeatedCallCheck->buildUnsavedRepeatCorrective($earlierUnsavedCall) : sprintf(
+                // A repeated `load_skills` while tools of loaded skills are callable: the answer names those skills and
+                // tools, and the next step keeps its tools. "Answer from the data you already have" and a tool-less step
+                // after it leave the model only the answer that the work cannot be done, although the tool for it is
+                // loaded and has not run. Once per turn: after a step that got this answer, the next repeated
+                // `load_skills` gets the repeat guard's own text and the tool-less step, so the turn still ends.
+                $repeatedSkillLoadResult = $toolName === LoadSkillsTool::NAME && !$repeatedCallCheck->hasRepeatGuardAnsweredASkillLoadInAnEarlierStepOfTheTurn()
+                    ? LoadSkillsTool::buildResultOfRepeatedCall(
+                        $repeatCount,
+                        $callMessage->getLoadedCapabilities()?->getLoadedSkillNames() ?? [],
+                        $this->buildCallableToolNamesOfLoadedSkills($agentRun, $conversation, $callMessage)
+                    )
+                    : null;
+                $resultContent = $repeatedSkillLoadResult ?? ($earlierUnsavedCall !== null ? $repeatedCallCheck->buildUnsavedRepeatCorrective($earlierUnsavedCall) : sprintf(
                     'You have already called `%s` with these exact arguments %d times and the result has '
                     . 'not changed. Do NOT call it again. If the call SUCCEEDED earlier, the work IS done — nothing '
                     . 'failed and nothing is unavailable, so NEVER tell the user you lack access: the platform closes '
@@ -173,14 +188,15 @@ class AgentToolCallDispatchService extends Service
                     . 'and why.',
                     $toolName,
                     $repeatCount
-                );
+                ));
                 $toolCall->markCompleted();
                 $toolCall->wasRefusedAsDuplicate = true;
-                // Third identical call of ANY tool: the notice demands "answer from the data you already have" —
+                // Third identical call of a tool: the notice demands "answer from the data you already have" —
                 // force the tool-less step so that answer actually happens (measured: identical load_skills /
                 // read loops sailed past the write-only breaker into the repeat-guard ABORT, killing mid-flow
-                // rounds the same way the write perseveration killed the endgame).
-                $forceToolLessAnswerStep = true;
+                // rounds the same way the write perseveration killed the endgame). Not after the `load_skills` answer
+                // that names callable tools: its next move is one of those tools.
+                $forceToolLessAnswerStep = $repeatedSkillLoadResult === null;
             } elseif (($seededPlanRefusal = $this->findSeededPlanRefusal($toolCall, $conversation, $allowThreads)) !== null) {
                 // `delegate` and `update_task_plan` under a purpose-seeded plan: the meta tool answers its refusal
                 $metaToolCallAnswer = $seededPlanRefusal;
@@ -510,6 +526,21 @@ class AgentToolCallDispatchService extends Service
     }
 
     /**
+     * The tools of the loaded skills the model can call at this call's row: the row's loaded tools without the tools
+     * the conversation tree's purpose blocks. What a `load_skills` answer names as "already in your tool list".
+     *
+     * @return string[]
+     */
+    protected function buildCallableToolNamesOfLoadedSkills(AgentRun $agentRun, AIConversation $conversation, AIConversationMessage $callMessage): array
+    {
+        $loadedToolNames = $callMessage->getLoadedCapabilities()?->getLoadedToolNames() ?? [];
+        if ($loadedToolNames === []) {
+            return [];
+        }
+        return array_values(array_diff($loadedToolNames, $conversation->findBlockedToolNamesOfConversationTree($agentRun)));
+    }
+
+    /**
      * The loaded skill and tool names of the call row and of the conversation's newest row that carries a set — what a
      * `load_skills` call can change (its own row; a sub-skill preload promotes onto the newest row). Compared before and
      * after the call to tell a load from an "Already loaded" answer.
@@ -584,8 +615,12 @@ class AgentToolCallDispatchService extends Service
         }
         $requestedAISkills = $aiSkillsService->resolveRequestedSkills($requestedSkillNames, $loadedSkillNames);
         if (!$requestedAISkills->namesAnySkill()) {
-            // a call that names nothing loads nothing; answering it like a load reads as success and is repeated
-            return AgentSkillLoadOutcome::withoutSkillNames(LoadSkillsTool::RESULT_WITHOUT_SKILL_NAMES);
+            // a call that names nothing loads nothing; answering it like a load reads as success and is repeated. While
+            // tools of loaded skills are callable the answer names them: the next move is one of them, not a name
+            return AgentSkillLoadOutcome::withoutSkillNames(LoadSkillsTool::buildResultOfCallNamingNoSkill(
+                $loadedSkillNames,
+                $this->buildCallableToolNamesOfLoadedSkills($agentRun, $conversation, $callMessage)
+            ));
         }
         $aISkillLoadRefusals = AISkillLoadRefusals::buildFor($requestedAISkills, $conversation->buildAISkillOfferRestrictions($agentRun));
         $toolArguments['skill_names'] = $aISkillLoadRefusals->loadableSkillNames;

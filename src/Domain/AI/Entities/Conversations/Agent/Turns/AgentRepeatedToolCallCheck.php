@@ -125,6 +125,19 @@ class AgentRepeatedToolCallCheck extends ValueObject
         return $this->conversation->messages->buildCurrentTurn()->buildToolCallHistory()->countRefusedRepeatsWithNormalizedIdentityKey($this->toolCall);
     }
 
+    /**
+     * Whether the repeat guard already answered a `load_skills` call in an earlier model step of the current turn
+     * ({@see \DDD\Domain\AI\Entities\Conversations\Messages\AIConversationTurnMessages::hasSkillLoadCallAnsweredByTheRepeatGuardBeforeTheNewestModelStep()});
+     * the checked call's own row is part of the newest step.
+     */
+    public function hasRepeatGuardAnsweredASkillLoadInAnEarlierStepOfTheTurn(): bool
+    {
+        if (!isset($this->conversation->messages)) {
+            return false;
+        }
+        return $this->conversation->messages->buildCurrentTurn()->hasSkillLoadCallAnsweredByTheRepeatGuardBeforeTheNewestModelStep();
+    }
+
     /** The head of the earlier result quoted in {@see buildUnsavedRepeatCorrective()}. */
     public const int MAX_QUOTED_UNSAVED_RESULT_CHARS = 600;
 

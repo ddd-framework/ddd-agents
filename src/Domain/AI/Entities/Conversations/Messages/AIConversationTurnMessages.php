@@ -509,8 +509,9 @@ class AIConversationTurnMessages extends ValueObject
      * A `load_skills` call that loaded nothing ({@see ToolCall::$loadSkillsCallLoadedNothing}, the "Already loaded"
      * answer) is no load: the skills were carried forward, so the prose after it is a reply (both strategies).
      * A load call the repeat guard answered instead of running ({@see ToolCall::$wasRefusedAsDuplicate}) is no load
-     * either: the guard forces a tool-less answer step after it, and counted as a load that very answer was nudged as
-     * a stall — the model loaded again, was answered by the guard again, and the turn ran to its step budget.
+     * either: the answer after it — on the tool-less step the guard forces, or on the one step that keeps its tools
+     * ({@see hasSkillLoadCallAnsweredByTheRepeatGuardBeforeTheNewestModelStep()}) — is a reply; counted as a load it was
+     * nudged as a stall, the model loaded again, was answered by the guard again, and the turn ran to its step budget.
      */
     public function hasSkillOrToolLoadCall(): bool
     {
@@ -601,6 +602,31 @@ class AIConversationTurnMessages extends ValueObject
             $streak++;
         }
         return $streak;
+    }
+
+    /**
+     * Whether the repeat guard answered a `load_skills` call of this turn instead of running it
+     * ({@see ToolCall::$wasRefusedAsDuplicate}) in a model step BEFORE the turn's newest one. A model step begins at
+     * the row that carries its usage stamp ({@see AIConversationMessage::applyUsageAsStepHead()}); the calls of the
+     * newest step do not count: the model wrote them before it read any of their answers. The dispatch asks it for a
+     * repeated `load_skills`: the first step with such a call can be answered with the loaded skills' tools and keeps
+     * its tools, every later one gets the repeat guard's own text and the tool-less step.
+     */
+    public function hasSkillLoadCallAnsweredByTheRepeatGuardBeforeTheNewestModelStep(): bool
+    {
+        $answeredInAnEarlierModelStep = false;
+        $answeredInTheModelStepBeingRead = false;
+        foreach ($this->rows as $message) {
+            if (($message->inputTokens ?? 0) > 0) {
+                $answeredInAnEarlierModelStep = $answeredInAnEarlierModelStep || $answeredInTheModelStepBeingRead;
+                $answeredInTheModelStepBeingRead = false;
+            }
+            $toolCall = isset($message->toolCall) ? $message->toolCall : null;
+            if ($toolCall !== null && ($toolCall->name ?? null) === LoadSkillsTool::NAME && $toolCall->wasRefusedAsDuplicate) {
+                $answeredInTheModelStepBeingRead = true;
+            }
+        }
+        return $answeredInAnEarlierModelStep;
     }
 
     /**

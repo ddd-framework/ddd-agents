@@ -59,7 +59,8 @@ model the contract per report channel; the purpose file belongs to the skills-an
 `armForcedOwnerReportCallIfOwed()`: an unattended EMAIL run whose own turn ends on a final text without the call, with
 a step left, runs one more step pinned to `send_owner_report`, preceded by one signal
 (`AIConversationOwnerReportDeliveryService::FORCED_OWNER_REPORT_CALL_NOTE`). The note is never the report; the binding
-stays on the text.
+stays on the text. The note asks for the outcome and names NOTHING_TO_REPORT first: a final text that says the check
+found nothing is closed without an email; a problem that kept the task from being done is REPORT.
 
 ## Template reports
 

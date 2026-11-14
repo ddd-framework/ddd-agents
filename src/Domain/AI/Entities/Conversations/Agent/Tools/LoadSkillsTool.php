@@ -37,6 +37,68 @@ class LoadSkillsTool extends ValueObject implements AgentMetaTool
         . 'you need exactly as "Available skills" or the sub-skill list of a loaded skill states it. A tool of a skill you have loaded is '
         . 'called directly. Do not repeat this call without a name.';
 
+    /** How many tool names an answer of this tool lists at most; the rest is counted ("and 4 more"). */
+    public const int MAX_TOOL_NAMES_LISTED_IN_A_RESULT = 12;
+
+    /**
+     * What a `load_skills` call that names no skill is answered with. While skills are loaded and their tools are
+     * callable, the answer names both: such a call asks for nothing, so the model's next move is a tool it already
+     * has — "name the skill you need" alone sent it back into the same empty call. Without a loaded skill or a callable
+     * tool the answer is {@see RESULT_WITHOUT_SKILL_NAMES}.
+     *
+     * @param string[] $loadedSkillNames the skills loaded before the call
+     * @param string[] $callableToolNames the loaded skills' tools the model can call now
+     */
+    public static function buildResultOfCallNamingNoSkill(array $loadedSkillNames, array $callableToolNames): string
+    {
+        if ($loadedSkillNames === [] || $callableToolNames === []) {
+            return self::RESULT_WITHOUT_SKILL_NAMES;
+        }
+        return 'Nothing was loaded: `skill_names` named no skill. ' . self::renderLoadedSkillsWithTheirTools($loadedSkillNames, $callableToolNames)
+            . ' Call the tool the request needs directly NOW. `' . self::NAME . '` takes only a skill that is not loaded yet, named exactly as '
+            . '"Available skills" or the sub-skill list of a loaded skill states it; never call it with an empty list.';
+    }
+
+    /**
+     * What the identical `load_skills` call is answered with once the repeat guard stops running it, while skills are
+     * loaded and their tools are callable: the call is not executed, the loaded skills and their tools are named, and
+     * the next move is one of those tools or the answer. Null without a loaded skill or a callable tool — the repeat
+     * guard's own text applies then. The dispatch gives this answer in ONE step of a turn; a later repeated call gets
+     * the repeat guard's own text and the tool-less step.
+     *
+     * @param string[] $loadedSkillNames the skills loaded before the call
+     * @param string[] $callableToolNames the loaded skills' tools the model can call now
+     */
+    public static function buildResultOfRepeatedCall(int $identicalCallCount, array $loadedSkillNames, array $callableToolNames): ?string
+    {
+        if ($loadedSkillNames === [] || $callableToolNames === []) {
+            return null;
+        }
+        return sprintf(
+            'NOT executed: you have called `%s` with these exact arguments %d times and it loads nothing more. %s Call the tool the '
+                . 'request needs directly NOW, or answer if the request needs no tool. Do not repeat this `%s` call.',
+            self::NAME,
+            $identicalCallCount,
+            self::renderLoadedSkillsWithTheirTools($loadedSkillNames, $callableToolNames),
+            self::NAME
+        );
+    }
+
+    /**
+     * "Loaded right now: A, B — their tools are ALREADY in your tool list (t1, t2 and 3 more)."
+     *
+     * @param string[] $loadedSkillNames
+     * @param string[] $callableToolNames
+     */
+    protected static function renderLoadedSkillsWithTheirTools(array $loadedSkillNames, array $callableToolNames): string
+    {
+        $callableToolNames = array_values(array_unique($callableToolNames));
+        $listedToolNames = array_slice($callableToolNames, 0, self::MAX_TOOL_NAMES_LISTED_IN_A_RESULT);
+        $unlistedToolCount = count($callableToolNames) - count($listedToolNames);
+        return 'Loaded right now: ' . implode(', ', $loadedSkillNames) . ' — their tools are ALREADY in your tool list ('
+            . implode(', ', $listedToolNames) . ($unlistedToolCount > 0 ? ' and ' . $unlistedToolCount . ' more' : '') . ').';
+    }
+
     /** The system-prompt catalog header — `renderCatalogBlock()` emits it, the composition labels it. */
     public const string CATALOG_HEADER = "\n\n# Available skills — load with load_skills when a request needs them\n";
 

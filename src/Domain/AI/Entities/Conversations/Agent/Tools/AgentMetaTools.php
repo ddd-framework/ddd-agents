@@ -85,7 +85,11 @@ class AgentMetaTools
      */
     public const array REPEAT_GUARD_EXEMPT_WHILE_SUCCEEDING_NAMES = [WaitForSubAgentsTool::NAME];
 
-    /** Never ABORT the turn on an identical repeat (they execute nothing); the corrective and the tool-less step still apply. */
+    /**
+     * Never ABORT the turn on an identical repeat (they execute nothing); the corrective and the tool-less step still
+     * apply — except for the first step of a turn whose repeated `load_skills` is answered with the loaded skills' tools
+     * ({@see LoadSkillsTool::buildResultOfRepeatedCall()}): that step is followed by one step with tools.
+     */
     public const array REPEAT_ABORT_EXEMPT_NAMES = [LoadSkillsTool::NAME, AskOwnerTool::NAME, FindWidgetsTool::NAME];
 
     /** Left out of the step offer when a supervisor steer or a work signal forces the first step's tools. */

@@ -138,6 +138,13 @@ step is left (`armForcedOwnerReportCallIfOwed()`; `ddd-module-agents-autonomy-sp
 - An identical write the loop already refused once in this turn, or the third identical call → the next step runs
   without tools (`AgentLoopCorrectionState::$forceToolLessAnswerStep`); the first refusal keeps the tools so the model
   can go on with the next open item.
+- `load_skills` is exempt from the repeat abort, and its third identical call is the exception to the line above:
+  when the repeat guard answers a `load_skills` call while tools of loaded skills are callable, the first model step
+  of the turn with such a call is answered with those tools by name (`LoadSkillsTool::buildResultOfRepeatedCall()`)
+  and the dispatch does not force the tool-less step. The next repeated `load_skills` of the turn
+  (`AgentRepeatedToolCallCheck::hasRepeatGuardAnsweredASkillLoadInAnEarlierStepOfTheTurn()`) gets the generic
+  corrective and the tool-less step. The calls of one model step are answered alike; a step begins at the row with
+  the usage stamp.
 
 ## 8. The loop's memory between steps
 

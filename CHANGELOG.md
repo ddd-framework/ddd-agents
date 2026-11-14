@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-alpha.12
+
+- A `load_skills` call that names no skill is answered with the loaded skills and their callable tools by name when
+  both exist.
+- The first model step of a turn whose repeated `load_skills` call the repeat guard answers, while tools of loaded
+  skills are callable, is answered with those tools and no longer forces the tool-less step; the next repeated
+  `load_skills` of the turn gets the generic corrective and the tool-less step as before.
+- The note before the forced `send_owner_report` step asks for the outcome and names NOTHING_TO_REPORT first.
+
 ## 0.1.0-alpha.11
 
 - Console commands: the package ships its first command, `app:ai-conversation:mark-finalized`, and the groundwork

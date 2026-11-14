@@ -72,8 +72,9 @@ left out when nothing is left to load. The call goes through the load path's own
 
 A sub-skill may be requested in the SAME call as its root. Billing and the budget policy restrict the offer only.
 `AISkillLoadRefusals::renderCorrectiveSentences()` is appended to the result, so the model pivots instead of retrying;
-`AgentSkillLoadOutcome` carries the result text and the admitted names. A call without a name is answered with
-`LoadSkillsTool::RESULT_WITHOUT_SKILL_NAMES`.
+`AgentSkillLoadOutcome` carries the result text and the admitted names. A call without a name is answered with the
+loaded skills and their callable tools by name (`LoadSkillsTool::buildResultOfCallNamingNoSkill()`); without a loaded
+skill or a callable tool with `RESULT_WITHOUT_SKILL_NAMES`.
 
 ## `load_tool` and sub-skill tools
 

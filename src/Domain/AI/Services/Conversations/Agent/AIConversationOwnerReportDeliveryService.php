@@ -63,12 +63,16 @@ class AIConversationOwnerReportDeliveryService extends Service
     protected const int OWNER_REPORT_CLAIM_STALE_AFTER_SECONDS = 10;
 
     /**
-     * The note the forced `send_owner_report` step reads ({@see armForcedOwnerReportCallIfOwed()}): the call has no
-     * accompanying message, so the platform states which message REPORT sends — the one the model just wrote.
+     * The note the forced `send_owner_report` step reads ({@see armForcedOwnerReportCallIfOwed()}). It asks for the
+     * outcome first and names both on equal terms — a text that says the check found nothing is closed with
+     * NOTHING_TO_REPORT, not mailed; a problem that kept the task from being done is REPORT — and,
+     * because the call has no accompanying message, states which message REPORT sends: the one the model just wrote.
      */
-    public const string FORCED_OWNER_REPORT_CALL_NOTE = 'Your previous message IS the report: REPORT emails exactly that '
-        . 'message to the owner — give only the subject. NOTHING_TO_REPORT only when the task\'s check found nothing worth '
-        . 'reporting; a summary, an overview or a draft the task asked for is worth reporting.';
+    public const string FORCED_OWNER_REPORT_CALL_NOTE = 'State the outcome of this run now; your previous message decides '
+        . 'it. NOTHING_TO_REPORT when that message says the task\'s check found nothing the task defines as worth reporting '
+        . '(nothing new, nothing changed, nothing to do) — no email goes out. REPORT when that message carries a result for '
+        . 'the owner — a finding, a summary, an overview or a draft the task asked for, or a problem that kept the task '
+        . 'from being done: REPORT emails exactly that message, give only the subject.';
 
     /**
      * Deliver the run's report NOW, inline at its terminal (the one place for the
