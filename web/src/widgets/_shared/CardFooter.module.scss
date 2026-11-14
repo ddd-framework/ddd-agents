@@ -1,0 +1,15 @@
+@import "../../styles/spacings";
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $x1_5;
+  margin-top: auto;
+}
+
+@container chatPane (max-width: 900px) {
+  .cardFooter {
+    flex-wrap: wrap;
+  }
+}

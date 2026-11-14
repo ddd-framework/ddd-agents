@@ -1,0 +1,340 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "entity-link-business-card",
+      "description": "Screenshot 20 rebuilt: a business card whose name is an EntityLink (title variant) and whose footer button runs the same openEntity action. The action carries the reference as the backend stores it after resolving it (the L-SERIAL persist contract). A click on the name opens the entityDetail canvas with the body the app registers for the `business` entity type; the example response stands for that body's read of business 301.",
+      "payload": {
+        "actions": {
+          "openLeve": {
+            "type": "openEntity",
+            "ref": "call_places_1:business:0",
+            "entity": {
+              "entityType": "business",
+              "entityId": "301",
+              "agentSpaceId": 7
+            }
+          }
+        },
+        "view": {
+          "type": "Surface",
+          "slots": {
+            "media": [
+              {
+                "type": "Image",
+                "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg",
+                "alt": "Der Prinzipalmarkt in Münster",
+                "aspectRatio": "16:9"
+              }
+            ],
+            "footer": [
+              {
+                "type": "Button",
+                "label": "Restaurantdetails öffnen",
+                "onClick": {
+                  "action": "openLeve"
+                },
+                "icon": "info",
+                "fullWidth": true
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "Stack",
+              "gap": "xsmall",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "justify": "between",
+                  "align": "center",
+                  "children": [
+                    {
+                      "type": "EntityLink",
+                      "text": "Altes Gasthaus Leve",
+                      "action": "openLeve",
+                      "variant": "title"
+                    },
+                    {
+                      "type": "Badge",
+                      "text": "Restaurant"
+                    }
+                  ]
+                },
+                {
+                  "type": "Caption",
+                  "text": "Westfälische Küche · Historisches Gasthaus"
+                },
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "gap": "xsmall",
+                  "align": "center",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "starActive"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "4,3"
+                    },
+                    {
+                      "type": "Caption",
+                      "text": "(891)"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "gap": "xsmall",
+                  "align": "center",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "location",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "Alter Steinweg 37, 48143 Münster-Altstadt, Deutschland"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "open-detail-from-name",
+          "click": {
+            "selector": "[data-testid=composed-entity-link]"
+          }
+        }
+      ],
+      "agentSpaceId": 7,
+      "responses": {
+        "GET /api/example/agent-spaces/7/businesses/301": {
+          "business": {
+            "id": 301,
+            "name": "Altes Gasthaus Leve"
+          }
+        }
+      }
+    },
+    {
+      "name": "entity-link-in-sentence-and-chips",
+      "description": "The entity names inside prose (a Text with inline EntityLinks, as ChatGPT links names in its answer) and the same businesses as chips under it, each chip bound to its own action through a Repeat. Click the second chip: the entityDetail canvas opens for that business.",
+      "payload": {
+        "data": {
+          "businesses": [
+            {
+              "name": "Kleiner Kiepenkerl",
+              "action": "openKiepenkerl"
+            },
+            {
+              "name": "Großer Kiepenkerl Gasthaus",
+              "action": "openGrosser"
+            },
+            {
+              "name": "Gasthaus Stuhlmacher",
+              "action": "openStuhlmacher"
+            }
+          ]
+        },
+        "actions": {
+          "openKiepenkerl": {
+            "type": "openEntity",
+            "ref": "call_c_1:business:0",
+            "entity": {
+              "entityType": "business",
+              "entityId": "9001",
+              "agentSpaceId": 7
+            }
+          },
+          "openGrosser": {
+            "type": "openEntity",
+            "ref": "call_c_1:business:1",
+            "entity": {
+              "entityType": "business",
+              "entityId": "301",
+              "agentSpaceId": 7
+            }
+          },
+          "openStuhlmacher": {
+            "type": "openEntity",
+            "ref": "call_c_1:business:2",
+            "entity": {
+              "entityType": "business",
+              "entityId": "9003",
+              "agentSpaceId": 7
+            }
+          }
+        },
+        "view": {
+          "type": "Stack",
+          "gap": "small",
+          "children": [
+            {
+              "type": "Text",
+              "text": "Am nächsten an Ihnen liegen",
+              "children": [
+                {
+                  "type": "EntityLink",
+                  "text": "Kleiner Kiepenkerl",
+                  "action": "openKiepenkerl"
+                },
+                {
+                  "type": "Text",
+                  "text": "und"
+                },
+                {
+                  "type": "EntityLink",
+                  "text": "Gasthaus Stuhlmacher",
+                  "action": "openStuhlmacher"
+                }
+              ]
+            },
+            {
+              "type": "Flow",
+              "gap": "xsmall",
+              "children": [
+                {
+                  "type": "Repeat",
+                  "items": {
+                    "$data": "businesses"
+                  },
+                  "children": [
+                    {
+                      "type": "EntityLink",
+                      "text": {
+                        "$item": "name"
+                      },
+                      "action": {
+                        "$item": "action"
+                      },
+                      "variant": "chip"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "open-second-chip",
+          "click": {
+            "text": "Großer Kiepenkerl Gasthaus"
+          }
+        }
+      ],
+      "agentSpaceId": 7,
+      "responses": {
+        "GET /api/example/agent-spaces/7/businesses/9001": {
+          "business": {
+            "id": 9001,
+            "name": "Kleiner Kiepenkerl"
+          }
+        },
+        "GET /api/example/agent-spaces/7/businesses/301": {
+          "business": {
+            "id": 301,
+            "name": "Großer Kiepenkerl"
+          }
+        },
+        "GET /api/example/agent-spaces/7/businesses/9003": {
+          "business": {
+            "id": 9003,
+            "name": "Stuhlmacher"
+          }
+        }
+      }
+    },
+    {
+      "name": "entity-link-unresolved",
+      "description": "The error state: an EntityLink whose action is gone (the persist pass dropped the reference it could not resolve) — the name shows without the click and the node reports failed UNRESOLVED_REF (ChatGPT's 20b showed a broken panel instead).",
+      "payload": {
+        "view": {
+          "type": "Text",
+          "text": "Ihr stärkster Wettbewerber ist",
+          "children": [
+            {
+              "type": "EntityLink",
+              "text": "Altes Gasthaus Leve"
+            }
+          ]
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "entity-link-empty",
+      "description": "The empty state: the name is bound to a state value that is empty — nothing shows, the node reports empty.",
+      "payload": {
+        "state": {
+          "name": ""
+        },
+        "actions": {
+          "openLeve": {
+            "type": "openEntity",
+            "ref": "call_places_1:business:0",
+            "entity": {
+              "entityType": "business",
+              "entityId": "8812",
+              "agentSpaceId": 1
+            }
+          }
+        },
+        "view": {
+          "type": "EntityLink",
+          "text": {
+            "$state": "name"
+          },
+          "action": "openLeve"
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "entity-link-loading",
+      "description": "The loading state: the name is bound to a tool result that is not stored yet — a skeleton line.",
+      "payload": {
+        "actions": {
+          "openLeve": {
+            "type": "openEntity",
+            "ref": "call_places_1:business:0",
+            "entity": {
+              "entityType": "business",
+              "entityId": "8812",
+              "agentSpaceId": 1
+            }
+          }
+        },
+        "view": {
+          "type": "EntityLink",
+          "text": {
+            "$from": {
+              "toolCall": "call_pending_1",
+              "path": "$.name"
+            }
+          },
+          "action": "openLeve"
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    }
+  ]
+}

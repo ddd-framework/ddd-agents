@@ -1,0 +1,54 @@
+@import "../../../styles/spacings";
+
+// A table on whatever surface holds it: no box of its own, rows divided by hairlines, the figures
+// right-aligned. Wider than the pane → it scrolls inside itself, the page never does.
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+  width: 100%;
+}
+
+.scroller {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.row + .row,
+thead + tbody .row:first-child {
+  border-top: 1px solid var(--agents-divider-gl);
+}
+
+// One line of figures per row: the compact rhythm of ChatGPT's tables (a row is about 40px, not 50px).
+.cell {
+  padding: $x1 $x1;
+  vertical-align: middle;
+  text-align: left;
+
+  &:first-child {
+    padding-left: 0;
+  }
+
+  &:last-child {
+    padding-right: 0;
+  }
+}
+
+.start {
+  text-align: left;
+}
+
+.center {
+  text-align: center;
+}
+
+.end {
+  text-align: right;
+}

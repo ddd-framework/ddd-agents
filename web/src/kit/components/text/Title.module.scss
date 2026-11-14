@@ -1,0 +1,6 @@
+// The title wraps and is never cut.
+.title {
+  display: block;
+  color: var(--agents-fg);
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,61 @@
+@import "../../styles/spacings";
+
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $x1;
+  padding-top: calc($x1 / 2);
+
+  // Pills that would wrap (useStackWhenWrapped) become a column of full-width pills.
+  &[data-stacked] {
+    flex-direction: column;
+
+    > * {
+      width: 100%;
+    }
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--agents-brd-gl);
+  border-radius: $x4;
+  padding: calc($x1 / 2) $x2;
+  background: var(--agents-bg-surface);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--agents-fg-cta);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--agents-fg-cta);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+}
+
+.pillChosen {
+  border-color: var(--agents-fg-cta);
+  background: var(--agents-fg-cta);
+
+  &:disabled {
+    // The chosen pill stays fully legible while its send is in flight — only the others dim.
+    opacity: 1;
+  }
+
+  .pillLabel {
+    color: var(--agents-bg-surface);
+  }
+}
+
+.pillLabel {
+  color: var(--agents-fg);
+}

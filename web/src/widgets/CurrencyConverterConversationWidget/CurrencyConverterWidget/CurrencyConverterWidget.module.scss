@@ -1,0 +1,154 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The currency converter — the title above one elevated card with two currency rows, a swap
+// button on the hairline between them and one footer line.
+.widget {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+  // Sized against its OWN width (chat, canvas pane, preview and the e-mail capture all get the narrow layout below).
+  container-type: inline-size;
+  container-name: currencyConverter;
+}
+
+.title {
+  padding: 0 $x0_5;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: $x2;
+  min-height: $x7;
+}
+
+// The amount column: the number and its symbol, flush right.
+.amount {
+  display: flex;
+  align-items: baseline;
+  justify-self: end;
+  gap: $x0_5;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// The editable amount: a soft box behind the number, so it reads as typeable.
+.field {
+  align-items: center;
+  padding: $x0_5 $x1_5;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+  cursor: text;
+
+  &:focus-within {
+    box-shadow: 0 0 0 $x0_125 var(--agents-fg-cta);
+  }
+}
+
+.fieldInvalid,
+.fieldInvalid:focus-within {
+  box-shadow: 0 0 0 $x0_125 var(--agents-danger-500);
+}
+
+.input {
+  min-width: 2ch;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--agents-fg);
+  font: inherit;
+  font-size: $x3;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+// Lines the result up with the typed amount above it (the field's padding).
+.result {
+  padding-right: $x1_5;
+}
+
+// The converted amount's room beside the currency symbol — what the hero number scales down to fit.
+.heroSlot {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// A flex row, so the hero takes the width of its number and the fit can compare it with the slot (as the dashboard's
+// hero row does).
+.heroRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// The hairline between the rows; the swap button sits on it, cut out of it by a ring in the card's colour.
+.divider {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: $x0_125;
+  margin: $x0_5 0;
+  background: var(--agents-divider-gl);
+}
+
+.swap {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: $x4;
+  height: $x4;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: var(--agents-bg-var);
+  box-shadow: 0 0 0 $x0_5 var(--agents-bg-surface);
+  color: var(--agents-fg-light);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--agents-divider-gl);
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: $x1;
+  row-gap: $x0_25;
+
+  // The dot trails the phrase before it, so a wrapped footer never starts its second line with a dot.
+  > *:not(:last-child)::after {
+    content: "·";
+    margin-left: $x1;
+    color: var(--agents-fg-lightest);
+  }
+}
+
+// A narrow chat: the typed amount steps down so the currency names keep their room (the hero scales itself).
+@container currencyConverter (max-width: 400px) {
+  .row {
+    column-gap: $x1;
+  }
+
+  .field {
+    padding: $x0_5 $x1;
+  }
+
+  .input {
+    font-size: $x2_5;
+  }
+}

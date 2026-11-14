@@ -1,0 +1,314 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "select-analytics-studio-filters",
+      "description": "The filter card of the analytics studio: period tabs, channel select, reference date, traffic slider, comparison checkbox; the KPIs follow; Copy JSON and Reset (ChatGPT reference 52).",
+      "payload": {
+        "state": {
+          "period": "7d",
+          "channel": "all",
+          "scale": 100,
+          "benchmark": true,
+          "asOf": "2026-10-25"
+        },
+        "data": {
+          "days": [
+            {
+              "x": "Mon",
+              "visitors": 980
+            },
+            {
+              "x": "Tue",
+              "visitors": 1120
+            },
+            {
+              "x": "Wed",
+              "visitors": 1040
+            },
+            {
+              "x": "Thu",
+              "visitors": 1260
+            },
+            {
+              "x": "Fri",
+              "visitors": 1130
+            },
+            {
+              "x": "Sat",
+              "visitors": 1460
+            },
+            {
+              "x": "Sun",
+              "visitors": 1210
+            }
+          ]
+        },
+        "computed": {
+          "channelShare": "channel == \"all\" ? 1 : channel == \"organic\" ? 0.511 : channel == \"paid\" ? 0.32 : 0.169",
+          "periodFactor": "period == \"7d\" ? 1 : 4",
+          "visitors": "round(sum(days, d => d.visitors) * channelShare * scale / 100 * periodFactor)",
+          "comparison": "benchmark ? round(visitors * 0.9) : \"—\"",
+          "settingsJson": "\"{\\\"period\\\":\\\"\" + period + \"\\\",\\\"channel\\\":\\\"\" + channel + \"\\\",\\\"scale\\\":\" + string(scale) + \",\\\"asOf\\\":\\\"\" + asOf + \"\\\"}\"",
+          "channelLabel": "channel == \"all\" ? \"All channels\" : channel == \"organic\" ? \"Organic\" : channel == \"paid\" ? \"Paid\" : \"Direct\"",
+          "comparisonDetail": "benchmark ? \"90 % of the visitors\" : \"Comparison values are off\""
+        },
+        "actions": {
+          "copyJson": {
+            "type": "copy",
+            "value": {
+              "$computed": "settingsJson"
+            }
+          },
+          "reset": {
+            "type": "resetState"
+          }
+        },
+        "view": {
+          "type": "Surface",
+          "title": "Analytics Studio",
+          "subtitle": "Interactive component test · demo data",
+          "children": [
+            {
+              "type": "Surface",
+              "title": "Filter & state",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Tabs",
+                  "label": "Period",
+                  "options": [
+                    {
+                      "id": "7d",
+                      "label": "7 days"
+                    },
+                    {
+                      "id": "30d",
+                      "label": "4 weeks"
+                    }
+                  ],
+                  "value": {
+                    "$state": "period"
+                  },
+                  "onChange": {
+                    "set": "period"
+                  }
+                },
+                {
+                  "type": "Grid",
+                  "columns": 2,
+                  "gap": "small",
+                  "children": [
+                    {
+                      "type": "Select",
+                      "label": "Channel",
+                      "options": [
+                        {
+                          "id": "all",
+                          "label": "All channels"
+                        },
+                        {
+                          "id": "organic",
+                          "label": "Organic"
+                        },
+                        {
+                          "id": "paid",
+                          "label": "Paid"
+                        },
+                        {
+                          "id": "direct",
+                          "label": "Direct"
+                        }
+                      ],
+                      "value": {
+                        "$state": "channel"
+                      },
+                      "onChange": {
+                        "set": "channel"
+                      }
+                    },
+                    {
+                      "type": "DatePicker",
+                      "label": "Reference date",
+                      "value": {
+                        "$state": "asOf"
+                      },
+                      "onChange": {
+                        "set": "asOf"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Slider",
+                  "label": "Traffic scaling",
+                  "min": 50,
+                  "max": 150,
+                  "step": 10,
+                  "unit": "%",
+                  "value": {
+                    "$state": "scale"
+                  },
+                  "onChange": {
+                    "set": "scale"
+                  }
+                },
+                {
+                  "type": "Checkbox",
+                  "label": "Show comparison values (90 % of the visitors)",
+                  "checked": {
+                    "$state": "benchmark"
+                  },
+                  "onChange": {
+                    "set": "benchmark"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Visitors",
+                  "value": {
+                    "$computed": "visitors"
+                  },
+                  "format": "number",
+                  "detail": {
+                    "$computed": "channelLabel"
+                  }
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Comparison",
+                  "value": {
+                    "$computed": "comparison"
+                  },
+                  "format": "number",
+                  "detail": {
+                    "$computed": "comparisonDetail"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Stack",
+              "direction": "row",
+              "gap": "small",
+              "children": [
+                {
+                  "type": "Button",
+                  "label": "Copy JSON",
+                  "icon": "copy",
+                  "onClick": {
+                    "action": "copyJson"
+                  }
+                },
+                {
+                  "type": "Button",
+                  "label": "Reset",
+                  "icon": "reset",
+                  "variant": "secondary",
+                  "onClick": {
+                    "action": "reset"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "4 weeks",
+          "click": {
+            "text": "4 weeks"
+          }
+        },
+        {
+          "name": "open the channel list",
+          "click": {
+            "selector": "[role=combobox]"
+          }
+        },
+        {
+          "name": "pick Organic",
+          "click": {
+            "selector": "[role=option] >> text=Organic"
+          }
+        },
+        {
+          "name": "clear the comparison",
+          "click": {
+            "text": "Show comparison values (90 % of the visitors)"
+          }
+        },
+        {
+          "name": "reset",
+          "click": {
+            "text": "Reset"
+          }
+        }
+      ]
+    },
+    {
+      "name": "select-alone",
+      "description": "One drop-down with a label and a placeholder, nothing picked.",
+      "payload": {
+        "state": {
+          "channel": ""
+        },
+        "view": {
+          "type": "Select",
+          "label": "Channel",
+          "placeholder": "Pick a channel",
+          "options": [
+            "Organic",
+            "Paid",
+            "Direct"
+          ],
+          "value": {
+            "$state": "channel"
+          },
+          "onChange": {
+            "set": "channel"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "open",
+          "click": {
+            "selector": "[role=combobox]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "select-no-options",
+      "description": "No usable choice — the drop-down renders nothing inside its card and the block reports failed. The preview sees the card (state data); the block's render report says failed.",
+      "payload": {
+        "view": {
+          "type": "Surface",
+          "title": "Filter & state",
+          "children": [
+            {
+              "type": "Select",
+              "label": "Channel",
+              "options": []
+            }
+          ]
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

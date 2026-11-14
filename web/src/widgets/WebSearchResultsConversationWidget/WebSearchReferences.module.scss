@@ -1,0 +1,58 @@
+@import "../../styles/spacings";
+@import "../../styles/tray-surface";
+
+// One source chip = the agent tray pill (Scheduled / Done): the same frosted surface, glow and full radius, so the
+// references under an answer read as part of the agent board, not as a form control.
+$chip-height: 4.5 * $x1;
+
+.references {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  padding-top: calc($x1 / 2);
+}
+
+// A div list (role="list"), not ul/li: the conversation markdown wrapping this widget styles every ul with a disc and
+// every li with a margin at a higher specificity, which drew a bullet before each chip.
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $x1 * 1.5;
+}
+
+.chipItem {
+  display: flex;
+  max-width: 100%;
+}
+
+.chip {
+  @include tray-surface;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: $x1;
+  max-width: 100%;
+  height: $chip-height;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 $x2 0 calc($x1 * 1.5);
+  color: var(--agents-fg);
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--agents-bg-var);
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.chipLabel {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

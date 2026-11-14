@@ -1,0 +1,84 @@
+@import "../../styles/spacings";
+@import "../../styles/surfaces";
+@import "../conversation-tokens";
+
+.root {
+  padding: $x1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+// Boxed variant (agent side-split): the canvas renders as a rounded surface card inside the inset pane.
+.rootBoxed {
+  border-radius: $x3;
+  background: var(--agents-bg-surface);
+  overflow: hidden;
+}
+
+// In-flow header row by default: it reserves its own height, so the content below can never render underneath the
+// close button. Only a canvas whose behaviour opts into `overlayCloseButton` floats it over the body (below).
+.closeButtonRow {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $x1;
+}
+
+// Boxed: the canvas bodies pad their own top ($x2 by convention), so the row adds no gap of its own — except above a
+// full-bleed body (`.rootFullBleedContent`, set when the canvas's behaviour declares `fullBleed`), which has no inset
+// of its own to meet the button with and keeps the $x1 gap.
+.rootBoxed:not(.rootFullBleedContent) .closeButtonRow {
+  margin-bottom: 0;
+}
+
+// Overlay variant (behaviour `overlayCloseButton`): the row floats over the body's top edge instead of reserving its
+// height; it lets clicks through to the body and re-enables them on the button only. The pane drops its top and side
+// padding too: nothing reserves room for the button any more, so the body (a hero) runs flush to the pane's edges and
+// the row keeps the button's own $x1 inset.
+.rootOverlayCloseButton {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.rootOverlayCloseButton .closeButtonRow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  margin-bottom: 0;
+  padding: $x1;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  button {
+    box-shadow: $floating-button-shadow;
+  }
+}
+
+.content {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+// Content-agnostic placeholder shown for one slide-in (CANVAS_OPEN_SETTLE_MS) so the open animation stays smooth before
+// the heavy widget content mounts. A centered spinner — the drawer hosts many widget types, so no content-shaped
+// skeleton would fit them all.
+.openingLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}

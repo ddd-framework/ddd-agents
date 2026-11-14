@@ -1,0 +1,131 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The gallery layouts of the media kit: an intrinsic grid — at most
+// four per row, never narrower than 220px, no media queries — a carousel stage and a magazine hero over the grid.
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(220px, calc((100% - #{$x1_5} * 3) / 4))), 1fr));
+  gap: $x1_5;
+  width: 100%;
+  min-width: 0;
+}
+
+// The thumbnail strip of a compact slot: small 4:3 tiles side by side.
+.gridCompact {
+  grid-template-columns: repeat(auto-fill, minmax($x8, 1fr));
+  gap: $x0_5;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+  margin: 0;
+}
+
+.magazine {
+  display: flex;
+  flex-direction: column;
+  gap: $x2;
+  width: 100%;
+  min-width: 0;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  width: 100%;
+  min-width: 0;
+  border-radius: $card-radius-compact;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.carouselStage {
+  position: relative;
+  min-width: 0;
+}
+
+// Previous / next: round dark controls over the picture's sides, above its click target (theme-invariant over a photo);
+// the hover layer is the GlobalStateComponent's.
+.carouselButton {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: $x4;
+  height: $x4;
+  border-radius: 50%;
+  background: rgba(var(--agents-bg-dark-rgb), 0.72);
+  transform: translateY(-50%);
+}
+
+.carouselButtonDisabled {
+  opacity: 0.4;
+}
+
+.carouselButtonTarget {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--agents-fg-on-dark);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.carouselButtonPrevious {
+  left: $x1;
+}
+
+.carouselButtonNext {
+  right: $x1;
+}
+
+.carouselPosition {
+  position: absolute;
+  top: $x1;
+  right: $x1;
+  z-index: 4;
+  padding: $x0_25 $x1;
+  border-radius: $x2;
+  background: rgba(var(--agents-bg-dark-rgb), 0.72);
+  pointer-events: none;
+}
+
+.pendingTile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+}
+
+.pendingTileCompact {
+  border-radius: $button-radius;
+}
+
+.pendingSkeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

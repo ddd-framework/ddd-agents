@@ -1,0 +1,4 @@
+// The package's global stylesheet (compiled into `dist/styles.css` beside the scoped module classes): the package
+// variables with their light and dark defaults, and the look of the default components.
+@import "variables";
+@import "default-components";

@@ -1,0 +1,43 @@
+{
+  "wireName": "QuickReplies",
+  "description": "The owner's answer on the single-choice pills of an owner question. A click posts the option's label as the owner's TEXT (sendMessageToChat), with the suffix the app declares appended when the widget belongs to another agent space than the active one (its agentSpaceId; the package default appends none, anotherAgentSpaceSuffixTemplate is empty). A placeholder option (an ellipsis, a bracketed or underscore blank, a trailing colon) never posts: it fills the composer instead. The backend reader is QuickRepliesConversationWidget (OwnerQuestionConversationWidget::readAnswer() / readPickFromFirstOwnerText()): the app's suffix is stripped when it names the widget's own agent space, then the whole text is matched against the labels (case-insensitive, trailing ' .!' ignored). Any owner text answers the widget; a text that matches no label is an answer without labels. The pills have no decline control. A stored contract: the click wording never changes without the readers accepting both.",
+  "anotherAgentSpaceSuffixTemplate": "",
+  "exampleBlocks": [
+    "```widget\n{\"type\":\"QuickReplies\",\"question\":\"Wie erreichen dich deine Kunden?\",\"options\":[\"Kunden kommen zu uns\",\"Wir fahren zu den Kunden\",\"Beides\"],\"questionKey\":\"serveModel\",\"optionMeanings\":[\"walkIn\",\"mobile\",\"hybrid\"],\"emittedBy\":\"tool:askOwner\"}\n```",
+    "```widget\n{\"type\":\"QuickReplies\",\"agentSpaceId\":412553,\"options\":[\"Yes, publish it\",\"Not yet\"]}\n```"
+  ],
+  "exampleReactions": [
+    {
+      "exampleBlock": 0,
+      "messageType": "TEXT",
+      "clickedOption": "Wir fahren zu den Kunden",
+      "clickedOnWidgetOfAnotherAgentSpace": false,
+      "text": "Wir fahren zu den Kunden",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedLabels": ["Wir fahren zu den Kunden"],
+      "expectedMeanings": ["mobile"]
+    },
+    {
+      "exampleBlock": 0,
+      "messageType": "TEXT",
+      "text": "Beides, aber hauptsächlich fahren wir raus",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedLabels": [],
+      "expectedMeanings": []
+    },
+    {
+      "exampleBlock": 1,
+      "messageType": "TEXT",
+      "clickedOption": "Yes, publish it",
+      "clickedOnWidgetOfAnotherAgentSpace": true,
+      "text": "Yes, publish it",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedLabels": ["Yes, publish it"],
+      "expectedMeanings": [],
+      "expectedAnotherAgentSpaceKey": 412553
+    }
+  ]
+}

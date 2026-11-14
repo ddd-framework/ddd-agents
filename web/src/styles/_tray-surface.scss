@@ -1,0 +1,13 @@
+// The frosted tray surface the web search reference chips share with the app's agent board trays. Copied from the
+// app's board stylesheet (the two parts the chips read), so no package rule imports
+// an app file. The board keeps its own copy; the values must stay equal.
+@import "spacings";
+
+$tray-glow: $x4;
+
+@mixin tray-surface {
+  background: rgba(var(--agents-bg-rgb), 0.4);
+  box-shadow:
+    inset 0 0 $x0_25 (1.25 * $x1) rgba(var(--agents-bg-rgb), 0.2),
+    0 0 $tray-glow rgba(var(--agents-shadow-rgb), 0.1);
+}

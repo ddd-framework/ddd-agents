@@ -1,0 +1,892 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "layout-analytics-dashboard",
+      "description": "Reference 05: one raised Surface with title, subtitle and the period tabs in its header row, a two-column Grid of KPI tiles, a nested flat Surface with a header badge around the line chart, a Divider and the channel section (a row Stack with the label left and the caption right).",
+      "payload": {
+        "state": {
+          "period": "7d"
+        },
+        "data": {
+          "week": [
+            {
+              "date": "Mo",
+              "visitors": 980
+            },
+            {
+              "date": "Di",
+              "visitors": 1120
+            },
+            {
+              "date": "Mi",
+              "visitors": 1040
+            },
+            {
+              "date": "Do",
+              "visitors": 1260
+            },
+            {
+              "date": "Fr",
+              "visitors": 1130
+            },
+            {
+              "date": "Sa",
+              "visitors": 1460
+            },
+            {
+              "date": "So",
+              "visitors": 1210
+            }
+          ],
+          "month": [
+            {
+              "date": "Woche 1",
+              "visitors": 6800
+            },
+            {
+              "date": "Woche 2",
+              "visitors": 7900
+            },
+            {
+              "date": "Woche 3",
+              "visitors": 8600
+            },
+            {
+              "date": "Woche 4",
+              "visitors": 9300
+            }
+          ],
+          "channels": [
+            {
+              "name": "Organic",
+              "share": 54
+            },
+            {
+              "name": "Paid",
+              "share": 28
+            },
+            {
+              "name": "Direct",
+              "share": 18
+            }
+          ]
+        },
+        "computed": {
+          "rows": "period == \"7d\" ? week : month",
+          "visitors": "period == \"7d\" ? 8200 : 32600",
+          "visitorsDelta": "period == \"7d\" ? 12.4 : 9.8",
+          "conversion": "period == \"7d\" ? \"4,6 %\" : \"4,3 %\"",
+          "conversionDelta": "period == \"7d\" ? 0.3 : -0.2"
+        },
+        "view": {
+          "type": "Surface",
+          "title": "Analytics",
+          "subtitle": "Interaktive Demo · Beispieldaten",
+          "slots": {
+            "header": [
+              {
+                "type": "Tabs",
+                "options": [
+                  {
+                    "id": "7d",
+                    "label": "7 Tage"
+                  },
+                  {
+                    "id": "30d",
+                    "label": "30 Tage"
+                  }
+                ],
+                "value": {
+                  "$state": "period"
+                },
+                "onChange": {
+                  "set": "period"
+                }
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "Grid",
+              "columns": 2,
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Besucher",
+                  "value": {
+                    "$computed": "visitors"
+                  },
+                  "delta": {
+                    "$computed": "visitorsDelta"
+                  },
+                  "deltaFormat": "percent"
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Conversion Rate",
+                  "value": {
+                    "$computed": "conversion"
+                  },
+                  "delta": {
+                    "$computed": "conversionDelta"
+                  },
+                  "deltaLabel": "PP"
+                }
+              ]
+            },
+            {
+              "type": "Surface",
+              "title": "Besucherentwicklung",
+              "slots": {
+                "header": [
+                  {
+                    "type": "Badge",
+                    "text": "Live-Ansicht"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "Chart",
+                  "kind": "line",
+                  "data": {
+                    "$computed": "rows"
+                  },
+                  "x": "date",
+                  "series": [
+                    {
+                      "field": "visitors",
+                      "label": "Besucher"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Divider"
+            },
+            {
+              "type": "Stack",
+              "gap": "small",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "justify": "between",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Kanäle",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Caption",
+                      "text": "Anteil am Traffic"
+                    }
+                  ]
+                },
+                {
+                  "type": "Chart",
+                  "kind": "bar",
+                  "horizontal": true,
+                  "data": {
+                    "$data": "channels"
+                  },
+                  "x": "name",
+                  "series": [
+                    {
+                      "field": "share",
+                      "label": "Anteil"
+                    }
+                  ],
+                  "valueFormat": "percent"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "pick 30 Tage",
+          "click": {
+            "text": "30 Tage"
+          }
+        },
+        {
+          "name": "back to 7 Tage",
+          "click": {
+            "text": "7 Tage"
+          }
+        }
+      ]
+    },
+    {
+      "name": "layout-element-overview-grid",
+      "description": "Reference 11: a two-column Grid of six Surfaces, each an icon, a bold title and a muted description; drops to one column on a narrow pane.",
+      "payload": {
+        "title": "Welche weiteren Elemente sind möglich?",
+        "view": {
+          "type": "Grid",
+          "columns": 2,
+          "children": [
+            {
+              "type": "Surface",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "tag",
+                      "tone": "muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Produktkarten",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "Produktfotos, Preise, Händler und Vergleiche",
+                      "tone": "muted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Surface",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "calendar",
+                      "tone": "muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Kalender & Planung",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "Datumswahl, Filter und Terminansichten",
+                      "tone": "muted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Surface",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "directions",
+                      "tone": "muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Reiseplaner",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "Routen mit mehreren Stopps auf Karten",
+                      "tone": "muted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Surface",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "barChart",
+                      "tone": "muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Daten-Dashboards",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "KPIs, Diagramme und dynamische Tabellen",
+                      "tone": "muted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Surface",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "photo",
+                      "tone": "muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Medien",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "Fotos, Galerien und verlinkte Videos",
+                      "tone": "muted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Surface",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Stack",
+                  "direction": "row",
+                  "children": [
+                    {
+                      "type": "Icon",
+                      "name": "edit",
+                      "tone": "muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Text",
+                      "text": "Interaktive Oberflächen",
+                      "weight": "bold"
+                    },
+                    {
+                      "type": "Text",
+                      "text": "Formulare, Auswahlfelder und Aktionen",
+                      "tone": "muted"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "layout-analytics-studio",
+      "description": "Reference 52 (the layout parts): the raised Surface with its header badge, a nested Surface with the 'Methodik' Popover at the end of its title row, a three-column KPI Grid, the channel Carousel (two slides visible, next arrow) repeated over a dataset with $item, and the action row Stack.",
+      "payload": {
+        "state": {
+          "period": "7d"
+        },
+        "data": {
+          "channels": [
+            {
+              "name": "Organic",
+              "visitors": 4190,
+              "share": "51,1 % Anteil"
+            },
+            {
+              "name": "Paid",
+              "visitors": 2620,
+              "share": "32,0 % Anteil"
+            },
+            {
+              "name": "Direct",
+              "visitors": 1390,
+              "share": "16,9 % Anteil"
+            }
+          ]
+        },
+        "computed": {
+          "visitors": "period == \"7d\" ? 8200 : 32600",
+          "conversions": "period == \"7d\" ? 354 : 1402"
+        },
+        "actions": {
+          "copyJson": {
+            "type": "copy",
+            "value": {
+              "$data": "channels"
+            }
+          },
+          "reset": {
+            "type": "resetState"
+          }
+        },
+        "view": {
+          "type": "Surface",
+          "title": "Analytics Studio",
+          "subtitle": "Interaktiver Komponenten-Test · Demo-Daten",
+          "slots": {
+            "header": [
+              {
+                "type": "Badge",
+                "text": "Interaktiv",
+                "tone": "success"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "Surface",
+              "title": "Filter & State",
+              "slots": {
+                "header": [
+                  {
+                    "type": "Popover",
+                    "label": "Methodik",
+                    "text": "Besucher werden anhand von Kanal und Skalierung berechnet. Der Benchmark beträgt 90 Prozent. Das Datum dient als Beschriftung."
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "Tabs",
+                  "label": "Zeitraum",
+                  "options": [
+                    {
+                      "id": "7d",
+                      "label": "7 Tage"
+                    },
+                    {
+                      "id": "4w",
+                      "label": "4 Wochen"
+                    }
+                  ],
+                  "value": {
+                    "$state": "period"
+                  },
+                  "onChange": {
+                    "set": "period"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Grid",
+              "columns": 3,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Besucher",
+                  "value": {
+                    "$computed": "visitors"
+                  },
+                  "detail": "Alle Kanäle"
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Conversions",
+                  "value": {
+                    "$computed": "conversions"
+                  },
+                  "detail": "Simuliert"
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Conversion",
+                  "value": "4,32 %",
+                  "detail": "Gewichtet"
+                }
+              ]
+            },
+            {
+              "type": "Stack",
+              "gap": "small",
+              "children": [
+                {
+                  "type": "Text",
+                  "text": "Kanal-Karussell",
+                  "weight": "bold"
+                },
+                {
+                  "type": "Carousel",
+                  "label": "Besucher je Kanal",
+                  "visibleItems": 2,
+                  "items": {
+                    "$data": "channels"
+                  },
+                  "children": [
+                    {
+                      "type": "KpiTile",
+                      "label": {
+                        "$item": "name"
+                      },
+                      "value": {
+                        "$item": "visitors"
+                      },
+                      "unit": "Besucher",
+                      "detail": {
+                        "$item": "share"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Stack",
+              "direction": "row",
+              "gap": "small",
+              "children": [
+                {
+                  "type": "Button",
+                  "label": "JSON kopieren",
+                  "icon": "copy",
+                  "onClick": {
+                    "action": "copyJson"
+                  }
+                },
+                {
+                  "type": "Spacer",
+                  "grow": true
+                },
+                {
+                  "type": "Button",
+                  "label": "Reset",
+                  "icon": "reset",
+                  "variant": "secondary",
+                  "onClick": {
+                    "action": "reset"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "open Methodik",
+          "click": {
+            "text": "Methodik"
+          }
+        },
+        {
+          "name": "close Methodik",
+          "press": "Escape"
+        },
+        {
+          "name": "next channel slide",
+          "click": {
+            "selector": "button[aria-label='Show the next slides']"
+          }
+        },
+        {
+          "name": "pick 4 Wochen",
+          "click": {
+            "text": "4 Wochen"
+          }
+        },
+        {
+          "name": "reset",
+          "click": {
+            "text": "Reset"
+          }
+        }
+      ]
+    },
+    {
+      "name": "layout-pressable-channel-tiles",
+      "description": "Pressable (catalog name list; tiles of reference 52 made clickable): three channel tiles in a Grid, each a Pressable that writes its channel into state; the selection ring follows a computed comparison and a Quote shows the pick.",
+      "payload": {
+        "state": {
+          "channel": "Organic"
+        },
+        "data": {
+          "channels": [
+            {
+              "name": "Organic",
+              "visitors": 4190,
+              "share": "51,1 % Anteil"
+            },
+            {
+              "name": "Paid",
+              "visitors": 2620,
+              "share": "32,0 % Anteil"
+            },
+            {
+              "name": "Direct",
+              "visitors": 1390,
+              "share": "16,9 % Anteil"
+            }
+          ]
+        },
+        "computed": {
+          "isOrganic": "channel == \"Organic\"",
+          "isPaid": "channel == \"Paid\"",
+          "isDirect": "channel == \"Direct\""
+        },
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "Grid",
+              "columns": 3,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "Pressable",
+                  "onClick": {
+                    "set": "channel"
+                  },
+                  "value": "Organic",
+                  "isSelected": {
+                    "$computed": "isOrganic"
+                  },
+                  "label": "Organic auswählen",
+                  "children": [
+                    {
+                      "type": "KpiTile",
+                      "label": "Organic",
+                      "value": 4190,
+                      "unit": "Besucher",
+                      "detail": "51,1 % Anteil"
+                    }
+                  ]
+                },
+                {
+                  "type": "Pressable",
+                  "onClick": {
+                    "set": "channel"
+                  },
+                  "value": "Paid",
+                  "isSelected": {
+                    "$computed": "isPaid"
+                  },
+                  "label": "Paid auswählen",
+                  "children": [
+                    {
+                      "type": "KpiTile",
+                      "label": "Paid",
+                      "value": 2620,
+                      "unit": "Besucher",
+                      "detail": "32,0 % Anteil"
+                    }
+                  ]
+                },
+                {
+                  "type": "Pressable",
+                  "onClick": {
+                    "set": "channel"
+                  },
+                  "value": "Direct",
+                  "isSelected": {
+                    "$computed": "isDirect"
+                  },
+                  "label": "Direct auswählen",
+                  "children": [
+                    {
+                      "type": "KpiTile",
+                      "label": "Direct",
+                      "value": 1390,
+                      "unit": "Besucher",
+                      "detail": "16,9 % Anteil"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Quote",
+              "text": {
+                "$state": "channel"
+              },
+              "attribution": "Ausgewählter Kanal"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "pick Paid",
+          "click": {
+            "text": "Paid"
+          }
+        },
+        {
+          "name": "pick Direct",
+          "click": {
+            "text": "Direct"
+          }
+        }
+      ]
+    },
+    {
+      "name": "layout-quote-flow-divider",
+      "description": "Quote, Flow, Divider and Spacer (catalog name list, no screenshot): a patient review of the shared test customer as a quotation with attribution and source link, a hairline, and a Flow of topic badges that wraps on a narrow pane.",
+      "payload": {
+        "view": {
+          "type": "Surface",
+          "title": "Was Patienten sagen",
+          "children": [
+            {
+              "type": "Quote",
+              "text": "Als Angstpatientin hatte ich große Sorge vor dem Implantat. Dr. Hoffmann hat jeden Schritt erklärt, und die Wartezeit war kurz.",
+              "attribution": "Sabine K., 5 Sterne",
+              "source": {
+                "name": "Google-Bewertungen",
+                "url": "https://www.google.com/maps/search/?api=1&query=Zahnarztpraxis+Dr.+Lena+Hoffmann+Wilhelmsh%C3%B6her+Allee+120+Kassel"
+              }
+            },
+            {
+              "type": "Divider"
+            },
+            {
+              "type": "Flow",
+              "children": [
+                {
+                  "type": "Badge",
+                  "text": "Einfühlsam",
+                  "tone": "success"
+                },
+                {
+                  "type": "Badge",
+                  "text": "Kurze Wartezeit",
+                  "tone": "success"
+                },
+                {
+                  "type": "Badge",
+                  "text": "Implantate",
+                  "tone": "info"
+                },
+                {
+                  "type": "Badge",
+                  "text": "Parkplatz knapp",
+                  "tone": "warning"
+                },
+                {
+                  "type": "Badge",
+                  "text": "Prophylaxe",
+                  "tone": "neutral"
+                }
+              ]
+            },
+            {
+              "type": "Spacer",
+              "size": "small"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "layout-carousel-loading",
+      "description": "Loading: the Carousel repeats over a $from tool result that is not stored yet — skeleton slides under the title.",
+      "payload": {
+        "view": {
+          "type": "Surface",
+          "title": "Kanal-Karussell",
+          "children": [
+            {
+              "type": "Carousel",
+              "items": {
+                "$from": {
+                  "toolCall": "call_1",
+                  "path": "$.rows"
+                }
+              },
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": {
+                    "$item": "name"
+                  },
+                  "value": {
+                    "$item": "visitors"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "layout-empty",
+      "description": "Empty: a Stack without children renders nothing and reports empty.",
+      "payload": {
+        "view": {
+          "type": "Stack"
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    }
+  ]
+}

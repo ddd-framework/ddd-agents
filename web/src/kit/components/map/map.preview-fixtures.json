@@ -1,0 +1,339 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "map-business-pins",
+      "description": "Map node — three cafés with rating pins and labels, no carousel; the expand control opens the full-screen map with the list (ChatGPT 07 → 02b).",
+      "payload": {
+        "title": "Cafés in Münster",
+        "view": {
+          "type": "Map",
+          "title": "Cafés in Münster",
+          "points": [
+            {
+              "label": "KAWENTSMANNs CAFE & TAGESBAR",
+              "lat": 51.9632,
+              "lng": 7.6268,
+              "rating": 4.7,
+              "subtitle": "Café",
+              "detail": "Closed",
+              "detailTone": "negative"
+            },
+            {
+              "label": "roestbar Rothenburg",
+              "lat": 51.9594,
+              "lng": 7.6262,
+              "rating": 4.6,
+              "subtitle": "Café",
+              "detail": "Closed",
+              "detailTone": "negative"
+            },
+            {
+              "label": "1648 CAFÉ | LOUNGE | GASTRONOMIE",
+              "lat": 51.9606,
+              "lng": 7.629,
+              "rating": 3.9,
+              "subtitle": "Restaurant",
+              "detail": "Closed",
+              "detailTone": "negative"
+            }
+          ],
+          "carousel": "hidden",
+          "minHeight": 420
+        }
+      },
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "open-full-screen",
+          "click": {
+            "selector": "[data-testid=map-expand]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "map-business-location",
+      "description": "Map node — five restaurants with photo cards in the bottom carousel; a card click selects the point and opens its entity detail panel (ChatGPT 42, 21, 21b).",
+      "payload": {
+        "actions": {
+          "openRestaurant1": {
+            "type": "openEntity",
+            "ref": "call_maps_1:business:0",
+            "entity": {
+              "entityType": "business",
+              "entityId": "301",
+              "agentSpaceId": 7
+            }
+          },
+          "openRestaurant2": {
+            "type": "openEntity",
+            "ref": "call_maps_1:business:1",
+            "entity": {
+              "entityType": "business",
+              "entityId": "302",
+              "agentSpaceId": 7
+            }
+          },
+          "openRestaurant3": {
+            "type": "openEntity",
+            "ref": "call_maps_1:business:2",
+            "entity": {
+              "entityType": "business",
+              "entityId": "303",
+              "agentSpaceId": 7
+            }
+          },
+          "openRestaurant4": {
+            "type": "openEntity",
+            "ref": "call_maps_1:business:3",
+            "entity": {
+              "entityType": "business",
+              "entityId": "304",
+              "agentSpaceId": 7
+            }
+          },
+          "openRestaurant5": {
+            "type": "openEntity",
+            "ref": "call_maps_1:business:4",
+            "entity": {
+              "entityType": "business",
+              "entityId": "305",
+              "agentSpaceId": 7
+            }
+          }
+        },
+        "view": {
+          "type": "Map",
+          "title": "Restaurants in Münster's old town",
+          "points": [
+            {
+              "label": "Kleiner Kiepenkerl",
+              "lat": 51.9631,
+              "lng": 7.6264,
+              "rating": 4.3,
+              "subtitle": "Restaurant",
+              "detail": "Closed",
+              "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjN2EzYjJlIi8+PHJlY3QgeD0iOCIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSIyNiIgcng9IjQiIGZpbGw9IiNjOWEyN2UiLz48Y2lyY2xlIGN4PSI0NiIgY3k9IjE4IiByPSI4IiBmaWxsPSIjYzlhMjdlIi8+PC9zdmc+",
+              "action": "openRestaurant1",
+              "detailTone": "negative"
+            },
+            {
+              "label": "Großer Kiepenkerl Gasthaus",
+              "lat": 51.9636,
+              "lng": 7.6255,
+              "rating": 4.2,
+              "subtitle": "Restaurant",
+              "detail": "Closed",
+              "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjNWI0NjM2Ii8+PHJlY3QgeD0iOCIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSIyNiIgcng9IjQiIGZpbGw9IiNkOGMzYTUiLz48Y2lyY2xlIGN4PSI0NiIgY3k9IjE4IiByPSI4IiBmaWxsPSIjZDhjM2E1Ii8+PC9zdmc+",
+              "action": "openRestaurant2",
+              "detailTone": "negative"
+            },
+            {
+              "label": "Altes Gasthaus Leve",
+              "lat": 51.9617,
+              "lng": 7.6311,
+              "rating": 4.3,
+              "subtitle": "Restaurant",
+              "detail": "Closed",
+              "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM2U0YTNkIi8+PHJlY3QgeD0iOCIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSIyNiIgcng9IjQiIGZpbGw9IiNiNWEzNmIiLz48Y2lyY2xlIGN4PSI0NiIgY3k9IjE4IiByPSI4IiBmaWxsPSIjYjVhMzZiIi8+PC9zdmc+",
+              "action": "openRestaurant3",
+              "detailTone": "negative"
+            },
+            {
+              "label": "Gasthaus Stuhlmacher",
+              "lat": 51.9619,
+              "lng": 7.6283,
+              "rating": 4.1,
+              "subtitle": "Restaurant",
+              "detail": "Closed",
+              "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjNGEzYjUyIi8+PHJlY3QgeD0iOCIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSIyNiIgcng9IjQiIGZpbGw9IiNjN2IzZDEiLz48Y2lyY2xlIGN4PSI0NiIgY3k9IjE4IiByPSI4IiBmaWxsPSIjYzdiM2QxIi8+PC9zdmc+",
+              "action": "openRestaurant4",
+              "detailTone": "negative"
+            },
+            {
+              "label": "Mocca d'or",
+              "lat": 51.9603,
+              "lng": 7.6266,
+              "rating": 3.6,
+              "subtitle": "Restaurant",
+              "detail": "Closed",
+              "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjMmYzZDRmIi8+PHJlY3QgeD0iOCIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSIyNiIgcng9IjQiIGZpbGw9IiM5ZmI0YzciLz48Y2lyY2xlIGN4PSI0NiIgY3k9IjE4IiByPSI4IiBmaWxsPSIjOWZiNGM3Ii8+PC9zdmc+",
+              "action": "openRestaurant5",
+              "detailTone": "negative"
+            }
+          ],
+          "minHeight": 330
+        },
+        "title": "Business location map — five restaurants in Münster"
+      },
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "select-first-card",
+          "click": {
+            "selector": "[data-testid=map-point-card]"
+          }
+        },
+        {
+          "name": "open-full-screen",
+          "click": {
+            "selector": "[data-testid=map-expand]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "map-route",
+      "description": "Map node — a route Münster → Köln: the travel-mode badge, the road line, numbered stops, the duration chip, the two stop cards and the distance / usual drive time tiles under the map (ChatGPT 40).",
+      "payload": {
+        "title": "Route Münster → Köln",
+        "view": {
+          "type": "Stack",
+          "gap": "medium",
+          "children": [
+            {
+              "type": "Stack",
+              "direction": "row",
+              "gap": "small",
+              "align": "center",
+              "children": [
+                {
+                  "type": "Badge",
+                  "text": "Car trip"
+                },
+                {
+                  "type": "Text",
+                  "text": "Münster to Köln",
+                  "tone": "muted"
+                }
+              ]
+            },
+            {
+              "type": "Map",
+              "title": "Münster → Köln",
+              "points": [
+                {
+                  "label": "48143 Münster, Nordrhein-Westfalen",
+                  "lat": 51.9607,
+                  "lng": 7.6261,
+                  "subtitle": "Start here"
+                },
+                {
+                  "label": "Köln",
+                  "lat": 50.9375,
+                  "lng": 6.9603,
+                  "subtitle": "Car ~1 h 36 min",
+                  "detail": "Visitor center",
+                  "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjNGI1ZDZiIi8+PHJlY3QgeD0iOCIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSIyNiIgcng9IjQiIGZpbGw9IiNjNGNjZDMiLz48Y2lyY2xlIGN4PSI0NiIgY3k9IjE4IiByPSI4IiBmaWxsPSIjYzRjY2QzIi8+PC9zdmc+"
+                }
+              ],
+              "route": true,
+              "routePath": [
+                {
+                  "lat": 51.9607,
+                  "lng": 7.6261
+                },
+                {
+                  "lat": 51.8336,
+                  "lng": 7.5838
+                },
+                {
+                  "lat": 51.6597,
+                  "lng": 7.5072
+                },
+                {
+                  "lat": 51.5136,
+                  "lng": 7.4653
+                },
+                {
+                  "lat": 51.3946,
+                  "lng": 7.329
+                },
+                {
+                  "lat": 51.2562,
+                  "lng": 7.1508
+                },
+                {
+                  "lat": 51.0936,
+                  "lng": 7.0305
+                },
+                {
+                  "lat": 50.9375,
+                  "lng": 6.9603
+                }
+              ],
+              "routeLabel": "1.6 hours",
+              "minHeight": 350
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Route length (ADAC)",
+                  "value": 152,
+                  "format": "number",
+                  "unit": "km",
+                  "detail": "approx.",
+                  "source": "adac.de"
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Usual drive time",
+                  "value": "1 h 47 min",
+                  "detail": "without traffic jams",
+                  "source": "adac.de"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "select-destination",
+          "click": {
+            "selector": "[data-testid=map-point-card][data-point-key=point-1]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "map-empty",
+      "description": "Map node without points — one muted line, the block reports empty.",
+      "payload": {
+        "view": {
+          "type": "Map",
+          "points": []
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "map-loading",
+      "description": "Map node whose points wait for a tool result ($from pending) — the frame-shaped skeleton.",
+      "payload": {
+        "view": {
+          "type": "Map",
+          "points": {
+            "$from": {
+              "toolCall": "call_maps_1",
+              "path": "$.rows",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    }
+  ]
+}

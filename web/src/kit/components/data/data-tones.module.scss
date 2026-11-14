@@ -1,0 +1,25 @@
+// The judgement colours of the data nodes: text in the 900 tone in light
+// mode, graphics in the 500 fill, both through light-dark() so they read on the dark scheme too.
+.textNeutral {
+  color: var(--agents-fg);
+}
+
+.textMuted {
+  color: var(--agents-fg-light);
+}
+
+.textSuccess {
+  color: light-dark(var(--agents-success-900), var(--agents-success-500));
+}
+
+.textWarning {
+  color: light-dark(var(--agents-warning-900), var(--agents-warning-500));
+}
+
+.textDanger {
+  color: light-dark(var(--agents-danger-900), var(--agents-danger-500));
+}
+
+.textInfo {
+  color: light-dark(var(--agents-info-900), var(--agents-info-500));
+}

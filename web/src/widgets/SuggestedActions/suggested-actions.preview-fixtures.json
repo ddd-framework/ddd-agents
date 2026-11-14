@@ -1,0 +1,19 @@
+{
+  "wireName": "SuggestedActions",
+  "fixtures": [
+    {
+      "name": "render-report-error",
+      "description": "A fence carries no options attribute, so the widget reports failed INVALID_PROP and renders nothing.",
+      "payload": {
+        "options": [
+          {
+            "displayText": "Yes",
+            "userAction": "Yes"
+          }
+        ]
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

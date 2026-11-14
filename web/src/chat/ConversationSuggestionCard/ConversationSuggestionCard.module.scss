@@ -1,0 +1,52 @@
+@import "../../styles/spacings";
+@import "../../styles/surfaces";
+@import "../conversation-tokens";
+
+// Branded card: the GlobalStateComponent root keeps the gradient and radius and draws the hover tint; the
+// button inside is the click target and carries the padding.
+.suggestionCard {
+  position: relative;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  background: linear-gradient(0deg, var(--agents-assistant-400, #00B16D) 0%, var(--agents-assistant-400, #00B16D) 100%);
+  backdrop-filter: blur($x1);
+  width: 100%;
+  max-width: $chat-suggestion-card-max-width;
+  min-height: $chat-suggestion-card-min-height;
+
+  svg path {
+    fill: currentColor;
+  }
+}
+
+.suggestionCardButton {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: $x2;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: inherit;
+  padding: $card-padding;
+  padding-bottom: $x4;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  // Inset: the card root clips overflow, an outside outline would be cut off.
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-on-dark);
+    outline-offset: -$x0_25;
+    border-radius: $card-radius;
+  }
+}
+
+.arrowIcon {
+  position: absolute;
+  right: $card-padding;
+  bottom: $x2;
+}

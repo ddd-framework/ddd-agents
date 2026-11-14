@@ -1,0 +1,73 @@
+{
+  "wireName": "CurrencyConverter",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "100 GBP to USD at the rate of 25 October 2026 — the approved design's reference conversion; the amount is edited and the currencies swapped.",
+      "payload": {
+        "fromCurrency": "GBP",
+        "toCurrency": "USD",
+        "amount": 100,
+        "rate": 1.31842,
+        "rateDate": "2026-10-25"
+      },
+      "locale": "en",
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "edit-amount",
+          "fill": {
+            "selector": "[data-testid='currency-converter-amount'] input",
+            "value": "250"
+          }
+        },
+        {
+          "name": "swap",
+          "click": {
+            "selector": "[data-testid='currency-converter-swap']"
+          }
+        }
+      ]
+    },
+    {
+      "name": "english-large-amount",
+      "description": "A large GBP amount in JPY (a currency without decimals), in English formatting, to check grouping and the fit of a long hero number.",
+      "payload": {
+        "fromCurrency": "GBP",
+        "toCurrency": "JPY",
+        "amount": 1250000,
+        "rate": 201.3846,
+        "rateDate": "2026-09-30"
+      },
+      "locale": "en",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "german",
+      "description": "The reference conversion in German: currency names, grouping and decimal marks and the date follow the UI language.",
+      "payload": {
+        "fromCurrency": "GBP",
+        "toCurrency": "USD",
+        "amount": 100,
+        "rate": 1.31842,
+        "rateDate": "2026-10-25"
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "invalid",
+      "description": "A block without a rate: the widget renders nothing and reports failed (INVALID_PROP).",
+      "payload": {
+        "fromCurrency": "GBP",
+        "toCurrency": "USD",
+        "amount": 100
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+@import "../../../../styles/spacings";
+
+// A funnel: one stage under the other, each bar centered on the full width so the stages narrow towards the end.
+.stages {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+// The stage's name and value centered over its bar, like the bars themselves.
+.stageHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: $x1;
+  min-width: 0;
+  text-align: center;
+}
+
+// A long stage name wraps; the figure never does — over the component library's Text's own wrapping class, hence the parent in the
+// selector.
+.stageHead .label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stage .figure {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// The bar in the first chart colour, centered, as wide as the stage's share of the largest stage.
+.bar {
+  display: block;
+  align-self: center;
+  width: var(--agents-chart-funnel-fraction, 0%);
+  height: $x3;
+  border-radius: $x1;
+  background: var(--agents-chart-01);
+}
+
+// The conversion from the stage before, centered between the two bars.
+.conversion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $x0_5;
+  color: var(--agents-fg-light);
+}
+
+.conversionIcon {
+  font-size: $x2;
+  color: var(--agents-fg-light);
+}

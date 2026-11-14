@@ -1,0 +1,37 @@
+@import "../../styles/spacings";
+
+// Hidden resting state: sunk toward the input, shrunken, transparent. Fast ease-in exit.
+.scrollToLatest {
+  opacity: 0;
+  transform: translateY($x1_5) scale(0.7);
+  pointer-events: none;
+  // visibility flips AFTER the exit transition ends, so the hidden button is untabbable
+  // but still fades out visibly.
+  visibility: hidden;
+  transition:
+    opacity 160ms ease-in,
+    transform 160ms ease-in,
+    visibility 0s linear 160ms;
+}
+
+// Visible state: springy pop-up (overshoot cubic-bezier) rising from the input.
+.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity 200ms ease-out,
+    transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollToLatest,
+  .visible {
+    transition:
+      opacity 150ms ease,
+      visibility 0s linear 150ms;
+    transform: none;
+  }
+}

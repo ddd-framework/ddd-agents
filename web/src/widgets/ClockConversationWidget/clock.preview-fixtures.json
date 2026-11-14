@@ -1,0 +1,76 @@
+{
+  "wireName": "Clock",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "One clock — the time in Münster for an owner in Berlin (ChatGPT ClockWidget, ref 36): digital and analog time, place with zone abbreviation, today with +0 h.",
+      "payload": { "clocks": [{ "timeZone": "Europe/Berlin", "label": "Münster, Deutschland" }] },
+      "settings": { "location": { "location": { "timezone": "Europe/Berlin" } } },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "world-clock",
+      "description": "The world clock of ref 37 — Berlin, New York, Tokio for an owner in Berlin: one row per place, yesterday / today with the hour difference.",
+      "payload": {
+        "title": "Berlin, New York, Tokio",
+        "clocks": [
+          { "timeZone": "Europe/Berlin", "label": "Berlin, Deutschland" },
+          { "timeZone": "America/New_York", "label": "New York, NY, USA" },
+          { "timeZone": "Asia/Tokyo", "label": "Tokio, Japan" }
+        ]
+      },
+      "settings": { "location": { "location": { "timezone": "Europe/Berlin" } } },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "world-clock-12h",
+      "description": "The same world clock in 12-hour format for an English-speaking owner in New York, ChatGPT's own field names (tz_name, location) as a weak model would copy them.",
+      "payload": {
+        "time_format": "12h",
+        "zones": [
+          { "tz_name": "America/New_York", "location": "New York, NY, USA", "tz_alias": "EDT" },
+          { "tz_name": "Asia/Kolkata", "location": "Bengaluru, India" },
+          { "tz_name": "Australia/Sydney", "location": "Sydney, Australia" }
+        ]
+      },
+      "settings": { "location": { "location": { "timezone": "America/New_York" } } },
+      "locale": "en",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "unknown-zone",
+      "description": "One valid and one unknown zone id: the unknown one is dropped and reported (failed INVALID_PROP), the valid clock still renders.",
+      "payload": {
+        "clocks": [
+          { "timeZone": "Asia/Tokyo", "label": "Tokio, Japan" },
+          { "timeZone": "JST", "label": "Osaka" }
+        ]
+      },
+      "settings": { "location": { "location": { "timezone": "Europe/Berlin" } } },
+      "locale": "de",
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "all-unknown",
+      "description": "Only unknown zone ids: one muted line, reported failed.",
+      "payload": { "clocks": [{ "timeZone": "Mars/Olympus_Mons", "label": "Olympus Mons" }] },
+      "locale": "de",
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "empty",
+      "description": "A block without any clock: one muted line, reported empty.",
+      "payload": { "clocks": [] },
+      "locale": "de",
+      "expectedState": "empty",
+      "width": 528
+    }
+  ]
+}

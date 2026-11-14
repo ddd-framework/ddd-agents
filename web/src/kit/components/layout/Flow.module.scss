@@ -1,0 +1,28 @@
+@import "./layout-gaps";
+
+// Small items that flow like words: each keeps its own width, lines wrap by the available width.
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+
+  > * {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.alignStart {
+  align-items: flex-start;
+}
+
+.alignCenter {
+  align-items: center;
+}
+
+.alignEnd {
+  align-items: flex-end;
+}
+
+@include layout-gap-classes;

@@ -1,0 +1,88 @@
+{
+  "wireName": "ComposedView",
+  "description": "The owner's answer on a Form node of a ComposedView tree (the Form component components/form/Form.composed.tsx and the backend node class FormComposedViewNode). A submit posts a FRONTEND_WIDGET_CLICK signal whose first line is `ComposedView form \"<form name>\" submitted:` followed by one `- <field name>: <value>` line per field (the field is a state name; true/false for a boolean, an empty value after the colon for an empty field; inside a value a backslash is written `\\\\` and a line break `\\n`, other control characters become a space); the decline control posts `ComposedView form \"<form name>\" declined.` The form `name` identifies the form (a tree may carry several); only a Form node the reader KEPT counts, and a signal naming a form the tree does not carry is no reaction to it. `fromState` is the state the frontend composer composed the sentence from (`formFields` the fields it sent, in order). The backend reader is ComposedViewConversationWidget (isReactionToThisWidget / readAnswer / isDeclined, ComposedViewFormSubmission). A stored contract: the wording never changes without the readers accepting both.",
+  "exampleBlocks": [
+    "```widget\n{\"type\":\"ComposedView\",\"title\":\"Opening hours on holidays\",\"state\":{\"closed\":false},\"view\":{\"type\":\"Form\",\"name\":\"holidayHours\",\"children\":[{\"type\":\"Checkbox\",\"label\":\"Closed on holidays\",\"checked\":{\"$state\":\"closed\"},\"onChange\":{\"set\":\"closed\"}}]}}\n```",
+    "```widget\n{\"type\":\"ComposedView\",\"state\":{\"email\":\"\",\"message\":\"\"},\"view\":{\"type\":\"Stack\",\"children\":[{\"type\":\"Form\",\"name\":\"contact\",\"children\":[{\"type\":\"Input\",\"label\":\"E-mail\",\"value\":{\"$state\":\"email\"},\"onChange\":{\"set\":\"email\"}}]},{\"type\":\"Form\",\"name\":\"feedback\",\"children\":[{\"type\":\"Textarea\",\"label\":\"Your feedback\",\"value\":{\"$state\":\"message\"},\"onChange\":{\"set\":\"message\"}}]}]}}\n```",
+    "```widget\n{\"type\":\"ComposedView\",\"state\":{\"message\":\"\",\"email\":\"\"},\"view\":{\"type\":\"Form\",\"name\":\"contactRequest\",\"title\":\"Your question to the team\",\"submitLabel\":\"Send question\",\"declineLabel\":\"Not now\",\"requiredFields\":[\"message\"],\"children\":[{\"type\":\"Textarea\",\"label\":\"Your question\",\"value\":{\"$state\":\"message\"},\"onChange\":{\"set\":\"message\"}},{\"type\":\"Input\",\"label\":\"E-mail for the answer\",\"value\":{\"$state\":\"email\"},\"onChange\":{\"set\":\"email\"}}]}}\n```"
+  ],
+  "exampleReactions": [
+    {
+      "exampleBlock": 0,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "ComposedView form \"holidayHours\" submitted:\n- closed: true",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedFieldValues": {
+        "closed": "true"
+      },
+      "fromState": {
+        "closed": true
+      },
+      "formFields": [
+        "closed"
+      ],
+      "formName": "holidayHours"
+    },
+    {
+      "exampleBlock": 0,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "ComposedView form \"holidayHours\" declined.",
+      "expectsAnswer": false,
+      "expectsDecline": true,
+      "formFields": [],
+      "formName": "holidayHours"
+    },
+    {
+      "exampleBlock": 1,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "ComposedView form \"feedback\" submitted:\n- message: Great service",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedFieldValues": {
+        "message": "Great service"
+      },
+      "fromState": {
+        "message": "Great service"
+      },
+      "formFields": [
+        "message"
+      ],
+      "formName": "feedback"
+    },
+    {
+      "exampleBlock": 2,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "ComposedView form \"contactRequest\" submitted:\n- message: Do you open on holidays?\\nAnd on Sundays? C:\\\\Temp\n- email:",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "fromState": {
+        "message": "Do you open on holidays?\nAnd on Sundays? C:\\Temp",
+        "email": ""
+      },
+      "formFields": [
+        "message",
+        "email"
+      ],
+      "expectedFieldValues": {
+        "message": "Do you open on holidays?\nAnd on Sundays? C:\\Temp",
+        "email": ""
+      },
+      "formName": "contactRequest"
+    },
+    {
+      "exampleBlock": 2,
+      "messageType": "SIGNAL",
+      "signalSource": "FRONTEND_WIDGET_CLICK",
+      "text": "ComposedView form \"contactRequest\" declined.",
+      "expectsAnswer": false,
+      "expectsDecline": true,
+      "formFields": [],
+      "formName": "contactRequest"
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "video-card",
+      "description": "One stub component: a single Video node (the core declares its schema, lane L4 builds its component) — the ChatGPT video reference.",
+      "payload": {
+        "view": {
+          "type": "Video",
+          "title": "Münster walking tour — old town and Prinzipalmarkt",
+          "videoId": "x5-yoDUoz5k",
+          "thumbnail": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiA5Ij48cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iOSIgZmlsbD0iIzQ0NTU2NiIvPjxwb2x5Z29uIHBvaW50cz0iNiwyIDYsNyAxMSw0LjUiIGZpbGw9IiNmZmYiLz48L3N2Zz4=",
+          "durationSeconds": 1418,
+          "channel": "Walking Germany"
+        }
+      },
+      "stubComposedViewComponents": true,
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "tree",
+      "description": "A ComposedView tree with state, inline rows, a computed value and a Video root rendered through the preview stub — the richest tree the core can render before the lanes ship their layout and data components.",
+      "payload": {
+        "title": "Videos about Münster",
+        "state": {
+          "period": "7d"
+        },
+        "data": {
+          "rows": [
+            {
+              "x": "Mo",
+              "visits": 980
+            },
+            {
+              "x": "Di",
+              "visits": 1120
+            }
+          ]
+        },
+        "computed": {
+          "total": "sum(rows, r => r.visits)"
+        },
+        "view": {
+          "type": "Video",
+          "title": "Münster in 4K — a summer evening",
+          "url": "https://www.youtube.com/watch?v=x5-yoDUoz5k",
+          "durationSeconds": 734,
+          "channel": "City Walks",
+          "source": {
+            "name": "YouTube",
+            "url": "https://www.youtube.com"
+          }
+        }
+      },
+      "stubComposedViewComponents": true,
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "kit-example",
+      "description": "The kit's taught example (ComposedViewKitSpec::JSON_FENCE_SPEC, round 10 K1) with its two $from bindings resolved: Tabs switch a computed between the two datasets, a Repeat of TableRows shows each channel with a sparkline over its own days.",
+      "payload": {
+        "title": "Visits per channel",
+        "state": {
+          "period": "7d"
+        },
+        "data": {
+          "d7": {
+            "$from": {
+              "toolCall": "call_7",
+              "path": "$.rows[*]",
+              "state": "resolved",
+              "value": [
+                {
+                  "channel": "Google Search",
+                  "days": [
+                    {
+                      "day": "Mon",
+                      "visits": 120
+                    },
+                    {
+                      "day": "Tue",
+                      "visits": 130
+                    },
+                    {
+                      "day": "Wed",
+                      "visits": 139
+                    },
+                    {
+                      "day": "Thu",
+                      "visits": 149
+                    },
+                    {
+                      "day": "Fri",
+                      "visits": 158
+                    },
+                    {
+                      "day": "Sat",
+                      "visits": 168
+                    },
+                    {
+                      "day": "Sun",
+                      "visits": 178
+                    }
+                  ]
+                },
+                {
+                  "channel": "Google Maps",
+                  "days": [
+                    {
+                      "day": "Mon",
+                      "visits": 80
+                    },
+                    {
+                      "day": "Tue",
+                      "visits": 86
+                    },
+                    {
+                      "day": "Wed",
+                      "visits": 93
+                    },
+                    {
+                      "day": "Thu",
+                      "visits": 99
+                    },
+                    {
+                      "day": "Fri",
+                      "visits": 106
+                    },
+                    {
+                      "day": "Sat",
+                      "visits": 112
+                    },
+                    {
+                      "day": "Sun",
+                      "visits": 118
+                    }
+                  ]
+                },
+                {
+                  "channel": "Direct",
+                  "days": [
+                    {
+                      "day": "Mon",
+                      "visits": 40
+                    },
+                    {
+                      "day": "Tue",
+                      "visits": 43
+                    },
+                    {
+                      "day": "Wed",
+                      "visits": 46
+                    },
+                    {
+                      "day": "Thu",
+                      "visits": 50
+                    },
+                    {
+                      "day": "Fri",
+                      "visits": 53
+                    },
+                    {
+                      "day": "Sat",
+                      "visits": 56
+                    },
+                    {
+                      "day": "Sun",
+                      "visits": 59
+                    }
+                  ]
+                }
+              ],
+              "rowCount": 3,
+              "resolvedAt": "2026-10-26T09:00:00Z"
+            }
+          },
+          "d30": {
+            "$from": {
+              "toolCall": "call_8",
+              "path": "$.rows[*]",
+              "state": "resolved",
+              "value": [
+                {
+                  "channel": "Google Search",
+                  "days": [
+                    {
+                      "day": "Mon",
+                      "visits": 504
+                    },
+                    {
+                      "day": "Tue",
+                      "visits": 544
+                    },
+                    {
+                      "day": "Wed",
+                      "visits": 585
+                    },
+                    {
+                      "day": "Thu",
+                      "visits": 625
+                    },
+                    {
+                      "day": "Fri",
+                      "visits": 665
+                    },
+                    {
+                      "day": "Sat",
+                      "visits": 706
+                    },
+                    {
+                      "day": "Sun",
+                      "visits": 746
+                    }
+                  ]
+                },
+                {
+                  "channel": "Google Maps",
+                  "days": [
+                    {
+                      "day": "Mon",
+                      "visits": 336
+                    },
+                    {
+                      "day": "Tue",
+                      "visits": 363
+                    },
+                    {
+                      "day": "Wed",
+                      "visits": 390
+                    },
+                    {
+                      "day": "Thu",
+                      "visits": 417
+                    },
+                    {
+                      "day": "Fri",
+                      "visits": 444
+                    },
+                    {
+                      "day": "Sat",
+                      "visits": 470
+                    },
+                    {
+                      "day": "Sun",
+                      "visits": 497
+                    }
+                  ]
+                },
+                {
+                  "channel": "Direct",
+                  "days": [
+                    {
+                      "day": "Mon",
+                      "visits": 168
+                    },
+                    {
+                      "day": "Tue",
+                      "visits": 181
+                    },
+                    {
+                      "day": "Wed",
+                      "visits": 195
+                    },
+                    {
+                      "day": "Thu",
+                      "visits": 208
+                    },
+                    {
+                      "day": "Fri",
+                      "visits": 222
+                    },
+                    {
+                      "day": "Sat",
+                      "visits": 235
+                    },
+                    {
+                      "day": "Sun",
+                      "visits": 249
+                    }
+                  ]
+                }
+              ],
+              "rowCount": 3,
+              "resolvedAt": "2026-10-26T09:00:00Z"
+            }
+          }
+        },
+        "computed": {
+          "rows": "period == '7d' ? d7 : d30"
+        },
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "Tabs",
+              "options": [
+                {
+                  "id": "7d",
+                  "label": "7 days"
+                },
+                {
+                  "id": "30d",
+                  "label": "30 days"
+                }
+              ],
+              "value": {
+                "$state": "period"
+              },
+              "onChange": {
+                "set": "period"
+              }
+            },
+            {
+              "type": "Table",
+              "source": {
+                "name": "getVisits"
+              },
+              "children": [
+                {
+                  "type": "Repeat",
+                  "items": {
+                    "$computed": "rows"
+                  },
+                  "children": [
+                    {
+                      "type": "TableRow",
+                      "children": [
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "channel"
+                          }
+                        },
+                        {
+                          "type": "TableCell",
+                          "children": [
+                            {
+                              "type": "Chart",
+                              "kind": "line",
+                              "data": {
+                                "$item": "days"
+                              },
+                              "x": "day",
+                              "series": [
+                                {
+                                  "field": "visits",
+                                  "label": "Visits"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "switch to 30 days",
+          "click": {
+            "text": "30 days"
+          }
+        }
+      ]
+    }
+  ]
+}

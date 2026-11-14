@@ -1,0 +1,88 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The shared frame of the rich kit nodes: heading block left, a technical
+// badge and the controls right; content below; an optional muted footer under a hairline. The surface itself is
+// WidgetSurface's (elevated at the root, a flat tile for a nested code block); nested nodes add no surface.
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $x1_5;
+  min-width: 0;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.headerEnd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $x1;
+  flex-shrink: 0;
+}
+
+.wrappingText {
+  overflow-wrap: anywhere;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  padding-top: $x1_5;
+  border-top: $x0_125 solid var(--agents-divider-gl);
+}
+
+.nested {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+}
+
+.compact {
+  gap: $x1;
+}
+
+.skeleton {
+  width: 100%;
+}
+
+// A notation label, not a status: flat on the nested level, the compact radius, no border.
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: $x0_25 $x1;
+  border-radius: $x1_5;
+  background: var(--agents-bg-var);
+  white-space: nowrap;
+}
+
+// A nested code block's tile: on the chat (its parents are layout only) it is a card of its own; inside a surface
+// (WidgetSurface marks itself with `data-surface-level`) it is a flat nested tile — two background levels, never three.
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+  border-radius: $card-radius;
+  padding: $card-padding;
+}
+
+:global([data-surface-level]) .tile {
+  background: var(--agents-bg-var);
+  box-shadow: none;
+  border-radius: $card-radius-compact;
+  padding: $card-padding-compact;
+  gap: $x1;
+}

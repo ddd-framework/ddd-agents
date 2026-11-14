@@ -1,0 +1,13 @@
+.badge {
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+// The component library's neutral status badge paints the page colour (`--agents-bg`) as its fill, so on a surface it read as loose
+// muted text. A faint fill of the theme's disabled colour keeps it a chip on the surface and on a flat tile alike, in
+// every scheme. The component library sets the fill as an inline style, which only `!important` outranks.
+.badge[data-tone="neutral"] > *,
+.badge[data-tone="muted"] > * {
+  background-color: rgba(var(--agents-bg-disabled-rgb), 0.16) !important;
+}

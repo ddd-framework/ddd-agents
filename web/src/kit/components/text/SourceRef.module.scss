@@ -1,0 +1,123 @@
+@import "../../../styles/spacings";
+
+// Spans only (display set here), so the node is valid HTML inline in a Text as well as a block of its own.
+.sourceRef {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $x1;
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.sourceList {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.sourceLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x1;
+  min-width: 0;
+}
+
+.sourceLabel {
+  color: var(--agents-fg-light);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $x0_5 $x1;
+  min-width: 0;
+}
+
+.chipItem {
+  display: flex;
+  max-width: 100%;
+}
+
+// A source chip: flat on the nested level, a full pill (an effect-free control: a link or a toggle).
+.chip {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  max-width: 100%;
+  min-height: $x3;
+  padding: 0 $x1;
+  border: 0;
+  border-radius: 999px;
+  // A translucent tint of the text colour, not a surface token: the chip sits on the chat background as well as on
+  // a Surface, and must differ from both (two background levels, never a third surface).
+  background: rgba(var(--agents-fg-rgb), 0.06);
+  color: var(--agents-fg);
+  font: inherit;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.linkedChip,
+.toggleChip {
+  cursor: pointer;
+
+  &:hover .chipName {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.toggleChip:disabled {
+  cursor: default;
+}
+
+.chipName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+}
+
+.moreCount {
+  color: var(--agents-fg-light);
+}
+
+// The parts of one attribution wrap as a sentence, a middle dot between them.
+.attribution {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 $x0_5;
+  min-width: 0;
+}
+
+.attributionText {
+  color: var(--agents-fg-light);
+  overflow-wrap: anywhere;
+}
+
+.licenseLink {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: $x0_25;
+
+  &:hover {
+    text-decoration-style: solid;
+  }
+}
+
+.expandedList {
+  display: block;
+  padding: $x1;
+  border-radius: $x1_5;
+  background: rgba(var(--agents-fg-rgb), 0.04);
+}

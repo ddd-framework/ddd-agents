@@ -1,0 +1,84 @@
+@import "../../../styles/spacings";
+
+// `link`: the entity's name inline, underlined with a dotted line that turns solid on hover (the `Link` node's look),
+// as a native button — it opens a panel, not a page.
+.link {
+  display: inline;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: $x0_5;
+  background: none;
+  color: var(--agents-fg);
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+
+  &:hover .linkName {
+    text-decoration-style: solid;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.linkName {
+  color: inherit;
+  overflow-wrap: anywhere;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--agents-fg-light);
+  text-underline-offset: $x0_5;
+}
+
+// `chip`: a small pill — an effect-free action (it only opens a panel), so a pill is allowed. The neutral translucent
+// fill of the composer chips: it shows on the chat background and on a Surface alike, in both schemes.
+.chip {
+  display: inline-flex;
+  max-width: 100%;
+  border-radius: $x2;
+  background: rgba(var(--agents-neutral-500-rgb), 0.1);
+}
+
+.chipButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  min-width: 0;
+  max-width: 100%;
+  padding: $x0_25 $x1;
+  border: none;
+  border-radius: $x2;
+  background: none;
+  color: var(--agents-fg);
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}
+
+.chipName {
+  min-width: 0;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.chipIcon {
+  flex-shrink: 0;
+}
+
+.plainName {
+  color: var(--agents-fg);
+  overflow-wrap: anywhere;
+}
+
+.plainChip {
+  display: inline-block;
+  padding: $x0_25 $x1;
+  border-radius: $x2;
+  background: rgba(var(--agents-neutral-500-rgb), 0.1);
+}

@@ -1,0 +1,336 @@
+@import "../../styles/spacings";
+@import "../../styles/media";
+@import "../conversation-tokens";
+@import "../../styles/conversation-widget-container";
+
+.chat {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, var(--agents-assistant-100) 0%, white 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.genericChat {
+  background: $chat-generic-bg;
+}
+
+// When the caller supplies a custom background via the `background` prop, the
+// default gradient is suppressed — the caller (and any solid color from a
+// parent surface) paints the chat background entirely.
+.customBg {
+  background: var(--agents-chat-background);
+}
+
+// The host paints an EQUIVALENT solid fill at its own root (behind the side panels too) — this pane must be fully
+// transparent so that layer shows through instead of being occluded by this one.
+.customBg.backgroundPaintedByHost {
+  background: transparent;
+}
+
+// Absolutely-positioned slot for the caller's background node. Lives BEHIND
+// the chat content via z-index: 0 + content layered at z-index: 1.
+.backgroundLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+// Agent full-screen ONLY (custom shader background, not the compact side-panel): the chat owns the whole viewport, so
+// the background layer and the top blur band stretch edge-to-edge across it instead of being confined to the pane.
+.customBg:not(.chatCompact) {
+  .backgroundLayer {
+    width: 100vw;
+    background-color: var(--agents-chat-background);
+  }
+
+  // Fixed (out of the flex flow) + full viewport width: the blur band pins to the top of the viewport across its
+  // whole width, rather than tracking the content column as the in-pane sticky version does.
+  .contentWrapper::before {
+    position: fixed;
+    width: 100vw;
+  }
+}
+
+// Opt-in override (agent host, docked side panel only): confine the band to the chat pane so it compresses with
+// the chat when a sibling panel pushes it aside. Back to the base rule's `sticky` (NOT `absolute` — .contentWrapper
+// IS the scroll container, an absolute band scrolls away with the messages); `width: 100%` undoes the 100vw.
+.customBg.confineTopBlurBandToChatPane:not(.chatCompact) .contentWrapper::before {
+  position: sticky;
+  width: 100%;
+  // Two mask layers INTERSECTED: the base bottom fade-out plus a $x2 left/right edge fade, so the confined band
+  // doesn't end in a hard vertical line beside the docked side panel.
+  -webkit-mask-image:
+    linear-gradient(to bottom, black 0%, black 80%, transparent 100%),
+    linear-gradient(to right, transparent 0, black $x2, black calc(100% - #{$x2}), transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, black 0%, black 80%, transparent 100%),
+    linear-gradient(to right, transparent 0, black $x2, black calc(100% - #{$x2}), transparent 100%);
+  mask-composite: intersect;
+}
+
+.contentWrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  // The blur (::before) and fade (::after) pseudos are full-width flex items; wrapping drops each onto its own
+  // line, so with a single content child there are three lines: blur, message column, fade.
+  flex-wrap: wrap;
+  // Pins the blur line to the top and the fade line to the viewport bottom when the conversation is too short to
+  // scroll (the message column sits centered between them); on overflow there's no free space, so `position: sticky`
+  // takes over and keeps both pinned to the top/bottom edges while scrolling.
+  align-content: space-between;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  @include conversation-widget-container;
+
+  // Top frosted-glass band that blurs the messages scrolling up under the floating top bar. Hosted here (not in
+  // the top bar) so it tracks the chat content column, and because this wrapper's container-type makes it the
+  // backdrop root the blur samples its own messages. Mirrors the
+  // bottom ::after: a full-width sticky flex line whose negative margin cancels its height so it adds nothing to
+  // the scrollable area. Masks out over its bottom 20% so the blur has no hard edge.
+  &::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    flex: 0 0 100%;
+    height: $x9;
+    margin-bottom: -1 * $x9;
+    pointer-events: none;
+    z-index: 3;
+    -webkit-backdrop-filter: blur($x2);
+    backdrop-filter: blur($x2);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 80%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 0%, black 80%, transparent 100%);
+  }
+
+  // Bottom fade-out that keeps the last messages dissolving into the chat
+  // background as they scroll towards the bottom. Anchored to the scroll
+  // viewport (not the message list) so it stays at the bottom edge regardless
+  // of how tall the conversation is. Negative margin cancels its own height so
+  // it never adds to the scrollable area. Fades to the agent conversation tint
+  // when present (set on an ancestor), else the neutral page background.
+  &::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    flex: 0 0 100%;
+    height: $x4;
+    margin-top: -$x4;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, var(--agents-chat-background) 75%);
+    z-index: 2;
+  }
+}
+
+// An active agent thread fills the scroll pane even before its first visible reply. A task CTA starts with a hidden
+// signal, so there is no user row for question-pinning to reserve this room. Filling the pane keeps the activity
+// at the top and the sticky fade at the bottom, instead of distributing spare space around a short message list.
+.topAlignedMessages {
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+// Over an animated backdrop (`data-agent-shader-backdrop` on an ancestor of the chat): the backdrop has no flat colour
+// to fade into, so the bottom band blurs the last messages into it (a mirror of the top ::before) instead of tinting
+// them. Deliberately NOT a mask on .contentWrapper: a masked scroll container becomes the backdrop root and the top
+// band's backdrop-filter stops sampling the messages.
+[data-agent-shader-backdrop] .contentWrapper::after {
+  height: $x6;
+  margin-top: -$x6;
+  background: none;
+  -webkit-backdrop-filter: blur($x2);
+  backdrop-filter: blur($x2);
+  -webkit-mask-image: linear-gradient(to top, black 0%, black 40%, transparent 100%);
+  mask-image: linear-gradient(to top, black 0%, black 40%, transparent 100%);
+}
+
+// Zero-height positioning row for the scroll-to-latest button: a flex sibling directly above the
+// input, so the button floats just over it regardless of the input's (multiline) height. z-index
+// above the sticky bottom fade (z 2) and level with the input (z 10).
+.scrollToLatestAnchor {
+  position: relative;
+  width: 100%;
+  height: 0;
+  z-index: 10;
+
+  >* {
+    position: absolute;
+    bottom: $x2;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+// The bottom slot of the pane: the chat input, and any caller-supplied node standing IN PLACE of it
+// (`inputReplacementSlot` — the agent closed-conversation status bar). Same width, same stacking: positioned above
+// the background layer (z-index 0) and the sticky bottom fade.
+// Hosts can tighten the inset from the pane's edges (the agent compact panel sets --agents-chat-input-side-inset and
+// --agents-chat-input-bottom-inset); the defaults keep $x3 at each side and $x2 below.
+// The message column with a host layer over it (`contentOverlaySlot`, the voice chat's focus mode). Switching, both go
+// by an ellipse growing up from the input: the column clears inside it (--agents-content-hide) as it rises, fades and blurs,
+// a little quicker so it stays just ahead of the layer's ellipse (--agents-overlay-reveal) that reveals it. Back, the other
+// way. The motion starts slow and drives hard into the end.
+@property --agents-content-hide {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --agents-overlay-reveal {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.contentLayers {
+  --agents-layers-punch: cubic-bezier(0.7, 0, 0.84, 0.25);
+  --agents-layers-swap: 720ms var(--agents-layers-punch);
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+
+  > .contentWrapper,
+  > .contentOverlay {
+    grid-area: 1 / 1;
+    min-height: 0;
+  }
+
+  > .contentWrapper {
+    -webkit-mask-image: radial-gradient(
+      calc(var(--agents-content-hide) * 4.8) calc(var(--agents-content-hide) * 3.9) at 50% 100%,
+      transparent 40%,
+      black 100%
+    );
+    mask-image: radial-gradient(
+      calc(var(--agents-content-hide) * 4.8) calc(var(--agents-content-hide) * 3.9) at 50% 100%,
+      transparent 40%,
+      black 100%
+    );
+    transition:
+      opacity var(--agents-layers-swap),
+      transform var(--agents-layers-swap),
+      filter var(--agents-layers-swap),
+      --agents-content-hide 600ms var(--agents-layers-punch) 120ms,
+      visibility 0s;
+  }
+
+  &[data-overlay-shown] > .contentWrapper {
+    --agents-content-hide: 100%;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-$x8);
+    filter: blur($x1);
+    transition:
+      opacity var(--agents-layers-swap),
+      transform var(--agents-layers-swap),
+      filter var(--agents-layers-swap),
+      --agents-content-hide 600ms var(--agents-layers-punch),
+      visibility 0s 720ms;
+  }
+}
+
+.contentOverlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    calc(var(--agents-overlay-reveal) * 4.4) calc(var(--agents-overlay-reveal) * 3.6) at 50% 100%,
+    black 35%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    calc(var(--agents-overlay-reveal) * 4.4) calc(var(--agents-overlay-reveal) * 3.6) at 50% 100%,
+    black 35%,
+    transparent 100%
+  );
+  transform: translateY($x8);
+  transition:
+    transform var(--agents-layers-swap),
+    --agents-overlay-reveal var(--agents-layers-swap),
+    visibility 0s 720ms;
+
+  .contentLayers[data-overlay-shown] > & {
+    --agents-overlay-reveal: 100%;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    transition:
+      transform 0s,
+      --agents-overlay-reveal var(--agents-layers-swap),
+      visibility 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contentLayers > .contentWrapper,
+  .contentLayers[data-overlay-shown] > .contentWrapper,
+  .contentOverlay,
+  .contentLayers[data-overlay-shown] > .contentOverlay {
+    -webkit-mask-image: none;
+    mask-image: none;
+    transform: none;
+    filter: none;
+    transition:
+      opacity 200ms ease,
+      visibility 0s 200ms;
+  }
+
+  .contentOverlay {
+    opacity: 0;
+  }
+
+  .contentLayers[data-overlay-shown] > .contentOverlay {
+    opacity: 1;
+    transition:
+      opacity 200ms ease,
+      visibility 0s;
+  }
+}
+
+.input,
+.inputReplacement {
+  width: calc(100% - 2 * var(--agents-chat-input-side-inset, #{$x3}));
+  max-width: $chat-content-max-width;
+  margin-bottom: var(--agents-chat-input-bottom-inset, #{$x2});
+  position: relative;
+  z-index: 10;
+}
+
+// AI-extension category conversation: the input's glow and send button take the category colour (`--agents-assistant-500`
+// from the palette class on `.chat`; the theme's CTA colour where the category has none). Without a category they keep
+// the inherited `--ai-base-color` — the agent's own colour inside the agent.
+.inputInCategory {
+  --ai-base-color: var(--agents-assistant-500, var(--agents-bg-cta));
+}
+
+// Scroll-up pagination "loading older messages" hint — floats at the top-center of the scroll pane so it doesn't
+// disturb the centered message column.
+.olderLoading {
+  position: absolute;
+  top: $x2;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: $x1 $x3;
+  border-radius: 999px;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg-light);
+  pointer-events: none;
+}

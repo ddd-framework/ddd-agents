@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Enable corepack (pnpm version from package.json)
+        run: npm i -g corepack@latest && corepack enable
+      - name: package.json and composer.json carry the same version
+        run: |
+          WEB_VERSION=$(node -p "require('./package.json').version")
+          PHP_VERSION=$(node -p "require('../composer.json').version")
+          if [ "$WEB_VERSION" != "$PHP_VERSION" ]; then
+            echo "web/package.json is ${WEB_VERSION}, composer.json is ${PHP_VERSION}" >&2
+            exit 1
+          fi
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      # build = vite build, tsc declarations, then scripts/check-package.mjs (export targets, imports, 'use client')
+      - run: pnpm build

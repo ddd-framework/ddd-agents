@@ -1,0 +1,50 @@
+@import "../../../styles/spacings";
+
+.responseContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  gap: $x1;
+}
+
+.responseMessage {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: $x1;
+
+  // AW-107 — staggered fade-in of a fresh reply's rendered blocks (see useFreshMessageBlockReveal). Scoped
+  // under .responseMessage so it never leaks to other markdown consumers. Opacity/transform only — hidden
+  // blocks keep their layout space, so the pin/reserve machinery sees stable heights.
+  [data-block-reveal="hidden"] {
+    opacity: 0;
+  }
+
+  [data-block-reveal="revealed"] {
+    // easeOutQuint, not easeOutExpo: expo front-loads nearly all motion into the first ~25% of the
+    // duration, so a longer duration alone would not read as slower — the softer curve is what does.
+    animation: blockRevealFadeIn 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes blockRevealFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// Defense-in-depth: the hook already bails out and never sets the attribute under reduced motion.
+@media (prefers-reduced-motion: reduce) {
+  .responseMessage [data-block-reveal] {
+    opacity: 1;
+    animation: none;
+  }
+}

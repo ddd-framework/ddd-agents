@@ -1,0 +1,26 @@
+@import "../../styles/spacings";
+
+// The entityDetail canvas body: the registered entity body fills the pane; the shell adds the pane
+// padding and keeps "Ask about this" in reach at the pane's foot while a long detail scrolls (ChatGPT's floating
+// "Anschlussfrage stellen").
+.entityDetail {
+  display: flex;
+  flex-direction: column;
+  gap: $x2;
+  min-width: 0;
+  min-height: 100%;
+  padding: $x2;
+}
+
+.entityDetailFooter {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding: $x1 0 $x2;
+  margin-bottom: -$x2;
+  // The pane's own surface behind the button, so scrolled content never shows through it.
+  background: linear-gradient(to bottom, transparent, var(--agents-bg-surface) $x1);
+}

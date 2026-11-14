@@ -1,0 +1,55 @@
+@import "../../styles/spacings";
+@import "../conversation-tokens";
+
+$activity-dots-duration: 500ms;
+$activity-dot-size: $x1;
+
+.activity {
+  display: flex;
+  align-items: center;
+  gap: $x1_5;
+  max-width: $chat-content-max-width;
+  min-height: $x3;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: ($x0_5 + $x0_25);
+}
+
+.dots span {
+  width: $activity-dot-size;
+  height: $activity-dot-size;
+  border-radius: 50%;
+  background-color: var(--agents-fg-light);
+  animation: activityDotBounce $activity-dots-duration infinite ease-in-out;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: $activity-dots-duration * 0.15;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: $activity-dots-duration * 0.3;
+}
+
+@keyframes activityDotBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: translateY(-1 * ($x0_5 + $x0_25));
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dots span {
+    animation: none;
+  }
+}

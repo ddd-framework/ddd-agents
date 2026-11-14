@@ -1,0 +1,61 @@
+@import "../../../../styles/spacings";
+
+$x0_75: 0.75 * $x1;
+
+// marker | text column | value + trailing nodes; hairline between entries, never a box.
+.entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: $x1_5;
+  padding: $x1_5 0;
+  min-width: 0;
+
+  & + & {
+    border-top: 1px solid var(--agents-divider-gl);
+  }
+}
+
+.withMarker {
+  grid-template-columns: $x2_5 minmax(0, 1fr) auto;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: $x1;
+}
+
+.value {
+  font-variant-numeric: tabular-nums;
+}
+
+.bullet {
+  justify-self: center;
+  width: $x0_75;
+  height: $x0_75;
+  margin-top: $x1;
+  border-radius: 50%;
+  background: var(--agents-fg-light);
+}
+
+.number::before {
+  counter-increment: data-list-entry;
+  content: counter(data-list-entry) ".";
+  color: var(--agents-fg-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  display: inline-flex;
+  line-height: 0;
+  padding-top: $x0_25;
+}

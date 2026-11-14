@@ -1,0 +1,40 @@
+@import "../../styles/spacings";
+@import "../../styles/surfaces";
+
+// The GlobalStateComponent root is the elevated card surface (and reserves the widget's last height); the button inside
+// is the click target.
+.placeholder {
+  display: inline-flex;
+  border-radius: $card-radius-compact;
+  box-shadow: $card-shadow;
+  background: var(--agents-bg-surface);
+}
+
+.placeholderButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $x1;
+  padding: $card-padding-compact $x1_5;
+  border: none;
+  background: none;
+  color: var(--agents-fg-light);
+  font-size: 13px;
+  font-style: italic;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  // Inset: the card root clips overflow, an outside outline would be cut off.
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: $card-radius-compact;
+  }
+}
+
+.cta {
+  color: var(--agents-fg-cta);
+  font-style: normal;
+  font-weight: 600;
+  text-decoration: underline;
+}

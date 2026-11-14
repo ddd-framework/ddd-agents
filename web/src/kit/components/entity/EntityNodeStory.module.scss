@@ -1,0 +1,16 @@
+@import "../../../styles/spacings";
+
+// The chat background the tree sits on in a conversation, so a white-on-white or a non-flipping colour shows.
+.chatSurface {
+  display: flex;
+  flex-direction: column;
+  gap: $x2;
+  width: 100%;
+  padding: $x3;
+  background: var(--agents-bg-var);
+}
+
+.log {
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}

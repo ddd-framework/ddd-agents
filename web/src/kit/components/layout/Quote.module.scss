@@ -1,0 +1,49 @@
+@import "../../../styles/spacings";
+
+// A quotation: an accent bar at the start edge, the quoted words, then who and where in the muted caption.
+.quote {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  margin: 0;
+  padding-inline-start: $x2;
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: $x0_5;
+    border-radius: $x0_25;
+    background: var(--agents-fg-lightest);
+  }
+}
+
+.quotedContent {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  margin: 0;
+}
+
+.caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $x0_5;
+}
+
+.sourceLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: $x0_25;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+    border-radius: $x0_5;
+  }
+}

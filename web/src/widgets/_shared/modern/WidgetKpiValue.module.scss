@@ -1,0 +1,46 @@
+@import "../../../styles/spacings";
+
+// One KPI: muted label over the hero number (the dashboard's ONE hero scale, `HeroValue`), the unit and delta on the
+// line below. The hero shrinks instead of overflowing; the label and unit wrap and are never cut.
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $x1;
+  min-width: 0;
+}
+
+.unitRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x0_5 $x1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+// The hero's line box (48px): a shrunk number or a text value sits on its baseline, so the rows below line up.
+.valueBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  min-height: $x6;
+}
+
+// A text value is smaller than the hero, so it is centred in the hero's line box.
+.textBlock {
+  justify-content: center;
+}
+
+.textValue {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

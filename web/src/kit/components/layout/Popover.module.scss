@@ -1,0 +1,85 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// A small text button that opens a floating panel under it. The panel floats over the following nodes (the Surface
+// keeps its overflow visible for it) and lines up with the button's start or end edge.
+.popover {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  padding: $x0_5 $x1;
+  border: none;
+  border-radius: $x1;
+  background: none;
+  color: var(--agents-fg-light);
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}
+
+.triggerWrapper {
+  border-radius: $x1;
+}
+
+.staticLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  color: var(--agents-fg-light);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--agents-fg-light);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + #{$x0_5});
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  width: max-content;
+  max-width: min(#{$x1 * 36}, calc(100vw - #{$x4}));
+  padding: $card-padding-compact $x1_5;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+  overflow-wrap: anywhere;
+  animation: popoverIn 150ms ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.placementStart {
+  left: 0;
+}
+
+.placementEnd {
+  right: 0;
+}
+
+@keyframes popoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-#{$x0_5});
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lM0XGmhGiZMIHljQlTSKPwhJjlniS3+ZlLVcChonUbA=' blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; form-action 'none'; base-uri 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Custom visualization</title>
+<style>html,body{margin:0;padding:0;background:transparent;color:var(--agents-fg,#1d1d1f);font-family:var(--agents-font-family,system-ui,sans-serif);font-size:14px;line-height:1.4;overflow-x:hidden}*,*::before,*::after{box-sizing:border-box}#visualization{display:flow-root}</style>
+<script>
+(function () {
+  "use strict";
+  // The sandbox host of the CustomVisualization widget. It runs in an iframe with
+  // sandbox="allow-scripts" (an opaque origin: no cookies, no storage, no parent DOM) under the policy above. It waits
+  // for ONE render message from its parent window, then shows the block's HTML and CSS, loads the allow-listed
+  // libraries and the block's script as blob: scripts (the only scripts the policy admits besides this one), and tells
+  // the parent its height, that it is alive (the heartbeat), when the script ran (ready) and when a script failed. It
+  // acts on nothing but that one message. The script reads window.AGENTS_VISUALIZATION and the theme variables
+  // --agents-*; the render message may name further global names and variable prefixes the app declared (the names its
+  // stored scripts read), and the frame then defines the same global and sets the same variables under those as well.
+  var CHANNEL = "agents-custom-visualization";
+  var GLOBAL_NAME = "AGENTS_VISUALIZATION";
+  var THEME_VARIABLE_PREFIX = "--agents-";
+  var GLOBAL_NAME_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+  var THEME_VARIABLE_PREFIX_PATTERN = /^--[a-z][a-z0-9-]*-$/;
+  var HEARTBEAT_INTERVAL_MS = 1000;
+  var MAX_ERROR_MESSAGE_LENGTH = 300;
+  var parentWindow = window.parent;
+  var postToParent = parentWindow.postMessage.bind(parentWindow);
+  var instanceToken = null;
+  var lastPostedHeight = -1;
+  var heightMeasureRequested = false;
+
+  var post = function (message) {
+    message.channel = CHANNEL;
+    message.token = instanceToken;
+    postToParent(message, "*");
+  };
+
+  var reportError = function (errorText) {
+    post({ type: "error", message: String(errorText || "Unknown script error").slice(0, MAX_ERROR_MESSAGE_LENGTH) });
+  };
+
+  // The content's own height: the root is a flow root (margins stay inside), and the document's scroll height is no
+  // measure — inside a frame it never drops below the frame's current height.
+  var measureHeight = function () {
+    heightMeasureRequested = false;
+    var visualizationRoot = document.getElementById("visualization");
+    if (!visualizationRoot) return;
+    var contentHeight = Math.ceil(visualizationRoot.getBoundingClientRect().height);
+    if (contentHeight !== lastPostedHeight) {
+      lastPostedHeight = contentHeight;
+      post({ type: "height", height: contentHeight });
+    }
+  };
+
+  var requestHeightMeasure = function () {
+    if (heightMeasureRequested) return;
+    heightMeasureRequested = true;
+    window.requestAnimationFrame(measureHeight);
+  };
+
+  var loadScriptText = function (scriptText) {
+    return new Promise(function (resolve, reject) {
+      var scriptUrl = URL.createObjectURL(new Blob([scriptText], { type: "text/javascript" }));
+      var scriptElement = document.createElement("script");
+      scriptElement.src = scriptUrl;
+      scriptElement.onload = function () {
+        URL.revokeObjectURL(scriptUrl);
+        resolve();
+      };
+      scriptElement.onerror = function () {
+        URL.revokeObjectURL(scriptUrl);
+        reject(new Error("A script could not be loaded in the sandbox."));
+      };
+      document.head.appendChild(scriptElement);
+    });
+  };
+
+  // The variable's name without its prefix (fg-light), or null when it carries none of the accepted prefixes.
+  var readThemeVariableSuffix = function (variableName, themeVariablePrefixes) {
+    var acceptedPrefixes = [THEME_VARIABLE_PREFIX].concat(themeVariablePrefixes);
+    for (var prefixIndex = 0; prefixIndex < acceptedPrefixes.length; prefixIndex++) {
+      var acceptedPrefix = acceptedPrefixes[prefixIndex];
+      var variableSuffix = variableName.slice(acceptedPrefix.length);
+      if (variableName.indexOf(acceptedPrefix) === 0 && /^[a-z-]+$/.test(variableSuffix)) return variableSuffix;
+    }
+    return null;
+  };
+
+  // Every accepted variable is set under the package's prefix and under each declared prefix.
+  var applyThemeVariables = function (themeVariables, themeVariablePrefixes) {
+    if (!themeVariables || typeof themeVariables !== "object") return;
+    Object.keys(themeVariables).forEach(function (variableName) {
+      var variableValue = themeVariables[variableName];
+      var variableSuffix = readThemeVariableSuffix(variableName, themeVariablePrefixes);
+      if (variableSuffix === null || typeof variableValue !== "string") return;
+      [THEME_VARIABLE_PREFIX].concat(themeVariablePrefixes).forEach(function (themeVariablePrefix) {
+        document.documentElement.style.setProperty(themeVariablePrefix + variableSuffix, variableValue);
+      });
+    });
+  };
+
+  var readDeclaredNames = function (declaredNames, namePattern) {
+    if (!Array.isArray(declaredNames)) return [];
+    return declaredNames.filter(function (declaredName) {
+      return typeof declaredName === "string" && namePattern.test(declaredName);
+    });
+  };
+
+  var loadLibrariesThenScript = function (librarySources, visualizationScript, libraryIndex) {
+    if (libraryIndex < librarySources.length) {
+      return loadScriptText(librarySources[libraryIndex]).then(function () {
+        return loadLibrariesThenScript(librarySources, visualizationScript, libraryIndex + 1);
+      });
+    }
+    return visualizationScript ? loadScriptText(visualizationScript) : Promise.resolve();
+  };
+
+  var render = function (renderMessage) {
+    window.addEventListener("error", function (errorEvent) {
+      reportError(errorEvent && errorEvent.message ? errorEvent.message : "Unknown script error");
+    });
+    window.addEventListener("unhandledrejection", function (rejectionEvent) {
+      var rejectionReason = rejectionEvent ? rejectionEvent.reason : null;
+      reportError(rejectionReason && rejectionReason.message ? rejectionReason.message : String(rejectionReason));
+    });
+    document.addEventListener("securitypolicyviolation", function (violationEvent) {
+      reportError("Blocked by the sandbox policy: " + violationEvent.effectiveDirective + " "
+        + String(violationEvent.blockedURI || "").slice(0, 80));
+    });
+    window.setInterval(function () {
+      post({ type: "heartbeat" });
+    }, HEARTBEAT_INTERVAL_MS);
+    post({ type: "heartbeat" });
+
+    var themeVariablePrefixes = readDeclaredNames(renderMessage.themeVariablePrefixes, THEME_VARIABLE_PREFIX_PATTERN);
+    applyThemeVariables(renderMessage.theme, themeVariablePrefixes);
+    document.documentElement.setAttribute("data-color-scheme", renderMessage.colorScheme === "dark" ? "dark" : "light");
+    var styleElement = document.createElement("style");
+    styleElement.textContent = renderMessage.css;
+    document.head.appendChild(styleElement);
+    var visualizationRoot = document.createElement("div");
+    visualizationRoot.id = "visualization";
+    visualizationRoot.innerHTML = renderMessage.html;
+    document.body.appendChild(visualizationRoot);
+
+    var visualization = Object.freeze({
+      data: renderMessage.data,
+      colorScheme: renderMessage.colorScheme === "dark" ? "dark" : "light"
+    });
+    [GLOBAL_NAME].concat(readDeclaredNames(renderMessage.visualizationGlobalNames, GLOBAL_NAME_PATTERN))
+      .forEach(function (globalName) {
+        // A declared name never replaces a property the window already has (location, parent, …).
+        if (!(globalName in window)) window[globalName] = visualization;
+      });
+    if (typeof ResizeObserver === "function") {
+      new ResizeObserver(requestHeightMeasure).observe(visualizationRoot);
+    }
+    requestHeightMeasure();
+
+    loadLibrariesThenScript(renderMessage.librarySources, renderMessage.script, 0).then(function () {
+      requestHeightMeasure();
+      post({ type: "ready" });
+    }, function (loadError) {
+      reportError(loadError.message);
+    });
+  };
+
+  var isRenderMessage = function (message) {
+    return message !== null && typeof message === "object" && message.channel === CHANNEL && message.type === "render"
+      && typeof message.token === "string" && typeof message.html === "string" && typeof message.css === "string"
+      && typeof message.script === "string" && Array.isArray(message.librarySources)
+      && message.librarySources.every(function (librarySource) { return typeof librarySource === "string"; })
+      && (message.visualizationGlobalNames === undefined || Array.isArray(message.visualizationGlobalNames))
+      && (message.themeVariablePrefixes === undefined || Array.isArray(message.themeVariablePrefixes));
+  };
+
+  window.addEventListener("message", function (messageEvent) {
+    if (messageEvent.source !== parentWindow || instanceToken !== null || !isRenderMessage(messageEvent.data)) return;
+    instanceToken = messageEvent.data.token;
+    render(messageEvent.data);
+  });
+})();
+</script>
+</head>
+<body></body>
+</html>

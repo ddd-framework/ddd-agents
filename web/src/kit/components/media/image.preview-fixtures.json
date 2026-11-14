@@ -1,0 +1,61 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "image-photo",
+      "description": "One real photo with title, caption and source chip — the hero of the ChatGPT photo gallery (09).",
+      "payload": {
+        "title": "Fotos aus Münster",
+        "view": {
+          "type": "Image",
+          "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg",
+          "alt": "The Historic Town Hall and the Stadtweinhaus on the Prinzipalmarkt in Münster",
+          "title": "Historisches Rathaus",
+          "caption": "Gotische Architektur am Prinzipalmarkt",
+          "source": {
+            "name": "commons.wikimedia.org",
+            "url": "https://commons.wikimedia.org"
+          },
+          "aspectRatio": "4:3"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "image-loading",
+      "description": "The picture is bound to a tool result that is still pending: the frame as a skeleton.",
+      "payload": {
+        "view": {
+          "type": "Image",
+          "src": {
+            "$from": {
+              "toolCall": "call_preview_1",
+              "path": "$.image.url",
+              "state": "pending"
+            }
+          },
+          "alt": "A pending photo"
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "image-broken",
+      "description": "The picture does not load: the frame shows the alt text and the node reports failed RENDER_FAILED.",
+      "payload": {
+        "view": {
+          "type": "Image",
+          "src": "https://upload.wikimedia.org/wikipedia/commons/0/00/This_file_does_not_exist.jpg",
+          "alt": "The Historic Town Hall on the Prinzipalmarkt in Münster",
+          "title": "Historisches Rathaus",
+          "caption": "Gotische Architektur am Prinzipalmarkt"
+        }
+      },
+      "expectedState": "error",
+      "expectedFailedRequests": ["This_file_does_not_exist.jpg"],
+      "width": 528
+    }
+  ]
+}

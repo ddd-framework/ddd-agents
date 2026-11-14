@@ -1,0 +1,3298 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "data-poll-bars",
+      "description": "ChatGPT ref 01: a poll as a table of share bars with the change since January, the caption and the source chip — Table + Repeat + TableCell bar / signed tone.",
+      "expectedState": "data",
+      "width": 720,
+      "payload": {
+        "title": "Aktuelle Sonntagsfrage",
+        "data": {
+          "parties": [
+            {
+              "party": "CSU",
+              "share": 36,
+              "shareOfMax": 0.9,
+              "change": -3,
+              "changeTone": "danger"
+            },
+            {
+              "party": "AfD",
+              "share": 21,
+              "shareOfMax": 0.525,
+              "change": 2,
+              "changeTone": "success"
+            },
+            {
+              "party": "Grüne",
+              "share": 15,
+              "shareOfMax": 0.375,
+              "change": 2,
+              "changeTone": "success"
+            },
+            {
+              "party": "Freie Wähler",
+              "share": 9,
+              "shareOfMax": 0.225,
+              "change": 0,
+              "changeTone": "muted"
+            },
+            {
+              "party": "SPD",
+              "share": 8,
+              "shareOfMax": 0.2,
+              "change": 0,
+              "changeTone": "muted"
+            },
+            {
+              "party": "Linke",
+              "share": 4,
+              "shareOfMax": 0.1,
+              "change": 1,
+              "changeTone": "success"
+            },
+            {
+              "party": "Sonstige",
+              "share": 7,
+              "shareOfMax": 0.175,
+              "change": -2,
+              "changeTone": "danger"
+            }
+          ]
+        },
+        "view": {
+          "type": "Table",
+          "caption": "Infratest dimap / BR24 BayernTrend, 20. Oktober 2026 · 1.207 Befragte. Rechts: Veränderung in Prozentpunkten seit Januar 2026.",
+          "source": {
+            "name": "www.infratest-dimap.de",
+            "url": "https://www.infratest-dimap.de/umfragen-analysen/bundeslaender/bayern/"
+          },
+          "children": [
+            {
+              "type": "Repeat",
+              "items": {
+                "$data": "parties"
+              },
+              "children": [
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": {
+                        "$item": "party"
+                      }
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": {
+                        "$item": "share"
+                      },
+                      "format": "percent",
+                      "bar": {
+                        "$item": "shareOfMax"
+                      },
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": {
+                        "$item": "change"
+                      },
+                      "signed": true,
+                      "tone": {
+                        "$item": "changeTone"
+                      },
+                      "align": "end"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-poll-bar-chart",
+      "description": "ChatGPT ref 01 as ONE bar chart with the change per bar: a bar per party on its track with the value, the signed change since January at the right (plus green, minus red, zero muted), the line naming what the change counts, the caption with institute, date and sample, and the source chip.",
+      "expectedState": "data",
+      "width": 720,
+      "payload": {
+        "title": "Aktuelle Sonntagsfrage",
+        "data": {
+          "parties": [
+            {
+              "party": "CSU",
+              "share": 36,
+              "shareOfMax": 0.9,
+              "change": -3,
+              "changeTone": "danger"
+            },
+            {
+              "party": "AfD",
+              "share": 21,
+              "shareOfMax": 0.525,
+              "change": 2,
+              "changeTone": "success"
+            },
+            {
+              "party": "Grüne",
+              "share": 15,
+              "shareOfMax": 0.375,
+              "change": 2,
+              "changeTone": "success"
+            },
+            {
+              "party": "Freie Wähler",
+              "share": 9,
+              "shareOfMax": 0.225,
+              "change": 0,
+              "changeTone": "muted"
+            },
+            {
+              "party": "SPD",
+              "share": 8,
+              "shareOfMax": 0.2,
+              "change": 0,
+              "changeTone": "muted"
+            },
+            {
+              "party": "Linke",
+              "share": 4,
+              "shareOfMax": 0.1,
+              "change": 1,
+              "changeTone": "success"
+            },
+            {
+              "party": "Sonstige",
+              "share": 7,
+              "shareOfMax": 0.175,
+              "change": -2,
+              "changeTone": "danger"
+            }
+          ]
+        },
+        "view": {
+          "type": "Chart",
+          "kind": "bar",
+          "horizontal": true,
+          "data": {
+            "$data": "parties"
+          },
+          "x": "party",
+          "series": [
+            {
+              "field": "share",
+              "label": "Anteil"
+            }
+          ],
+          "valueFormat": "percent",
+          "caption": "Infratest dimap / BR24 BayernTrend, 20. Oktober 2026 · 1.207 Befragte",
+          "source": {
+            "name": "www.infratest-dimap.de",
+            "url": "https://www.infratest-dimap.de/umfragen-analysen/bundeslaender/bayern/"
+          },
+          "deltaField": "change",
+          "deltaUnit": "pp",
+          "deltaLabel": "Rechts: Veränderung in Prozentpunkten seit Januar 2026."
+        }
+      }
+    },
+    {
+      "name": "data-line-chart",
+      "description": "ChatGPT ref 03: four parties over three polls, percent axis, legend under the plot; clicking a legend entry hides its series, hovering a point shows the tooltip.",
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "hide-afd",
+          "click": {
+            "selector": ".apexcharts-legend-series[seriesname='AfD']"
+          }
+        },
+        {
+          "name": "hover-point",
+          "hover": {
+            "selector": ".apexcharts-svg"
+          }
+        }
+      ],
+      "payload": {
+        "data": {
+          "polls": [
+            {
+              "date": "Jan. 2024",
+              "csu": 40,
+              "afd": 15,
+              "gruene": 13,
+              "fw": 13
+            },
+            {
+              "date": "Jan. 2026",
+              "csu": 39,
+              "afd": 19,
+              "gruene": 13,
+              "fw": 9
+            },
+            {
+              "date": "Okt. 2026",
+              "csu": 36,
+              "afd": 21,
+              "gruene": 15,
+              "fw": 9
+            }
+          ]
+        },
+        "view": {
+          "type": "Chart",
+          "kind": "line",
+          "title": "Entwicklung der wichtigsten Parteien",
+          "data": {
+            "$data": "polls"
+          },
+          "x": "date",
+          "series": [
+            {
+              "field": "csu",
+              "label": "CSU"
+            },
+            {
+              "field": "afd",
+              "label": "AfD"
+            },
+            {
+              "field": "gruene",
+              "label": "Grüne"
+            },
+            {
+              "field": "fw",
+              "label": "Freie Wähler"
+            }
+          ],
+          "valueFormat": "percent",
+          "min": 0,
+          "max": 45,
+          "caption": "Infratest dimap / BayernTREND, Januar 2024 bis Oktober 2026",
+          "source": {
+            "name": "www.infratest-dimap.de",
+            "url": "https://www.infratest-dimap.de/umfragen-analysen/bundeslaender/bayern/"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-coalition-table",
+      "description": "ChatGPT ref 04: the short form — three columns, seats right-aligned, the majority as a check or a cross.",
+      "expectedState": "data",
+      "width": 720,
+      "payload": {
+        "title": "Rechnerische Koalitionsmöglichkeiten",
+        "data": {
+          "coalitions": [
+            {
+              "coalition": "CSU + Freie Wähler",
+              "seats": 94,
+              "majority": true
+            },
+            {
+              "coalition": "CSU + Grüne",
+              "seats": 104,
+              "majority": true
+            },
+            {
+              "coalition": "CSU + SPD",
+              "seats": 86,
+              "majority": false
+            }
+          ]
+        },
+        "view": {
+          "type": "Table",
+          "columns": [
+            {
+              "key": "coalition",
+              "label": "Koalition"
+            },
+            {
+              "key": "seats",
+              "label": "Sitze"
+            },
+            {
+              "key": "majority",
+              "label": "Mehrheit (91)"
+            }
+          ],
+          "rows": {
+            "$data": "coalitions"
+          },
+          "caption": "Auf Grundlage der GMS-Umfrage vom 19. Oktober 2026 bei modellierten 180 Sitzen.",
+          "source": {
+            "name": "GMS-Umfrage Bayern"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-cohort-heatmap",
+      "description": "ChatGPT ref 12: a retention cohort table of heat cells, the Nutzer / Umsatz toggle (Tabs, lane L5) switching every cell; missing months show a dash.",
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "switch-to-revenue",
+          "click": {
+            "text": "Umsatz"
+          }
+        }
+      ],
+      "payload": {
+        "title": "Retention Analysis",
+        "state": {
+          "mode": "users"
+        },
+        "data": {
+          "usersRows": [
+            {
+              "cohort": "Mai",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 82,
+              "h1": 0.55,
+              "m2": 74,
+              "h2": 0.35,
+              "m3": 69,
+              "h3": 0.225,
+              "m4": 65,
+              "h4": 0.125
+            },
+            {
+              "cohort": "Juni",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 85,
+              "h1": 0.625,
+              "m2": 78,
+              "h2": 0.45,
+              "m3": 72,
+              "h3": 0.3,
+              "m4": null,
+              "h4": null
+            },
+            {
+              "cohort": "Juli",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 81,
+              "h1": 0.525,
+              "m2": 75,
+              "h2": 0.375,
+              "m3": null,
+              "h3": null,
+              "m4": null,
+              "h4": null
+            },
+            {
+              "cohort": "Aug.",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 88,
+              "h1": 0.7,
+              "m2": null,
+              "h2": null,
+              "m3": null,
+              "h3": null,
+              "m4": null,
+              "h4": null
+            }
+          ],
+          "revenueRows": [
+            {
+              "cohort": "Mai",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 88,
+              "h1": 0.7,
+              "m2": 81,
+              "h2": 0.525,
+              "m3": 77,
+              "h3": 0.425,
+              "m4": 74,
+              "h4": 0.35
+            },
+            {
+              "cohort": "Juni",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 90,
+              "h1": 0.75,
+              "m2": 84,
+              "h2": 0.6,
+              "m3": 79,
+              "h3": 0.475,
+              "m4": null,
+              "h4": null
+            },
+            {
+              "cohort": "Juli",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 86,
+              "h1": 0.65,
+              "m2": 80,
+              "h2": 0.5,
+              "m3": null,
+              "h3": null,
+              "m4": null,
+              "h4": null
+            },
+            {
+              "cohort": "Aug.",
+              "m0": 100,
+              "h0": 1.0,
+              "m1": 92,
+              "h1": 0.8,
+              "m2": null,
+              "h2": null,
+              "m3": null,
+              "h3": null,
+              "m4": null,
+              "h4": null
+            }
+          ]
+        },
+        "computed": {
+          "cohortRows": "mode == \"users\" ? usersRows : revenueRows"
+        },
+        "view": {
+          "type": "Surface",
+          "subtitle": "Kohorten 2026 · Beispieldaten",
+          "slots": {
+            "header": [
+              {
+                "type": "Tabs",
+                "options": [
+                  {
+                    "id": "users",
+                    "label": "Nutzer"
+                  },
+                  {
+                    "id": "revenue",
+                    "label": "Umsatz"
+                  }
+                ],
+                "value": {
+                  "$state": "mode"
+                },
+                "onChange": {
+                  "set": "mode"
+                }
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "Table",
+              "caption": "Niedrig → Hoch: je dunkler, desto höher die Bindung.",
+              "children": [
+                {
+                  "type": "TableRow",
+                  "header": true,
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": ""
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "M0",
+                      "align": "center"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "M1",
+                      "align": "center"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "M2",
+                      "align": "center"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "M3",
+                      "align": "center"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "M4",
+                      "align": "center"
+                    }
+                  ]
+                },
+                {
+                  "type": "Repeat",
+                  "items": {
+                    "$computed": "cohortRows"
+                  },
+                  "children": [
+                    {
+                      "type": "TableRow",
+                      "children": [
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "cohort"
+                          }
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "m0"
+                          },
+                          "format": "percent",
+                          "heat": {
+                            "$item": "h0"
+                          },
+                          "align": "center"
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "m1"
+                          },
+                          "format": "percent",
+                          "heat": {
+                            "$item": "h1"
+                          },
+                          "align": "center"
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "m2"
+                          },
+                          "format": "percent",
+                          "heat": {
+                            "$item": "h2"
+                          },
+                          "align": "center"
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "m3"
+                          },
+                          "format": "percent",
+                          "heat": {
+                            "$item": "h3"
+                          },
+                          "align": "center"
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "m4"
+                          },
+                          "format": "percent",
+                          "heat": {
+                            "$item": "h4"
+                          },
+                          "align": "center"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-mrr-simulator",
+      "description": "ChatGPT ref 16: Bear / Base / Bull tabs, two KPI tiles, the MRR line chart and the start-customers slider on one state; the copy button copies the scenario.",
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "scenario-bull",
+          "click": {
+            "text": "Bull"
+          }
+        },
+        {
+          "name": "scenario-bear",
+          "click": {
+            "text": "Bear"
+          }
+        }
+      ],
+      "payload": {
+        "title": "MRR Growth Simulator",
+        "state": {
+          "scenario": "base",
+          "customers": 800
+        },
+        "data": {
+          "months": [
+            {
+              "month": "M1",
+              "bear": 1.0,
+              "base": 1.0,
+              "bull": 1.0
+            },
+            {
+              "month": "M2",
+              "bear": 1.02,
+              "base": 1.055,
+              "bull": 1.09
+            },
+            {
+              "month": "M3",
+              "bear": 1.0404,
+              "base": 1.113,
+              "bull": 1.1881
+            },
+            {
+              "month": "M4",
+              "bear": 1.0612,
+              "base": 1.1742,
+              "bull": 1.295
+            },
+            {
+              "month": "M5",
+              "bear": 1.0824,
+              "base": 1.2388,
+              "bull": 1.4116
+            },
+            {
+              "month": "M6",
+              "bear": 1.1041,
+              "base": 1.307,
+              "bull": 1.5386
+            },
+            {
+              "month": "M7",
+              "bear": 1.1262,
+              "base": 1.3788,
+              "bull": 1.6771
+            },
+            {
+              "month": "M8",
+              "bear": 1.1487,
+              "base": 1.4547,
+              "bull": 1.828
+            },
+            {
+              "month": "M9",
+              "bear": 1.1717,
+              "base": 1.5347,
+              "bull": 1.9926
+            },
+            {
+              "month": "M10",
+              "bear": 1.1951,
+              "base": 1.6191,
+              "bull": 2.1719
+            },
+            {
+              "month": "M11",
+              "bear": 1.219,
+              "base": 1.7081,
+              "bull": 2.3674
+            },
+            {
+              "month": "M12",
+              "bear": 1.2434,
+              "base": 1.8021,
+              "bull": 2.5804
+            }
+          ]
+        },
+        "computed": {
+          "factor12": "scenario == \"bear\" ? last(months).bear : scenario == \"bull\" ? last(months).bull : last(months).base",
+          "growth": "scenario == \"bear\" ? 2 : scenario == \"bull\" ? 9 : 5.5",
+          "grossGrowth": "growth + 3",
+          "plotted": "map(months, r => {month: r.month, mrr: round(customers * 79 * (scenario == \"bear\" ? r.bear : scenario == \"bull\" ? r.bull : r.base))})",
+          "mrr12": "round(customers * 79 * factor12)"
+        },
+        "actions": {
+          "copyScenario": {
+            "type": "copy",
+            "value": {
+              "$computed": "plotted"
+            }
+          }
+        },
+        "view": {
+          "type": "Surface",
+          "subtitle": "12-Monats-Modell · 79 € ARPA · Beispieldaten",
+          "children": [
+            {
+              "type": "Tabs",
+              "options": [
+                {
+                  "id": "bear",
+                  "label": "Bear"
+                },
+                {
+                  "id": "base",
+                  "label": "Base"
+                },
+                {
+                  "id": "bull",
+                  "label": "Bull"
+                }
+              ],
+              "value": {
+                "$state": "scenario"
+              },
+              "onChange": {
+                "set": "scenario"
+              }
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "MRR Monat 12",
+                  "value": {
+                    "$computed": "mrr12"
+                  },
+                  "format": "currency",
+                  "currency": "EUR"
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Netto-Wachstum / Monat",
+                  "value": {
+                    "$computed": "growth"
+                  },
+                  "format": "percent",
+                  "signed": true,
+                  "tone": "success"
+                }
+              ]
+            },
+            {
+              "type": "Chart",
+              "kind": "line",
+              "data": {
+                "$computed": "plotted"
+              },
+              "x": "month",
+              "series": [
+                {
+                  "field": "mrr",
+                  "label": "MRR"
+                }
+              ],
+              "valueFormat": "currency",
+              "currency": "EUR",
+              "min": 0
+            },
+            {
+              "type": "Slider",
+              "label": "Startkunden",
+              "min": 200,
+              "max": 2000,
+              "step": 50,
+              "value": {
+                "$state": "customers"
+              },
+              "onChange": {
+                "set": "customers"
+              }
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Wachstumsrate",
+                  "value": {
+                    "$computed": "grossGrowth"
+                  },
+                  "format": "percent",
+                  "signed": true
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Churn-Rate",
+                  "value": 3,
+                  "format": "percent",
+                  "higherIsBetter": false,
+                  "source": {
+                    "name": "Modellannahme"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Button",
+              "label": "Szenariodaten als JSON kopieren",
+              "icon": "copy",
+              "onClick": {
+                "action": "copyScenario"
+              },
+              "fullWidth": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-stock-chart",
+      "description": "ChatGPT ref 31: the price as a KPI tile with its change, the 1D / 5D range tabs over the price area chart (intraday or the five daily closes), the key stats in a four-column table.",
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "hover-price",
+          "hover": {
+            "selector": ".apexcharts-svg"
+          }
+        },
+        {
+          "name": "range-5d",
+          "click": {
+            "text": "5D"
+          }
+        }
+      ],
+      "payload": {
+        "title": "Apple Inc (AAPL)",
+        "data": {
+          "intraday": [
+            {
+              "time": "9:30",
+              "price": 350.0
+            },
+            {
+              "time": "9:36",
+              "price": 349.1
+            },
+            {
+              "time": "9:43",
+              "price": 348.2
+            },
+            {
+              "time": "9:49",
+              "price": 347.3
+            },
+            {
+              "time": "9:56",
+              "price": 346.62
+            },
+            {
+              "time": "10:02",
+              "price": 346.06
+            },
+            {
+              "time": "10:09",
+              "price": 345.87
+            },
+            {
+              "time": "10:15",
+              "price": 346.06
+            },
+            {
+              "time": "10:22",
+              "price": 345.6
+            },
+            {
+              "time": "10:28",
+              "price": 345.6
+            },
+            {
+              "time": "10:35",
+              "price": 345.6
+            },
+            {
+              "time": "10:41",
+              "price": 345.88
+            },
+            {
+              "time": "10:48",
+              "price": 345.6
+            },
+            {
+              "time": "10:54",
+              "price": 345.86
+            },
+            {
+              "time": "11:00",
+              "price": 346.02
+            },
+            {
+              "time": "11:07",
+              "price": 345.6
+            },
+            {
+              "time": "11:14",
+              "price": 345.6
+            },
+            {
+              "time": "11:20",
+              "price": 345.6
+            },
+            {
+              "time": "11:26",
+              "price": 345.6
+            },
+            {
+              "time": "11:33",
+              "price": 346.2
+            },
+            {
+              "time": "11:39",
+              "price": 345.62
+            },
+            {
+              "time": "11:46",
+              "price": 345.6
+            },
+            {
+              "time": "11:52",
+              "price": 346.12
+            },
+            {
+              "time": "11:59",
+              "price": 345.95
+            },
+            {
+              "time": "12:05",
+              "price": 345.6
+            },
+            {
+              "time": "12:12",
+              "price": 345.6
+            },
+            {
+              "time": "12:18",
+              "price": 345.6
+            },
+            {
+              "time": "12:25",
+              "price": 346.14
+            },
+            {
+              "time": "12:31",
+              "price": 345.72
+            },
+            {
+              "time": "12:38",
+              "price": 345.6
+            },
+            {
+              "time": "12:45",
+              "price": 345.66
+            },
+            {
+              "time": "12:51",
+              "price": 345.67
+            },
+            {
+              "time": "12:58",
+              "price": 346.21
+            },
+            {
+              "time": "13:04",
+              "price": 346.6
+            },
+            {
+              "time": "13:11",
+              "price": 346.36
+            },
+            {
+              "time": "13:17",
+              "price": 345.93
+            },
+            {
+              "time": "13:24",
+              "price": 346.32
+            },
+            {
+              "time": "13:30",
+              "price": 346.9
+            },
+            {
+              "time": "13:37",
+              "price": 346.24
+            },
+            {
+              "time": "13:43",
+              "price": 346.5
+            },
+            {
+              "time": "13:49",
+              "price": 346.93
+            },
+            {
+              "time": "13:56",
+              "price": 347.07
+            },
+            {
+              "time": "14:03",
+              "price": 346.66
+            },
+            {
+              "time": "14:09",
+              "price": 346.99
+            },
+            {
+              "time": "14:15",
+              "price": 347.24
+            },
+            {
+              "time": "14:22",
+              "price": 346.79
+            },
+            {
+              "time": "14:29",
+              "price": 346.93
+            },
+            {
+              "time": "14:35",
+              "price": 346.51
+            },
+            {
+              "time": "14:41",
+              "price": 345.86
+            },
+            {
+              "time": "14:48",
+              "price": 345.6
+            },
+            {
+              "time": "14:55",
+              "price": 345.6
+            },
+            {
+              "time": "15:01",
+              "price": 345.6
+            },
+            {
+              "time": "15:07",
+              "price": 345.74
+            },
+            {
+              "time": "15:14",
+              "price": 346.13
+            },
+            {
+              "time": "15:20",
+              "price": 346.68
+            },
+            {
+              "time": "15:27",
+              "price": 347.25
+            },
+            {
+              "time": "15:33",
+              "price": 347.84
+            },
+            {
+              "time": "15:40",
+              "price": 348.17
+            },
+            {
+              "time": "15:46",
+              "price": 347.86
+            },
+            {
+              "time": "15:53",
+              "price": 347.73
+            }
+          ],
+          "fiveDays": [
+            {
+              "time": "17. Okt.",
+              "price": 344.62
+            },
+            {
+              "time": "20. Okt.",
+              "price": 346.8
+            },
+            {
+              "time": "21. Okt.",
+              "price": 345.91
+            },
+            {
+              "time": "22. Okt.",
+              "price": 348.22
+            },
+            {
+              "time": "23. Okt.",
+              "price": 347.73
+            }
+          ]
+        },
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "KpiTile",
+              "label": "Kurs · 23. Okt., 19:58:16 EDT",
+              "value": 347.73,
+              "format": "currency",
+              "currency": "USD",
+              "delta": -0.49,
+              "deltaFormat": "currency",
+              "deltaLabel": "(0,14 %) · nachbörslich 347,60 $",
+              "detail": "NASDAQ, Echtzeit",
+              "source": {
+                "name": "Nasdaq",
+                "url": "https://www.nasdaq.com/market-activity/stocks/aapl"
+              }
+            },
+            {
+              "type": "Tabs",
+              "options": [
+                {
+                  "id": "1d",
+                  "label": "1D"
+                },
+                {
+                  "id": "5d",
+                  "label": "5D"
+                }
+              ],
+              "value": {
+                "$state": "range"
+              },
+              "onChange": {
+                "set": "range"
+              }
+            },
+            {
+              "type": "Chart",
+              "kind": "area",
+              "data": {
+                "$computed": "pricePoints"
+              },
+              "x": "time",
+              "series": [
+                {
+                  "field": "price",
+                  "label": "Kurs"
+                }
+              ],
+              "valueFormat": "number",
+              "min": 344,
+              "max": 352
+            },
+            {
+              "type": "Table",
+              "children": [
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Öffnen",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 349.49,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Volumen",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 39500000,
+                      "format": "compact",
+                      "align": "end"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Marktkapitalisierung",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 5120000000000,
+                      "format": "compact",
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Tagestief",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 345.41,
+                      "align": "end"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Jahrestief",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 0.12,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "EPS (TTM)",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 8.71,
+                      "align": "end"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Tageshoch",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 351.7,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Jahreshoch",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 1023,
+                      "align": "end"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "KGV",
+                      "tone": "muted"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 39.92,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell"
+                    },
+                    {
+                      "type": "TableCell"
+                    }
+                  ]
+                }
+              ],
+              "source": {
+                "name": "www.nasdaq.com",
+                "url": "https://www.nasdaq.com/market-activity/stocks/aapl"
+              }
+            }
+          ]
+        },
+        "state": {
+          "range": "1d"
+        },
+        "computed": {
+          "pricePoints": "range == \"5d\" ? fiveDays : intraday"
+        }
+      }
+    },
+    {
+      "name": "data-analytics-studio",
+      "description": "ChatGPT ref 52, the data half: period tabs, channel select, reference date, benchmark checkbox and traffic slider (lane L5) drive three KPI tiles, the line chart with its comparison series, the channel bar and pie charts, the scatter chart and the detail table with a Repeat, a total row and the date in its caption.",
+      "expectedState": "data",
+      "width": 720,
+      "interactions": [
+        {
+          "name": "four-weeks",
+          "click": {
+            "text": "4 Wochen"
+          }
+        },
+        {
+          "name": "benchmark-off",
+          "click": {
+            "text": "Vergleichswerte"
+          }
+        }
+      ],
+      "payload": {
+        "title": "Analytics Studio",
+        "state": {
+          "period": "7d",
+          "channel": "all",
+          "asOf": "2026-10-25",
+          "scale": 100,
+          "benchmark": true
+        },
+        "data": {
+          "days": [
+            {
+              "x": "Mo",
+              "organic": 500,
+              "paid": 300,
+              "direct": 180,
+              "rate": 3.5
+            },
+            {
+              "x": "Di",
+              "organic": 580,
+              "paid": 340,
+              "direct": 200,
+              "rate": 4.0
+            },
+            {
+              "x": "Mi",
+              "organic": 520,
+              "paid": 320,
+              "direct": 200,
+              "rate": 3.8
+            },
+            {
+              "x": "Do",
+              "organic": 640,
+              "paid": 400,
+              "direct": 220,
+              "rate": 4.4
+            },
+            {
+              "x": "Fr",
+              "organic": 600,
+              "paid": 360,
+              "direct": 170,
+              "rate": 4.6
+            },
+            {
+              "x": "Sa",
+              "organic": 720,
+              "paid": 500,
+              "direct": 240,
+              "rate": 5.3
+            },
+            {
+              "x": "So",
+              "organic": 630,
+              "paid": 400,
+              "direct": 180,
+              "rate": 4.2
+            }
+          ],
+          "weeks": [
+            {
+              "x": "W1",
+              "organic": 3400,
+              "paid": 2100,
+              "direct": 1300,
+              "rate": 3.7
+            },
+            {
+              "x": "W2",
+              "organic": 3950,
+              "paid": 2350,
+              "direct": 1600,
+              "rate": 3.9
+            },
+            {
+              "x": "W3",
+              "organic": 4300,
+              "paid": 2550,
+              "direct": 1750,
+              "rate": 4.2
+            },
+            {
+              "x": "W4",
+              "organic": 4700,
+              "paid": 2750,
+              "direct": 1850,
+              "rate": 4.5
+            }
+          ]
+        },
+        "computed": {
+          "baseRows": "period == \"7d\" ? days : weeks",
+          "channelVisits": "map(baseRows, r => {x: r.x, rate: r.rate, visits: channel == \"organic\" ? r.organic : channel == \"paid\" ? r.paid : channel == \"direct\" ? r.direct : r.organic + r.paid + r.direct})",
+          "plotted": "map(channelVisits, r => {x: r.x, visits: round(r.visits * scale / 100), comparison: round(r.visits * scale / 100 * 0.9), conversions: round(r.visits * scale / 100 * r.rate / 100), rate: r.rate})",
+          "totalVisits": "sum(plotted, r => r.visits)",
+          "totalConversions": "sum(plotted, r => r.conversions)",
+          "averageRate": "totalVisits > 0 ? round(totalConversions / totalVisits * 10000) / 100 : 0",
+          "channelTotals": "[{name: \"Organic\", visitors: round(sum(baseRows, r => r.organic) * scale / 100)}, {name: \"Paid\", visitors: round(sum(baseRows, r => r.paid) * scale / 100)}, {name: \"Direct\", visitors: round(sum(baseRows, r => r.direct) * scale / 100)}]",
+          "channelLabel": "channel == \"organic\" ? \"Organic\" : channel == \"paid\" ? \"Paid\" : channel == \"direct\" ? \"Direct\" : \"Alle Kanäle\"",
+          "tableCaption": "\"Detailtabelle · \" + asOf + (period == \"7d\" ? \" · Tageswerte\" : \" · Wochenwerte\")"
+        },
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "Surface",
+              "title": "Filter & State",
+              "density": "compact",
+              "children": [
+                {
+                  "type": "Tabs",
+                  "label": "Zeitraum",
+                  "options": [
+                    {
+                      "id": "7d",
+                      "label": "7 Tage"
+                    },
+                    {
+                      "id": "30d",
+                      "label": "4 Wochen"
+                    }
+                  ],
+                  "value": {
+                    "$state": "period"
+                  },
+                  "onChange": {
+                    "set": "period"
+                  }
+                },
+                {
+                  "type": "Select",
+                  "label": "Kanal",
+                  "options": [
+                    {
+                      "id": "all",
+                      "label": "Alle Kanäle"
+                    },
+                    {
+                      "id": "organic",
+                      "label": "Organic"
+                    },
+                    {
+                      "id": "paid",
+                      "label": "Paid"
+                    },
+                    {
+                      "id": "direct",
+                      "label": "Direct"
+                    }
+                  ],
+                  "value": {
+                    "$state": "channel"
+                  },
+                  "onChange": {
+                    "set": "channel"
+                  }
+                },
+                {
+                  "type": "DatePicker",
+                  "label": "Referenzdatum",
+                  "value": {
+                    "$state": "asOf"
+                  },
+                  "onChange": {
+                    "set": "asOf"
+                  }
+                },
+                {
+                  "type": "Slider",
+                  "label": "Traffic-Skalierung",
+                  "min": 50,
+                  "max": 150,
+                  "step": 10,
+                  "unit": "%",
+                  "value": {
+                    "$state": "scale"
+                  },
+                  "onChange": {
+                    "set": "scale"
+                  }
+                },
+                {
+                  "type": "Checkbox",
+                  "label": "Vergleichswerte (90 % der Besucher) anzeigen",
+                  "checked": {
+                    "$state": "benchmark"
+                  },
+                  "onChange": {
+                    "set": "benchmark"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Grid",
+              "columns": 3,
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Besucher",
+                  "value": {
+                    "$computed": "totalVisits"
+                  },
+                  "detail": {
+                    "$computed": "channelLabel"
+                  }
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Conversions",
+                  "value": {
+                    "$computed": "totalConversions"
+                  },
+                  "detail": "Simuliert"
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Conversion",
+                  "value": {
+                    "$computed": "averageRate"
+                  },
+                  "format": "percent",
+                  "detail": "Gewichtet"
+                }
+              ]
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "minColumnWidth": "regular",
+              "children": [
+                {
+                  "type": "Chart",
+                  "kind": "line",
+                  "title": "Line · Besucher",
+                  "data": {
+                    "$computed": "plotted"
+                  },
+                  "x": "x",
+                  "series": [
+                    {
+                      "field": "visits",
+                      "label": "Besucher"
+                    },
+                    {
+                      "field": "comparison",
+                      "label": "Vergleich",
+                      "visible": {
+                        "$state": "benchmark"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Chart",
+                  "kind": "bar",
+                  "title": "Bar · Kanäle",
+                  "data": {
+                    "$computed": "channelTotals"
+                  },
+                  "x": "name",
+                  "series": [
+                    {
+                      "field": "visitors",
+                      "label": "Besucher"
+                    }
+                  ]
+                },
+                {
+                  "type": "Chart",
+                  "kind": "pie",
+                  "title": "Pie · Traffic-Mix",
+                  "data": {
+                    "$computed": "channelTotals"
+                  },
+                  "x": "name",
+                  "series": [
+                    {
+                      "field": "visitors",
+                      "label": "Besucher"
+                    }
+                  ]
+                },
+                {
+                  "type": "Chart",
+                  "kind": "scatter",
+                  "title": "Scatter · Traffic / CVR",
+                  "data": {
+                    "$computed": "plotted"
+                  },
+                  "x": "visits",
+                  "xLabel": "Besucher",
+                  "series": [
+                    {
+                      "field": "rate",
+                      "label": "Conversion Rate"
+                    }
+                  ],
+                  "valueFormat": "percent"
+                }
+              ]
+            },
+            {
+              "type": "Table",
+              "caption": {
+                "$computed": "tableCaption"
+              },
+              "children": [
+                {
+                  "type": "TableRow",
+                  "header": true,
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Zeitraum"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Besucher",
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Conversions",
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "CVR",
+                      "align": "end"
+                    }
+                  ]
+                },
+                {
+                  "type": "Repeat",
+                  "items": {
+                    "$computed": "plotted"
+                  },
+                  "children": [
+                    {
+                      "type": "TableRow",
+                      "children": [
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "x"
+                          }
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "visits"
+                          }
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "conversions"
+                          }
+                        },
+                        {
+                          "type": "TableCell",
+                          "value": {
+                            "$item": "rate"
+                          },
+                          "format": "percent",
+                          "decimals": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "emphasis": true,
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Gesamt"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": {
+                        "$computed": "totalVisits"
+                      }
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": {
+                        "$computed": "totalConversions"
+                      }
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": {
+                        "$computed": "averageRate"
+                      },
+                      "format": "percent"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-review-sources-donut",
+      "description": "Shares of a whole as a donut: the practice's reviews by platform (Google, Jameda, Facebook), the share on each slice, the total in the middle, the legend under the ring, the caption with the date and the source chip.",
+      "expectedState": "data",
+      "locale": "de",
+      "width": 528,
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "view": {
+          "type": "Chart",
+          "kind": "donut",
+          "title": "Bewertungen nach Plattform",
+          "data": [
+            {
+              "platform": "Google",
+              "reviews": 87
+            },
+            {
+              "platform": "Jameda",
+              "reviews": 32
+            },
+            {
+              "platform": "Facebook",
+              "reviews": 11
+            }
+          ],
+          "x": "platform",
+          "series": [
+            {
+              "field": "reviews",
+              "label": "Bewertungen"
+            }
+          ],
+          "caption": "130 Bewertungen insgesamt, Stand 25. Oktober 2026",
+          "source": {
+            "name": "Example Reviews · Bewertungsquellen"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-profile-views-heatmap",
+      "description": "A heatmap of the Google Business Profile views by weekday × time of day over the last four weeks: one heat row per weekday, one column per two-hour slot, the count in each cell; the caption names the period.",
+      "expectedState": "data",
+      "locale": "de",
+      "width": 528,
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "data": {
+          "views": [
+            {
+              "day": "Mo",
+              "h08": 64,
+              "h10": 58,
+              "h12": 41,
+              "h14": 46,
+              "h16": 52,
+              "h18": 33
+            },
+            {
+              "day": "Di",
+              "h08": 57,
+              "h10": 52,
+              "h12": 38,
+              "h14": 43,
+              "h16": 49,
+              "h18": 30
+            },
+            {
+              "day": "Mi",
+              "h08": 52,
+              "h10": 47,
+              "h12": 35,
+              "h14": 40,
+              "h16": 44,
+              "h18": 27
+            },
+            {
+              "day": "Do",
+              "h08": 55,
+              "h10": 50,
+              "h12": 37,
+              "h14": 42,
+              "h16": 47,
+              "h18": 29
+            },
+            {
+              "day": "Fr",
+              "h08": 49,
+              "h10": 44,
+              "h12": 31,
+              "h14": 24,
+              "h16": 19,
+              "h18": 22
+            },
+            {
+              "day": "Sa",
+              "h08": 21,
+              "h10": 28,
+              "h12": 26,
+              "h14": 19,
+              "h16": 15,
+              "h18": 12
+            },
+            {
+              "day": "So",
+              "h08": 11,
+              "h10": 17,
+              "h12": 19,
+              "h14": 16,
+              "h16": 18,
+              "h18": 20
+            }
+          ]
+        },
+        "view": {
+          "type": "Chart",
+          "kind": "heatmap",
+          "title": "Profilaufrufe nach Wochentag und Uhrzeit",
+          "data": {
+            "$data": "views"
+          },
+          "x": "day",
+          "series": [
+            {
+              "field": "h08",
+              "label": "8–10"
+            },
+            {
+              "field": "h10",
+              "label": "10–12"
+            },
+            {
+              "field": "h12",
+              "label": "12–14"
+            },
+            {
+              "field": "h14",
+              "label": "14–16"
+            },
+            {
+              "field": "h16",
+              "label": "16–18"
+            },
+            {
+              "field": "h18",
+              "label": "18–20"
+            }
+          ],
+          "caption": "Aufrufe des Google-Profils, 28. September bis 25. Oktober 2026 (Uhrzeit in Stunden)",
+          "source": {
+            "name": "Google Business Profile · Statistiken"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-review-request-funnel",
+      "description": "The stages of a process as a funnel: review invitations sent → e-mail opened → review link clicked → review written, each stage a centered bar with its count and the conversion from the stage before in percent; caption and source chip.",
+      "expectedState": "data",
+      "locale": "de",
+      "width": 528,
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "view": {
+          "type": "Chart",
+          "kind": "funnel",
+          "title": "Bewertungseinladungen der letzten 30 Tage",
+          "data": [
+            {
+              "stage": "Einladungen versendet",
+              "count": 64
+            },
+            {
+              "stage": "E-Mail geöffnet",
+              "count": 41
+            },
+            {
+              "stage": "Bewertungslink geklickt",
+              "count": 19
+            },
+            {
+              "stage": "Bewertung geschrieben",
+              "count": 5
+            }
+          ],
+          "x": "stage",
+          "series": [
+            {
+              "field": "count",
+              "label": "Patienten"
+            }
+          ],
+          "caption": "Einladungen per E-Mail, 26. September bis 25. Oktober 2026",
+          "source": {
+            "name": "Example Review Invitations · Bewertungseinladungen"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-profile-radar",
+      "description": "ChatGPT ref 14 with real data: the practice's Google profile across six completeness dimensions against the average of its five local competitors, two polygons, the legend under the plot, hovering a point shows both values.",
+      "expectedState": "data",
+      "locale": "de",
+      "width": 528,
+      "dataSet": "kassel-dental-practice",
+      "interactions": [
+        {
+          "name": "hover-point",
+          "hover": {
+            "position": {
+              "x": 352,
+              "y": 125
+            }
+          }
+        }
+      ],
+      "payload": {
+        "data": {
+          "dimensions": [
+            {
+              "dimension": "Fotos",
+              "own": 55,
+              "competitors": 75
+            },
+            {
+              "dimension": "Öffnungszeiten",
+              "own": 100,
+              "competitors": 95
+            },
+            {
+              "dimension": "Leistungen",
+              "own": 90,
+              "competitors": 70
+            },
+            {
+              "dimension": "Attribute",
+              "own": 70,
+              "competitors": 65
+            },
+            {
+              "dimension": "Bewertungen",
+              "own": 92,
+              "competitors": 68
+            },
+            {
+              "dimension": "Beiträge",
+              "own": 60,
+              "competitors": 40
+            }
+          ]
+        },
+        "view": {
+          "type": "Chart",
+          "kind": "radar",
+          "title": "Google-Profil im Vergleich",
+          "data": {
+            "$data": "dimensions"
+          },
+          "x": "dimension",
+          "series": [
+            {
+              "field": "own",
+              "label": "Ihre Praxis"
+            },
+            {
+              "field": "competitors",
+              "label": "Ø 5 Wettbewerber"
+            }
+          ],
+          "valueFormat": "percent",
+          "min": 0,
+          "max": 100,
+          "caption": "Vollständigkeit je Bereich in Prozent, Stand 25. Oktober 2026",
+          "source": {
+            "name": "Google Business Profile · Example Analytics Wettbewerbsanalyse"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-list",
+      "description": "The List node: a numbered short form, ListItems with a trailing Icon and a Repeat of ListItems (no single ChatGPT screenshot; ref 52's carousel content as entries).",
+      "expectedState": "data",
+      "width": 528,
+      "payload": {
+        "title": "Kanäle im Überblick",
+        "data": {
+          "channels": [
+            {
+              "name": "Organic",
+              "visitors": "4.190",
+              "share": "51,1 % Anteil"
+            },
+            {
+              "name": "Paid",
+              "visitors": "2.620",
+              "share": "32,0 % Anteil"
+            },
+            {
+              "name": "Direct",
+              "visitors": "1.390",
+              "share": "16,9 % Anteil"
+            }
+          ]
+        },
+        "view": {
+          "type": "List",
+          "marker": "number",
+          "children": [
+            {
+              "type": "Repeat",
+              "items": {
+                "$data": "channels"
+              },
+              "children": [
+                {
+                  "type": "ListItem",
+                  "title": {
+                    "$item": "name"
+                  },
+                  "description": "Besucher",
+                  "meta": {
+                    "$item": "share"
+                  },
+                  "value": {
+                    "$item": "visitors"
+                  },
+                  "slots": {
+                    "trailing": [
+                      {
+                        "type": "Icon",
+                        "name": "lineChart",
+                        "tone": "muted"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-loading",
+      "description": "Loading: a table and a chart bound to a tool result that is still pending show skeletons in their shape.",
+      "expectedState": "loading",
+      "width": 528,
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "KpiTile",
+              "label": "Besucher",
+              "value": {
+                "$from": {
+                  "toolCall": "call_7",
+                  "path": "$.total",
+                  "state": "pending"
+                }
+              }
+            },
+            {
+              "type": "Chart",
+              "kind": "line",
+              "title": "Besucher",
+              "data": {
+                "$from": {
+                  "toolCall": "call_7",
+                  "path": "$.rows[*]",
+                  "state": "pending"
+                }
+              },
+              "x": "x",
+              "series": [
+                {
+                  "field": "visits"
+                }
+              ]
+            },
+            {
+              "type": "Table",
+              "columns": [
+                {
+                  "key": "x",
+                  "label": "Tag"
+                },
+                {
+                  "key": "visits",
+                  "label": "Besucher"
+                }
+              ],
+              "rows": {
+                "$from": {
+                  "toolCall": "call_7",
+                  "path": "$.rows[*]",
+                  "state": "pending"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-empty",
+      "description": "Empty: a chart and a table over an empty dataset show one muted line each and report empty (the preview reads the block's render report, so its state is empty).",
+      "expectedState": "empty",
+      "width": 528,
+      "payload": {
+        "data": {
+          "none": []
+        },
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "Chart",
+              "kind": "bar",
+              "title": "Bewertungen pro Monat",
+              "data": {
+                "$data": "none"
+              },
+              "x": "month",
+              "series": [
+                {
+                  "field": "count"
+                }
+              ]
+            },
+            {
+              "type": "Table",
+              "columns": [
+                {
+                  "key": "name",
+                  "label": "Wettbewerber"
+                }
+              ],
+              "rows": {
+                "$data": "none"
+              },
+              "emptyText": "Noch keine Wettbewerber erfasst."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-error",
+      "description": "Error: rows without a number in the series and an unknown bound icon report failed (INVALID_PROP); the rest of the tree renders.",
+      "expectedState": "error",
+      "width": 528,
+      "payload": {
+        "state": {
+          "icon": "rocket"
+        },
+        "view": {
+          "type": "Stack",
+          "children": [
+            {
+              "type": "Chart",
+              "kind": "line",
+              "title": "Besucher",
+              "data": [
+                {
+                  "x": "Mo",
+                  "visits": "viele"
+                }
+              ],
+              "x": "x",
+              "series": [
+                {
+                  "field": "visits"
+                }
+              ],
+              "source": {
+                "name": "Google Analytics"
+              }
+            },
+            {
+              "type": "Icon",
+              "name": {
+                "$state": "icon"
+              },
+              "label": "Status"
+            },
+            {
+              "type": "KpiTile",
+              "label": "Besucher",
+              "value": 8200,
+              "source": {
+                "name": "Google Analytics"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-visibility-overview-ro",
+      "description": "AW-351 synthetic regression/state fixture; supplied problematic literals preserved.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "title": "Vizibilitate online",
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "google-profile",
+              "label": "Google profile",
+              "value": "Verificat · publicat",
+              "detail": "Profilul este vizibil pe Google.",
+              "source": {
+                "name": "getGoogleProfile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "reviews",
+              "label": "Reviews",
+              "value": "5/5 · 22 recenzii",
+              "detail": "Recenzii publicate de clienți.",
+              "source": {
+                "name": "getReviews"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "listings",
+              "label": "Listings",
+              "value": "19 din 20 corecte",
+              "detail": "O înregistrare necesită verificare.",
+              "source": {
+                "name": "getListings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "organic-rank",
+              "label": "Google organic rank",
+              "value": 12,
+              "detail": "Poziția medie în rezultatele organice.",
+              "source": {
+                "name": "getGoogleOrganicRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "maps-rank",
+              "label": "Google Maps rank",
+              "value": 4,
+              "detail": "Poziția medie pe Google Maps.",
+              "source": {
+                "name": "getGoogleMapsRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "ai-visibility",
+              "label": "AI Visibility",
+              "value": "61,4/100",
+              "detail": "Vizibilitate în răspunsurile generate de AI.",
+              "source": {
+                "name": "getAiVisibility"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-visibility-overview-toned",
+      "description": "AW-351: the visibility overview with the judgement tones a model may set (status accents, meter colours).",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "title": "Vizibilitate online",
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "google-profile",
+              "label": "Google profile",
+              "value": "Verificat · publicat",
+              "detail": "Profilul este vizibil pe Google.",
+              "source": {
+                "name": "getGoogleProfile"
+              },
+              "tone": "success"
+            },
+            {
+              "type": "KpiTile",
+              "id": "reviews",
+              "label": "Reviews",
+              "value": "5/5 · 22 recenzii",
+              "detail": "Recenzii publicate de clienți.",
+              "source": {
+                "name": "getReviews"
+              },
+              "tone": "success"
+            },
+            {
+              "type": "KpiTile",
+              "id": "listings",
+              "label": "Listings",
+              "value": "19 din 20 corecte",
+              "detail": "O înregistrare necesită verificare.",
+              "source": {
+                "name": "getListings"
+              },
+              "tone": "warning"
+            },
+            {
+              "type": "KpiTile",
+              "id": "organic-rank",
+              "label": "Google organic rank",
+              "value": 12,
+              "detail": "Poziția medie în rezultatele organice.",
+              "source": {
+                "name": "getGoogleOrganicRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "maps-rank",
+              "label": "Google Maps rank",
+              "value": 4,
+              "detail": "Poziția medie pe Google Maps.",
+              "source": {
+                "name": "getGoogleMapsRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "ai-visibility",
+              "label": "AI Visibility",
+              "value": "61,4/100",
+              "detail": "Vizibilitate în răspunsurile generate de AI.",
+              "source": {
+                "name": "getAiVisibility"
+              },
+              "tone": "warning"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-kpi-numeric-suffixes",
+      "description": "AW-351 synthetic fixture. Unsourced figures use bound literal state to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "numeric-0",
+              "label": "Metric 1",
+              "value": {
+                "$state": "fixture_numeric_0"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "numeric-1",
+              "label": "Metric 2",
+              "value": {
+                "$state": "fixture_numeric_1"
+              },
+              "unit": "%"
+            },
+            {
+              "type": "KpiTile",
+              "id": "numeric-2",
+              "label": "Metric 3",
+              "value": {
+                "$state": "fixture_numeric_2"
+              },
+              "unit": "/100"
+            },
+            {
+              "type": "KpiTile",
+              "id": "numeric-3",
+              "label": "Metric 4",
+              "value": {
+                "$state": "fixture_numeric_3"
+              },
+              "unit": "recenzii"
+            },
+            {
+              "type": "KpiTile",
+              "id": "numeric-4",
+              "label": "Metric 5",
+              "value": {
+                "$state": "fixture_numeric_4"
+              },
+              "unit": "EUR / lună",
+              "format": "currency",
+              "currency": "EUR"
+            },
+            {
+              "type": "KpiTile",
+              "id": "numeric-5",
+              "label": "Metric 6",
+              "value": {
+                "$state": "fixture_numeric_5"
+              },
+              "unit": "visits in the last 28 days",
+              "format": "compact"
+            }
+          ]
+        },
+        "state": {
+          "fixture_numeric_0": 8,
+          "fixture_numeric_1": 0,
+          "fixture_numeric_2": -12.5,
+          "fixture_numeric_3": "61,4/100",
+          "fixture_numeric_4": 113498,
+          "fixture_numeric_5": 8200
+        }
+      }
+    },
+    {
+      "name": "data-kpi-text-unicode",
+      "description": "AW-351 synthetic fixture. Unsourced figures use bound literal state to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "text-0",
+              "label": "Status 1",
+              "value": "Verified",
+              "detail": "Updated today"
+            },
+            {
+              "type": "KpiTile",
+              "id": "text-1",
+              "label": "Status 2",
+              "value": "Verificat · publicat"
+            },
+            {
+              "type": "KpiTile",
+              "id": "text-2",
+              "label": "Status 3",
+              "value": {
+                "$state": "fixture_text_2"
+              },
+              "detail": "Updated today"
+            },
+            {
+              "type": "KpiTile",
+              "id": "text-3",
+              "label": "Status 4",
+              "value": {
+                "$state": "fixture_text_3"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "text-4",
+              "label": "Status 5",
+              "value": "Informații verificate azi",
+              "detail": "Updated today"
+            },
+            {
+              "type": "KpiTile",
+              "id": "text-5",
+              "label": "Status 6",
+              "value": "Știință, încredere și țară"
+            }
+          ]
+        },
+        "state": {
+          "fixture_text_2": "5/5 · 22 recenzii",
+          "fixture_text_3": "19 din 20 corecte"
+        }
+      }
+    },
+    {
+      "name": "data-kpi-long-text",
+      "description": "AW-351 synthetic fixture. Unsourced figures use literal datasets to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 2,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "long-status",
+              "label": "Google profile",
+              "value": "Profil verificat și publicat; informațiile despre companie sunt actualizate în toate directoarele disponibile.",
+              "detail": "Date actualizate pentru toate locațiile companiei în ultimele douăzeci și opt de zile, inclusiv înregistrările care necesită verificare.",
+              "source": {
+                "name": "getGoogleBusinessProfileVerificationAndPublicationStatusForAllLocations"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "compound",
+              "label": "Status",
+              "value": "Donaudampfschifffahrtsgesellschaftskapitän"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-kpi-mixed-optional",
+      "description": "AW-351 synthetic fixture. Unsourced figures use bound literal state to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 4,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "mixed-0",
+              "label": "Metric 1",
+              "value": {
+                "$state": "fixture_mixed_0"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-1",
+              "label": "Metric 2",
+              "value": "Verificat · publicat",
+              "detail": "Updated today",
+              "unit": "%",
+              "delta": 5,
+              "higherIsBetter": false,
+              "deltaLabel": "vs previous month",
+              "source": {
+                "name": "getGoogleProfile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-2",
+              "label": "Metric 3",
+              "value": 12,
+              "detail": "Results collected during the last twenty-eight days",
+              "unit": "visits in the last 28 days",
+              "delta": 0,
+              "higherIsBetter": true,
+              "deltaLabel": "vs previous month",
+              "source": {
+                "name": "Google profile",
+                "url": "https://example.com/profile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-3",
+              "label": "Metric 4",
+              "value": "19 din 20 corecte",
+              "detail": "Date actualizate pentru toate locațiile companiei în ultimele douăzeci și opt de zile, inclusiv înregistrările care necesită verificare.",
+              "delta": -0.5,
+              "higherIsBetter": false,
+              "deltaLabel": "vs previous month",
+              "source": {
+                "name": "getGoogleBusinessProfileVerificationAndPublicationStatusForAllLocations"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-4",
+              "label": "Metric 5",
+              "value": {
+                "$state": "fixture_mixed_4"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-5",
+              "label": "Metric 6",
+              "value": "Știință, încredere și țară",
+              "detail": "Updated today",
+              "unit": "%",
+              "delta": 5,
+              "higherIsBetter": false,
+              "deltaLabel": "vs previous month",
+              "source": {
+                "name": "getGoogleProfile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-6",
+              "label": "Metric 7",
+              "value": 12,
+              "detail": "Results collected during the last twenty-eight days",
+              "unit": "visits in the last 28 days",
+              "delta": 0,
+              "higherIsBetter": true,
+              "deltaLabel": "vs previous month",
+              "source": {
+                "name": "Google profile",
+                "url": "https://example.com/profile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "mixed-7",
+              "label": "Metric 8",
+              "value": "Verificat · publicat",
+              "detail": "Date actualizate pentru toate locațiile companiei în ultimele douăzeci și opt de zile, inclusiv înregistrările care necesită verificare.",
+              "delta": -0.5,
+              "higherIsBetter": false,
+              "deltaLabel": "vs previous month",
+              "source": {
+                "name": "getGoogleBusinessProfileVerificationAndPublicationStatusForAllLocations"
+              }
+            }
+          ]
+        },
+        "state": {
+          "fixture_mixed_0": 12,
+          "fixture_mixed_4": 12
+        }
+      }
+    },
+    {
+      "name": "data-visibility-overview-en",
+      "description": "AW-351 synthetic fixture. Unsourced figures use bound literal state to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "google-profile",
+              "label": "Google business profile",
+              "value": "Verified · published",
+              "detail": "Updated today",
+              "source": {
+                "name": "getGoogleProfile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "reviews",
+              "label": "Customer reviews",
+              "value": "5/5 · 22 reviews",
+              "detail": "Results collected during the last twenty-eight days",
+              "source": {
+                "name": "getReviews"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "listings",
+              "label": "Directory listings",
+              "value": "19 of 20 correct",
+              "detail": "Updated today",
+              "source": {
+                "name": "getListings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "organic-rank",
+              "label": "Google organic rank",
+              "value": 12,
+              "detail": "Results collected during the last twenty-eight days",
+              "source": {
+                "name": "getGoogleOrganicRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "maps-rank",
+              "label": "Google Maps rank",
+              "value": 4,
+              "detail": "Updated today",
+              "source": {
+                "name": "getGoogleMapsRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "ai-visibility",
+              "label": "AI Visibility",
+              "value": "61,4/100",
+              "detail": "Results collected during the last twenty-eight days",
+              "source": {
+                "name": "getAiVisibility"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "locale-decimal",
+              "label": "Score",
+              "value": {
+                "$state": "fixture_locale_decimal"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "locale-currency",
+              "label": "Budget",
+              "value": {
+                "$state": "fixture_locale_currency"
+              },
+              "format": "currency",
+              "currency": "EUR"
+            }
+          ]
+        },
+        "state": {
+          "fixture_locale_decimal": 12.5,
+          "fixture_locale_currency": 113498
+        }
+      }
+    },
+    {
+      "name": "data-visibility-overview-de",
+      "description": "AW-351 synthetic fixture. Unsourced figures use bound literal state to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "google-profile",
+              "label": "Google-Unternehmensprofil",
+              "value": "Verifiziert · veröffentlicht",
+              "detail": "Heute aktualisiert",
+              "source": {
+                "name": "getGoogleProfile"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "reviews",
+              "label": "Kundenbewertungen",
+              "value": "5/5 · 22 Bewertungen",
+              "detail": "Ergebnisse aus den vergangenen achtundzwanzig Tagen",
+              "source": {
+                "name": "getReviews"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "listings",
+              "label": "Branchenverzeichnisse",
+              "value": "19 von 20 korrekt",
+              "detail": "Heute aktualisiert",
+              "source": {
+                "name": "getListings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "organic-rank",
+              "label": "Organische Google-Platzierung",
+              "value": 12,
+              "detail": "Ergebnisse aus den vergangenen achtundzwanzig Tagen",
+              "source": {
+                "name": "getGoogleOrganicRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "maps-rank",
+              "label": "Google-Maps-Platzierung",
+              "value": 4,
+              "detail": "Heute aktualisiert",
+              "source": {
+                "name": "getGoogleMapsRank"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "ai-visibility",
+              "label": "KI-Sichtbarkeit",
+              "value": "61,4/100",
+              "detail": "Ergebnisse aus den vergangenen achtundzwanzig Tagen",
+              "source": {
+                "name": "getAiVisibility"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "locale-decimal",
+              "label": "Score",
+              "value": {
+                "$state": "fixture_locale_decimal"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "locale-currency",
+              "label": "Budget",
+              "value": {
+                "$state": "fixture_locale_currency"
+              },
+              "format": "currency",
+              "currency": "EUR"
+            }
+          ]
+        },
+        "state": {
+          "fixture_locale_decimal": 12.5,
+          "fixture_locale_currency": 113498
+        }
+      }
+    },
+    {
+      "name": "data-kpi-pending",
+      "description": "AW-351 synthetic fixture. Unsourced figures use literal datasets to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "loading",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "KpiTile",
+          "id": "pending-metric",
+          "label": "Besucher",
+          "value": {
+            "$from": {
+              "toolCall": "call_7",
+              "path": "$.total",
+              "state": "pending"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-empty",
+      "description": "AW-351 synthetic fixture. Unsourced figures use literal datasets to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "empty",
+      "width": 672,
+      "payload": {
+        "state": {
+          "missing": null
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "empty-metric",
+          "label": "Conversions",
+          "value": {
+            "$state": "missing"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-pending-mixed",
+      "description": "AW-351 synthetic fixture. Unsourced figures use bound literal state to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "loading",
+      "width": 672,
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "id": "visibility",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "pending-metric",
+              "label": "Pending",
+              "value": {
+                "$from": {
+                  "toolCall": "call_7",
+                  "path": "$.total",
+                  "state": "pending"
+                }
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "resolved-metric",
+              "label": "Resolved",
+              "value": {
+                "$state": "fixture_resolved_metric"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "empty-metric",
+              "label": "Empty",
+              "value": {
+                "$state": "missing"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "text-metric",
+              "label": "Status",
+              "value": "Verified"
+            }
+          ]
+        },
+        "state": {
+          "missing": null,
+          "fixture_resolved_metric": 22
+        }
+      }
+    },
+    {
+      "name": "data-kpi-failed",
+      "description": "AW-351 synthetic fixture. Unsourced figures use literal datasets to exercise layout without provenance warnings; no customer facts are implied.",
+      "expectedState": "error",
+      "width": 672,
+      "payload": {
+        "data": {
+          "metric": {
+            "$from": {
+              "toolCall": "call_7",
+              "path": "$.total",
+              "state": "failed"
+            }
+          }
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "failed-metric",
+          "label": "Reviews",
+          "value": {
+            "$data": "metric"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-no-source",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "no-source",
+          "label": "No source",
+          "value": {
+            "$state": "metric"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-name-only",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "name-only",
+          "label": "Name-only source",
+          "value": {
+            "$state": "metric"
+          },
+          "source": {
+            "name": "getRankings"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-named-url",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "named-url",
+          "label": "Named URL",
+          "value": {
+            "$state": "metric"
+          },
+          "source": {
+            "name": "Rankings report",
+            "url": "https://example.com/rankings"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-host-url",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "host-url",
+          "label": "URL without a name",
+          "value": {
+            "$state": "metric"
+          },
+          "source": {
+            "url": "https://example.com/rankings"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-long-name",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 672,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "KpiTile",
+          "id": "long-name",
+          "label": "Long source name",
+          "value": {
+            "$state": "metric"
+          },
+          "source": {
+            "name": "Rankings report for all business locations during the previous twenty-eight days",
+            "url": "https://example.com/rankings"
+          }
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-mixed",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 960,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "Grid",
+          "id": "source-mixed",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "no-source",
+              "label": "No source",
+              "value": {
+                "$state": "metric"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "name-only",
+              "label": "Name-only source",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "getRankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "named-url",
+              "label": "Named URL",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "Rankings report",
+                "url": "https://example.com/rankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "host-url",
+              "label": "URL without a name",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "url": "https://example.com/rankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "long-name",
+              "label": "Long source name",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "Rankings report for all business locations during the previous twenty-eight days",
+                "url": "https://example.com/rankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "invalid",
+              "label": "Invalid URL",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "Invalid report",
+                "url": "https://"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "data-kpi-source-mixed-narrow",
+      "description": "AW-351 synthetic source-footer fixture; bound literal state exercises layout without implying customer facts.",
+      "expectedState": "data",
+      "width": 320,
+      "payload": {
+        "state": {
+          "metric": 4
+        },
+        "view": {
+          "type": "Grid",
+          "id": "source-mixed",
+          "columns": 3,
+          "children": [
+            {
+              "type": "KpiTile",
+              "id": "no-source",
+              "label": "No source",
+              "value": {
+                "$state": "metric"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "name-only",
+              "label": "Name-only source",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "getRankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "named-url",
+              "label": "Named URL",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "Rankings report",
+                "url": "https://example.com/rankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "host-url",
+              "label": "URL without a name",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "url": "https://example.com/rankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "long-name",
+              "label": "Long source name",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "Rankings report for all business locations during the previous twenty-eight days",
+                "url": "https://example.com/rankings"
+              }
+            },
+            {
+              "type": "KpiTile",
+              "id": "invalid",
+              "label": "Invalid URL",
+              "value": {
+                "$state": "metric"
+              },
+              "source": {
+                "name": "Invalid report",
+                "url": "https://"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

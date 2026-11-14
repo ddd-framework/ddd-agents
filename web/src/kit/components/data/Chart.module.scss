@@ -1,0 +1,28 @@
+@import "../../../styles/spacings";
+
+// A chart on whatever surface holds it: title, the plot at the full width, the caption and source under it. No box
+// of its own — a Surface node is the card (the ChatGPT charts sit framed only when a card frames them).
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+}
+
+.plot {
+  min-width: 0;
+  width: 100%;
+}
+
+// A sparkline in a table cell: small, inline, no gap.
+.sparkline {
+  gap: 0;
+  width: $x9 * 1.5;
+  max-width: 100%;
+}
+
+.skeleton {
+  width: 100%;
+}

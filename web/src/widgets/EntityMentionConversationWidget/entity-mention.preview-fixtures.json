@@ -1,0 +1,55 @@
+{
+  "wireName": "EntityMention",
+  "fixtures": [
+    {
+      "name": "entity-mention-competitor",
+      "description": "The read-only echo above the owner's own message: the competitor the owner put into the composer with the detail panel's \"Ask about this\" (ChatGPT's \"Anschlussfrage stellen\", 21b–21d).",
+      "payload": {
+        "entityType": "competitor",
+        "entityId": "8812",
+        "label": "Dentalzentrum Kassel-West",
+        "agentSpaceId": 1
+      },
+      "expectedState": "data",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "entity-mention-without-label",
+      "description": "A mention whose opener knew no name: the chip says \"About this entry\".",
+      "payload": {
+        "entityType": "review",
+        "entityId": "4711"
+      },
+      "expectedState": "data",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "entity-mention-invalid",
+      "description": "The error state: a fence that names no entity (no entityId) renders nothing and reports failed INVALID_PROP.",
+      "payload": {
+        "entityType": "competitor",
+        "label": "Dentalzentrum Kassel-West"
+      },
+      "expectedState": "error",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "default",
+      "description": "The owner opened the chat from the competitor list and asks about Dentalzentrum Kassel-West (Friedrich-Ebert-Straße 140, 4.7 ★ from 154 reviews): the chip above their message names it.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "entityType": "competitor",
+        "entityId": "5124",
+        "label": "Dentalzentrum Kassel-West",
+        "agentSpaceId": 7
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

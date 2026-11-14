@@ -1,0 +1,74 @@
+@import "../../styles/spacings";
+@import "../../styles/surfaces";
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+}
+
+// Option tile on the chat: the GlobalStateComponent root is the elevated card surface and draws the hover tint;
+// the checkbox-role element inside owns click, keyboard focus and the padding.
+.option {
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  background: var(--agents-bg-surface);
+}
+
+// Selected = a light CTA tint plus a hairline inset ring, no border and no padding change.
+.optionSelected {
+  background: color-mix(in srgb, var(--agents-fg-cta) 8%, var(--agents-bg-surface));
+  box-shadow: inset 0 0 0 $x0_125 var(--agents-fg-cta), $card-shadow;
+}
+
+.optionControl {
+  display: flex;
+  align-items: center;
+  gap: $x1_5;
+  padding: $x1_5;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  // Inset: the card root clips overflow, an outside outline would be cut off.
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: $card-radius;
+  }
+}
+
+.optionBody {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  flex: 1;
+  min-width: 0;
+}
+
+.optionLabel {
+  color: var(--agents-fg);
+}
+
+.optionLabelSelected {
+  color: var(--agents-fg-cta);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: $x1_5;
+  margin-top: $x0_5;
+  flex-wrap: wrap;
+}

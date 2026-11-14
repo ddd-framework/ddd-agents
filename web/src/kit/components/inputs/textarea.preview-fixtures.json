@@ -1,0 +1,37 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "textarea-note",
+      "description": "A multi-line field with a counter.",
+      "payload": {
+        "state": {
+          "note": "Open on Sundays from 10 to 14."
+        },
+        "view": {
+          "type": "Textarea",
+          "label": "Note for the team",
+          "rows": 4,
+          "maxLength": 280,
+          "value": {
+            "$state": "note"
+          },
+          "onChange": {
+            "set": "note"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "type",
+          "fill": {
+            "selector": "textarea >> visible=true",
+            "value": "Closed on public holidays."
+          }
+        }
+      ]
+    }
+  ]
+}

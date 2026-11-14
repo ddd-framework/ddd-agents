@@ -1,0 +1,319 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "contact-request",
+      "description": "A Form with a recipient, a subject and a message (the editable e-mail draft of ChatGPT reference 47): the owner edits the fields and sends them to the agent, or declines.",
+      "payload": {
+        "state": {
+          "recipient": "",
+          "subject": "Short request",
+          "message": "Hello,\n\nI am interested in your offer and would like more information on prices, availability and terms.\n\nCould you send me the documents?\n\nKind regards"
+        },
+        "view": {
+          "type": "Form",
+          "name": "shortRequest",
+          "title": "Short request",
+          "description": "Edit the draft, then send it to me — I will e-mail it for you.",
+          "submitLabel": "Send request",
+          "declineLabel": "Not now",
+          "requiredFields": [
+            "recipient",
+            "message"
+          ],
+          "children": [
+            {
+              "type": "Input",
+              "label": "Recipient",
+              "inputType": "email",
+              "placeholder": "name@example.com",
+              "value": {
+                "$state": "recipient"
+              },
+              "onChange": {
+                "set": "recipient"
+              }
+            },
+            {
+              "type": "Input",
+              "label": "Subject",
+              "value": {
+                "$state": "subject"
+              },
+              "onChange": {
+                "set": "subject"
+              }
+            },
+            {
+              "type": "Textarea",
+              "label": "Your question",
+              "rows": 7,
+              "value": {
+                "$state": "message"
+              },
+              "onChange": {
+                "set": "message"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "send without a recipient",
+          "click": {
+            "text": "Send request"
+          }
+        },
+        {
+          "name": "type the recipient",
+          "fill": {
+            "selector": "input[type=email]",
+            "value": "info@example.com"
+          }
+        },
+        {
+          "name": "send the request",
+          "click": {
+            "text": "Send request"
+          }
+        }
+      ]
+    },
+    {
+      "name": "filter-and-state",
+      "description": "The 'Filter & State' panel of ChatGPT reference 52 as a Form: period tabs, a channel select, a reference date, a traffic slider and a checkbox; Apply sends the chosen settings.",
+      "payload": {
+        "state": {
+          "period": "7d",
+          "channel": "all",
+          "asOf": "2026-10-25",
+          "scale": 100,
+          "benchmark": true
+        },
+        "view": {
+          "type": "Form",
+          "name": "dashboardFilters",
+          "title": "Filter & state",
+          "description": "Pick what the dashboard shows.",
+          "submitLabel": "Apply",
+          "children": [
+            {
+              "type": "Tabs",
+              "label": "Period",
+              "options": [
+                {
+                  "id": "7d",
+                  "label": "7 days"
+                },
+                {
+                  "id": "4w",
+                  "label": "4 weeks"
+                }
+              ],
+              "value": {
+                "$state": "period"
+              },
+              "onChange": {
+                "set": "period"
+              }
+            },
+            {
+              "type": "Stack",
+              "direction": "row",
+              "children": [
+                {
+                  "type": "Select",
+                  "label": "Channel",
+                  "options": [
+                    {
+                      "id": "all",
+                      "label": "All channels"
+                    },
+                    {
+                      "id": "organic",
+                      "label": "Organic"
+                    },
+                    {
+                      "id": "paid",
+                      "label": "Paid"
+                    },
+                    {
+                      "id": "direct",
+                      "label": "Direct"
+                    }
+                  ],
+                  "value": {
+                    "$state": "channel"
+                  },
+                  "onChange": {
+                    "set": "channel"
+                  }
+                },
+                {
+                  "type": "DatePicker",
+                  "label": "Reference date",
+                  "value": {
+                    "$state": "asOf"
+                  },
+                  "onChange": {
+                    "set": "asOf"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Slider",
+              "label": "Traffic scaling",
+              "min": 50,
+              "max": 150,
+              "step": 5,
+              "unit": "%",
+              "value": {
+                "$state": "scale"
+              },
+              "onChange": {
+                "set": "scale"
+              }
+            },
+            {
+              "type": "Checkbox",
+              "label": "Show comparison values (90 % of visitors)",
+              "checked": {
+                "$state": "benchmark"
+              },
+              "onChange": {
+                "set": "benchmark"
+              }
+            }
+          ],
+          "slots": {
+            "header": [
+              {
+                "type": "Popover",
+                "label": "Method",
+                "icon": "info",
+                "placement": "end",
+                "text": "All numbers are demo data. The filters work locally and react to your input."
+              }
+            ]
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "open the method popover",
+          "click": {
+            "text": "Method"
+          }
+        },
+        {
+          "name": "pick 4 weeks",
+          "click": {
+            "text": "4 weeks"
+          }
+        },
+        {
+          "name": "apply",
+          "click": {
+            "text": "Apply"
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirm-only",
+      "description": "A Form without inputs (the empty state): one line of text and the two buttons — sends an empty submit or the decline.",
+      "payload": {
+        "view": {
+          "type": "Form",
+          "name": "publishConfirm",
+          "title": "Publish the draft?",
+          "submitLabel": "Publish",
+          "declineLabel": "Not now",
+          "children": [
+            {
+              "type": "Text",
+              "text": "The post goes live on Google and Facebook.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "decline",
+          "click": {
+            "text": "Not now"
+          }
+        }
+      ]
+    },
+    {
+      "name": "contact-request-email",
+      "description": "The contact-request form as the e-mail capture shows it: the fields frozen at their values, no action row (run with --mode email).",
+      "payload": {
+        "state": {
+          "recipient": "",
+          "subject": "Short request",
+          "message": "Hello,\n\nI am interested in your offer and would like more information on prices, availability and terms.\n\nCould you send me the documents?\n\nKind regards"
+        },
+        "view": {
+          "type": "Form",
+          "name": "shortRequest",
+          "title": "Short request",
+          "description": "Edit the draft, then send it to me — I will e-mail it for you.",
+          "submitLabel": "Send request",
+          "declineLabel": "Not now",
+          "requiredFields": [
+            "recipient",
+            "message"
+          ],
+          "children": [
+            {
+              "type": "Input",
+              "label": "Recipient",
+              "inputType": "email",
+              "placeholder": "name@example.com",
+              "value": {
+                "$state": "recipient"
+              },
+              "onChange": {
+                "set": "recipient"
+              }
+            },
+            {
+              "type": "Input",
+              "label": "Subject",
+              "value": {
+                "$state": "subject"
+              },
+              "onChange": {
+                "set": "subject"
+              }
+            },
+            {
+              "type": "Textarea",
+              "label": "Your question",
+              "rows": 7,
+              "value": {
+                "$state": "message"
+              },
+              "onChange": {
+                "set": "message"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+@import "../../../../styles/spacings";
+
+// The frame of one kit input: label row, control, muted
+// line. No surface of its own — an input sits inside the tree's Card or Stack, which carries the surface.
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+  width: 100%;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $x1;
+  min-width: 0;
+}
+
+.label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.labelValue {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.description {
+  overflow-wrap: anywhere;
+}
+
+.pending {
+  display: block;
+}
+
+// A replayed message or the e-mail capture: the control shows its value, nothing reacts (the element is `inert`).
+.frozen {
+  cursor: default;
+}

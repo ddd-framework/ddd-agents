@@ -1,0 +1,185 @@
+// The package variables: every colour, surface and shadow custom property package rules read,
+// with a neutral default for light and for dark.
+//
+// An app sets them to its own theme with a plain rule, e.g. `:root { --agents-fg-cta: #0a7d4f; }`. The defaults sit
+// in the cascade layer `agents-defaults`, and any declaration outside a layer wins over a layered one whatever its
+// selector specificity or stylesheet order — so the app's rule wins whether it loads before or after this stylesheet.
+// An app that puts its own rules in layers declares the order once, `@layer agents-defaults, <its layers>;`, before
+// this stylesheet loads.
+//
+// Dark: the dark set applies when the system asks for dark and the page does not pin light (`data-theme="light"` on
+// the root element), or when the page pins dark (`data-theme="dark"`). The colour scheme follows, so the `light-dark()`
+// pairs in package rules pick their dark half.
+@use "sass:color";
+@use "sass:map";
+
+// Colours emitted as they are (`--agents-<name>`).
+$agents-light-colors: (
+  "bg": #ffffff,
+  "bg-surface": #ffffff,
+  "bg-var": #f4f5f7,
+  "bg-disabled": #c3c9d2,
+  "brd-gl": #c8ced7,
+  "divider-gl": #e3e6eb,
+  "fg": #1f2329,
+  "fg-light": #5a6270,
+  "fg-lightest": #8b929d,
+  "fg-cta": #2563eb,
+  "fg-on-dark": #ffffff,
+  "text-subtle": #8b929d,
+  "neutral-200": #e3e6eb,
+  "neutral-700": #374151,
+  "primary-400": #3b82f6,
+  "primary-500": #2563eb,
+  "primary-700": #1d4ed8,
+  "info-500": #2563eb,
+  "info-900": #1e3a8a,
+  "success-500": #16a34a,
+  "success-900": #14532d,
+  "warning-500": #d97706,
+  "warning-900": #78350f,
+  "danger-500": #dc2626,
+  "danger-900": #7f1d1d,
+  "accent1-300": #a5b4fc,
+  "accent1-500": #4f46e5,
+  "accent3-300": #f9a8d4,
+  "accent3-900": #be185d,
+  "accent4-300": #5eead4,
+  "accent4-900": #0f766e,
+  "chart-01": #2563eb,
+  "chart-02": #f59e0b,
+  "chart-03": #16a34a,
+  "chart-04": #db2777,
+  "chart-05": #1e40af,
+  "chart-06": #60a5fa,
+  "chart-07": #bfdbfe,
+  "chart-08": #4c1d95,
+  // The chat.
+  "bg-cta": #2563eb,
+  "bg-hover-primary": #dbeafe,
+  "danger-100": #fee2e2,
+  "neutral-000": #ffffff,
+  "neutral-300": #d1d5db,
+  "global-background": #ffffff,
+  "chat-background": #f4f5f7,
+  "chat-user-bubble-background": rgba(#5a6270, 0.12),
+  "chat-user-bubble-text": #1f2329,
+  // The colour steps of a named assistant (host application: an AI-Extensions category's palette).
+  "assistant-100": #e0e7ff,
+  "assistant-400": #6366f1,
+  "assistant-500": #4f46e5,
+  "assistant-600": #4338ca,
+);
+
+// Colours emitted only as an `r, g, b` triplet (`--agents-<name>-rgb`), for `rgba(var(--agents-<name>-rgb), <alpha>)`.
+$agents-light-triplets: (
+  "bg": map.get($agents-light-colors, "bg"),
+  "bg-disabled": map.get($agents-light-colors, "bg-disabled"),
+  "bg-dark": #14171c,
+  "fg": map.get($agents-light-colors, "fg"),
+  "fg-cta": map.get($agents-light-colors, "fg-cta"),
+  "shadow": #0b0d12,
+  "neutral-500": #5a6270,
+  "neutral-000": #ffffff,
+  "neutral-900": #111827,
+  "danger-500": map.get($agents-light-colors, "danger-500"),
+);
+
+$agents-dark-colors: (
+  "bg": #111418,
+  "bg-surface": #1a1e24,
+  "bg-var": #232830,
+  "bg-disabled": #4b5260,
+  "brd-gl": #3d4450,
+  "divider-gl": #2e343d,
+  "fg": #e8eaed,
+  "fg-light": #aab1bc,
+  "fg-lightest": #7d8592,
+  "fg-cta": #60a5fa,
+  "fg-on-dark": #ffffff,
+  "text-subtle": #7d8592,
+  "neutral-200": #2e343d,
+  "neutral-700": #d1d5db,
+  "primary-400": #93c5fd,
+  "primary-500": #60a5fa,
+  "primary-700": #3b82f6,
+  "info-500": #60a5fa,
+  "info-900": #bfdbfe,
+  "success-500": #4ade80,
+  "success-900": #bbf7d0,
+  "warning-500": #fbbf24,
+  "warning-900": #fde68a,
+  "danger-500": #f87171,
+  "danger-900": #fecaca,
+  "accent1-300": #c7d2fe,
+  "accent1-500": #818cf8,
+  "accent3-300": #fbcfe8,
+  "accent3-900": #f472b6,
+  "accent4-300": #99f6e4,
+  "accent4-900": #2dd4bf,
+  "chart-01": #60a5fa,
+  "chart-02": #fbbf24,
+  "chart-03": #4ade80,
+  "chart-04": #f472b6,
+  "chart-05": #3b82f6,
+  "chart-06": #93c5fd,
+  "chart-07": #1e3a8a,
+  "chart-08": #a78bfa,
+  "bg-cta": #3b82f6,
+  "bg-hover-primary": #1e3a8a,
+  "danger-100": #450a0a,
+  "neutral-000": #ffffff,
+  "neutral-300": #4b5563,
+  "global-background": #111418,
+  "chat-background": #111418,
+  "chat-user-bubble-background": rgba(#aab1bc, 0.14),
+  "chat-user-bubble-text": #e8eaed,
+  "assistant-100": #1e1b4b,
+  "assistant-400": #818cf8,
+  "assistant-500": #6366f1,
+  "assistant-600": #a5b4fc,
+);
+
+$agents-dark-triplets: (
+  "bg": map.get($agents-dark-colors, "bg"),
+  "bg-disabled": map.get($agents-dark-colors, "bg-disabled"),
+  "bg-dark": #000000,
+  "fg": map.get($agents-dark-colors, "fg"),
+  "fg-cta": map.get($agents-dark-colors, "fg-cta"),
+  "shadow": #000000,
+  "neutral-500": #aab1bc,
+  "neutral-000": #ffffff,
+  "neutral-900": #0b0d12,
+  "danger-500": map.get($agents-dark-colors, "danger-500"),
+);
+
+@function agents-rgb-triplet($colour) {
+  @return color.channel($colour, "red", $space: rgb), color.channel($colour, "green", $space: rgb),
+    color.channel($colour, "blue", $space: rgb);
+}
+
+@mixin agents-variables($colors, $triplets, $scheme) {
+  color-scheme: $scheme;
+  @each $name, $colour in $colors {
+    --agents-#{$name}: #{$colour};
+  }
+  @each $name, $colour in $triplets {
+    --agents-#{$name}-rgb: #{agents-rgb-triplet($colour)};
+  }
+}
+
+@layer agents-defaults {
+  :root {
+    @include agents-variables($agents-light-colors, $agents-light-triplets, light);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      @include agents-variables($agents-dark-colors, $agents-dark-triplets, dark);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    @include agents-variables($agents-dark-colors, $agents-dark-triplets, dark);
+  }
+}

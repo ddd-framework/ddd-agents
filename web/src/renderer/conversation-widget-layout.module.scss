@@ -1,0 +1,47 @@
+.narrow {
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* This file is loaded by postcss-modules via `composes: ... from` (see
+   ConversationMarkdown.module.scss / Conversation.module.scss), which parses it with
+   the plain CSS parser — keep it free of Sass-only syntax (`//` comments,
+   `$vars`). */
+
+/* Break out of the content column to 5/3 of its width, but never wider than
+   the chatPane container minus a 48px gutter each side — on mid-size panes
+   (~800–1400px) the unclamped overhang is wider than the pane and clips at
+   its edge. */
+.wide {
+  --agents-wide-breakout-width: clamp(100%, 100cqw - 96px, calc(100% * 5 / 3));
+  width: var(--agents-wide-breakout-width);
+  margin-left: calc((100% - var(--agents-wide-breakout-width)) / 2);
+  margin-right: calc((100% - var(--agents-wide-breakout-width)) / 2);
+  box-sizing: border-box;
+}
+
+@container chatPane (max-width: 768px) {
+  .narrow {
+    width: 100%;
+  }
+
+  .wide {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .narrow {
+    width: 100%;
+  }
+
+  .wide {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

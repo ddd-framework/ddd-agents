@@ -1,0 +1,35 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "checkbox-benchmark",
+      "description": "One checkbox with a muted explanation (ChatGPT reference 52).",
+      "payload": {
+        "state": {
+          "benchmark": true
+        },
+        "view": {
+          "type": "Checkbox",
+          "label": "Show comparison values",
+          "description": "The comparison line is 90 % of the visitors.",
+          "checked": {
+            "$state": "benchmark"
+          },
+          "onChange": {
+            "set": "benchmark"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "clear",
+          "click": {
+            "text": "Show comparison values"
+          }
+        }
+      ]
+    }
+  ]
+}

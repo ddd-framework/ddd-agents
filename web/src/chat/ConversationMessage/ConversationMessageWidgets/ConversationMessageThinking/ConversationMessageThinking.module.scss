@@ -1,0 +1,65 @@
+@import "../../../../styles/spacings";
+@import "../../../conversation-tokens";
+
+$thinkingDotsAnimationDuration: 500ms;
+$thinkingDotSize: $x1;
+$thinkingDotGap: $x0_5 + $x0_25;
+$thinkingDotBounce: -1 * ($x0_5 + $x0_25);
+
+.responseContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  max-width: $chat-content-max-width;
+}
+
+.thinkingMessage {
+  display: flex;
+  gap: $x1;
+}
+
+.thinkingDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $thinkingDotGap;
+}
+
+.thinkingDots span {
+  width: $thinkingDotSize;
+  height: $thinkingDotSize;
+  background-color: var(--agents-fg-light);
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce $thinkingDotsAnimationDuration infinite ease-in-out;
+}
+
+/* Delay each dot slightly */
+.thinkingDots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.thinkingDots span:nth-child(2) {
+  animation-delay: $thinkingDotsAnimationDuration * 0.15;
+}
+
+.thinkingDots span:nth-child(3) {
+  animation-delay: $thinkingDotsAnimationDuration * 0.3;
+}
+
+/* The gentle up-and-down motion */
+@keyframes bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: translateY($thinkingDotBounce);
+    opacity: 1;
+  }
+}

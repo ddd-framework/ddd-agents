@@ -1,0 +1,178 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "slider-revenue-simulator",
+      "description": "The revenue simulator: three sliders recompute two KPIs live; \"Copy result\" copies the summary (ChatGPT reference 10).",
+      "payload": {
+        "state": {
+          "visitors": 35000,
+          "conversionRate": 3.0,
+          "basketValue": 70
+        },
+        "computed": {
+          "orders": "round(visitors * conversionRate / 100)",
+          "revenue": "orders * basketValue",
+          "summary": "\"Monthly revenue: \" + string(revenue) + \" EUR, orders: \" + string(orders) + \", visitors: \" + string(visitors) + \", conversion rate: \" + string(conversionRate) + \" %, basket value: \" + string(basketValue) + \" EUR\""
+        },
+        "actions": {
+          "copyResult": {
+            "type": "copy",
+            "value": {
+              "$computed": "summary"
+            }
+          }
+        },
+        "view": {
+          "type": "Surface",
+          "title": "Revenue Simulator",
+          "subtitle": "E-commerce · example scenario",
+          "children": [
+            {
+              "type": "Grid",
+              "columns": 2,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Monthly revenue",
+                  "value": {
+                    "$computed": "revenue"
+                  },
+                  "format": "currency",
+                  "currency": "EUR",
+                  "decimals": 0
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Orders",
+                  "value": {
+                    "$computed": "orders"
+                  },
+                  "format": "number"
+                }
+              ]
+            },
+            {
+              "type": "Divider"
+            },
+            {
+              "type": "Slider",
+              "label": "Visitors / month",
+              "min": 0,
+              "max": 100000,
+              "step": 1000,
+              "value": {
+                "$state": "visitors"
+              },
+              "onChange": {
+                "set": "visitors"
+              }
+            },
+            {
+              "type": "Slider",
+              "label": "Conversion rate",
+              "min": 0.5,
+              "max": 8,
+              "step": 0.1,
+              "unit": "%",
+              "decimals": 1,
+              "value": {
+                "$state": "conversionRate"
+              },
+              "onChange": {
+                "set": "conversionRate"
+              }
+            },
+            {
+              "type": "Slider",
+              "label": "Basket value",
+              "min": 10,
+              "max": 200,
+              "step": 5,
+              "unit": "€",
+              "value": {
+                "$state": "basketValue"
+              },
+              "onChange": {
+                "set": "basketValue"
+              }
+            },
+            {
+              "type": "Button",
+              "label": "Copy result",
+              "icon": "copy",
+              "fullWidth": true,
+              "onClick": {
+                "action": "copyResult"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "more visitors",
+          "click": {
+            "selector": ".MuiSlider-thumb >> nth=0"
+          },
+          "press": "ArrowRight"
+        },
+        {
+          "name": "higher conversion rate",
+          "click": {
+            "selector": ".MuiSlider-thumb >> nth=1"
+          },
+          "press": "ArrowRight"
+        },
+        {
+          "name": "copy result",
+          "click": {
+            "text": "Copy result"
+          }
+        }
+      ]
+    },
+    {
+      "name": "slider-loading",
+      "description": "The value is bound to a tool result that has not arrived yet — skeleton.",
+      "payload": {
+        "view": {
+          "type": "Slider",
+          "label": "Visitors / month",
+          "min": 0,
+          "max": {
+            "$from": {
+              "toolCall": "call_pending",
+              "path": "$.max"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "slider-invalid-range",
+      "description": "max is not above min — the slider renders nothing inside its card and the block reports failed. The preview sees the card (state data); the block's render report says failed.",
+      "payload": {
+        "view": {
+          "type": "Surface",
+          "title": "Revenue Simulator",
+          "children": [
+            {
+              "type": "Slider",
+              "label": "Visitors / month",
+              "min": 100,
+              "max": 100
+            }
+          ]
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

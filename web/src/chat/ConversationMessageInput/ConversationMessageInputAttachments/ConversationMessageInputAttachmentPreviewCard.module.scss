@@ -1,0 +1,83 @@
+@import "../../../styles/spacings";
+
+.card {
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: $x1;
+  // NO overflow: hidden — the ✕ holder overflows the top-right corner; the background still
+  // clips to the border-radius by itself, and the thumbnail rounds its own corners.
+  // Semitransparent neutral fill so the card reads as a tile on both the light and dark
+  // chat surface (same recipe as the selection chip's pill).
+  background: rgba(var(--agents-neutral-500-rgb), 0.1);
+}
+
+.cardFailed {
+  box-shadow: 0 0 0 1px var(--agents-danger-500);
+}
+
+.cardGenericFile {
+  display: flex;
+  align-items: center;
+  padding: $x1 $x5 $x1 $x1_5;
+}
+
+.thumbnail {
+  display: block;
+  // 128×128px square tile; object-fit crops the picked image to its center.
+  width: 16 * $x1;
+  height: 16 * $x1;
+  object-fit: cover;
+  border-radius: $x1;
+}
+
+.fileFacts {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  min-width: 0;
+}
+
+.uploadProgress {
+  position: absolute;
+  left: $x0_5;
+  right: $x0_5;
+  bottom: $x0_5;
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+}
+
+.uploadStatusCaption {
+  // Black shadow so the white caption stays readable over any thumbnail.
+  text-shadow:
+    0 1px 3px rgba(var(--agents-neutral-900-rgb), 0.8),
+    0 0 $x1 rgba(var(--agents-neutral-900-rgb), 0.6);
+}
+
+.failedCaption {
+  position: absolute;
+  left: $x0_5;
+  bottom: $x0_5;
+}
+
+// The Button's own wrapper span stays in flow, so this holder does the positioning: the translate
+// centers the ✕ exactly on the image's top-right corner, whatever the button's rendered size.
+.removeButtonHolder {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(40%, -40%);
+  display: flex;
+  // Fades in on card hover (below) — and stays visible while focused, for keyboard users.
+  opacity: 0;
+  transition: opacity 150ms ease;
+
+  &:focus-within {
+    opacity: 1;
+  }
+}
+
+.card:hover .removeButtonHolder {
+  opacity: 1;
+}
+

@@ -1,0 +1,121 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "youtube-video-cards",
+      "description": "What searchYouTubeVideos dictates for two results (ChatGPT 45, the Münster walking tour): a two-column grid of VideoCards with thumbnail, length chip, title, channel · views · date and the watch link; play swaps in the embed.",
+      "payload": {
+        "view": {
+          "type": "Grid",
+          "columns": 2,
+          "minColumnWidth": "regular",
+          "children": [
+            {
+              "type": "VideoCard",
+              "title": "Münster, Germany 4k Walking Tour | Explore the Charming Streets & Landmarks",
+              "videoId": "x5-yoDUoz5k",
+              "thumbnail": "https://i.ytimg.com/vi/x5-yoDUoz5k/hqdefault.jpg",
+              "durationSeconds": 1418,
+              "channel": "Duslin Travels",
+              "viewCount": 18234,
+              "publishedAt": "2025-02-08"
+            },
+            {
+              "type": "VideoCard",
+              "title": "Münster Walking Tour Germany | Spring Sunny day Walk in Münster | 4K HDR 60fps",
+              "videoId": "QZRHqiz_oH4",
+              "thumbnail": "https://i.ytimg.com/vi/QZRHqiz_oH4/hqdefault.jpg",
+              "durationSeconds": 3725,
+              "channel": "Walking Germany",
+              "viewCount": 1284000,
+              "publishedAt": "2024-05-19"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "play the first video in place",
+          "click": {
+            "selector": "button[aria-label^=\"Play the video Münster, Germany\"]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "youtube-video-card-single",
+      "description": "One search result: the VideoCard at the root of the tree — the shape of a one-video answer.",
+      "payload": {
+        "view": {
+          "type": "VideoCard",
+          "title": "Münster, Germany 4k Walking Tour | Explore the Charming Streets & Landmarks",
+          "videoId": "x5-yoDUoz5k",
+          "thumbnail": "https://i.ytimg.com/vi/x5-yoDUoz5k/hqdefault.jpg",
+          "durationSeconds": 1418,
+          "channel": "Duslin Travels",
+          "viewCount": 18234,
+          "publishedAt": "2025-02-08"
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "play in place",
+          "click": {
+            "selector": "button[aria-label^=\"Play the video\"]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "youtube-video-card-without-details",
+      "description": "A result whose detail read failed: no length and no views, the thumbnail taken from the videoId — the card still plays.",
+      "payload": {
+        "view": {
+          "type": "VideoCard",
+          "title": "Münster, Germany 4k Walking Tour",
+          "videoId": "x5-yoDUoz5k",
+          "channel": "Duslin Travels",
+          "publishedAt": "2025-02-08"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "youtube-video-card-loading",
+      "description": "The card bound to a pending tool result: the card-shaped skeleton.",
+      "payload": {
+        "view": {
+          "type": "VideoCard",
+          "title": "Pending video",
+          "videoId": {
+            "$from": {
+              "toolCall": "call_preview_youtube",
+              "path": "$.videos[0].videoId",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "youtube-video-card-unplayable",
+      "description": "A card whose videoId is no YouTube id: it shows its title only and reports failed.",
+      "payload": {
+        "view": {
+          "type": "VideoCard",
+          "title": "A tour without a playable video",
+          "videoId": "not a video id!"
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

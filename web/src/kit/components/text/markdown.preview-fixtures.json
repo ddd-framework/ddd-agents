@@ -1,0 +1,29 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-markdown-coalition",
+      "description": "Screenshot 04 as one Markdown node: heading, paragraph, a table with ✓/✗, a source link.",
+      "payload": {
+        "view": {
+          "type": "Markdown",
+          "markdown": "## Rechnerische Koalitionsmöglichkeiten\n\nAuf Grundlage der GMS-Umfrage vom 19. Oktober 2026 ergibt sich bei modellierten 180 Sitzen folgende Verteilung:\n\n| Koalition | Sitze | Mehrheit (91) |\n|---|---:|---|\n| CSU + Freie Wähler | 94 | ✓ |\n| CSU + Grüne | 104 | ✓ |\n| CSU + SPD | 86 | ✗ |\n\nQuelle: [wahlrecht.de](https://www.wahlrecht.de/umfragen/landtage/bayern.htm)"
+        }
+      },
+      "expectedState": "data",
+      "width": 720
+    },
+    {
+      "name": "text-markdown-safe-subset",
+      "description": "Raw HTML, an image and a javascript: link in model Markdown: none reach the DOM, the link keeps its text.",
+      "payload": {
+        "view": {
+          "type": "Markdown",
+          "markdown": "**Fett**, *kursiv* und `Code`.\n\n<script>alert(1)</script><b>HTML</b> ![Pixel](https://example.org/p.png)\n\n- [WDR](https://www1.wdr.de) öffnet in einem neuen Tab\n- [böse](javascript:alert(1)) bleibt Text\n\n> Ein Zitat."
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

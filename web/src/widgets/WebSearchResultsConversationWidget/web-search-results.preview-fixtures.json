@@ -1,0 +1,57 @@
+{
+  "wireName": "WebSearchResults",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "The sources of a web research answer — the source cards of the ChatGPT news feed reference.",
+      "payload": {
+        "query": "Münster bakery opening hours on public holidays",
+        "provider": "PERPLEXITY",
+        "sources": [
+          { "url": "https://www.muenster.de/feiertage.html", "title": "Feiertage in Münster" },
+          { "url": "https://www.ihk.de/nordwestfalen/ladenoeffnung", "title": "Ladenöffnung an Feiertagen" },
+          { "url": "https://www.bäckerhandwerk.de/oeffnungszeiten", "title": "Öffnungszeiten im Bäckerhandwerk" }
+        ]
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "render-report-empty",
+      "description": "No answer and no source with a url reports empty NO_DATA.",
+      "payload": {
+        "query": "opening hours",
+        "sources": []
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "kassel-dental-emergency-service",
+      "description": "The owner asked how the dental emergency service in Kassel is organised at weekends (for the practice's Notfallsprechstunde page); the widget carries the three pages the answer used.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "query": "zahnärztlicher Notdienst Kassel Wochenende",
+        "provider": "PERPLEXITY",
+        "sources": [
+          {
+            "url": "https://www.lzkh.de/patienten/zahnaerztlicher-notdienst",
+            "title": "Zahnärztlicher Notdienst in Hessen – Landeszahnärztekammer Hessen"
+          },
+          {
+            "url": "https://www.kzvh.de/patienten/notdienst",
+            "title": "Notdienstsuche – Kassenzahnärztliche Vereinigung Hessen"
+          },
+          {
+            "url": "https://www.kassel.de/buerger/gesundheit/notdienste.php",
+            "title": "Notdienste und Bereitschaftsdienste – Stadt Kassel"
+          }
+        ]
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

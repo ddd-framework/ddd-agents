@@ -1,0 +1,8 @@
+@import "../../../styles/spacings";
+
+// The chat background behind a story, so a surface or token that does not switch with the scheme shows.
+.chatPane {
+  width: 100%;
+  padding: $x3;
+  background: var(--agents-bg-var);
+}

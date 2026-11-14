@@ -1,0 +1,20 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// Sits where the owner bubble would (right-aligned in the timeline), but muted — the seed instruction is
+// machine-composed, not the owner's utterance.
+.disclosure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $x1;
+  margin: $x1 0;
+}
+
+.instructionPanel {
+  max-width: 80%;
+  padding: $card-padding;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  background: var(--agents-bg-surface);
+}

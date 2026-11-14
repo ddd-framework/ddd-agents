@@ -1,0 +1,103 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-follow-up-links",
+      "description": "Screenshot 50 rebuilt with what a ComposedView may do: Title, Text, a Label and three Links that open pages in a new tab. The follow-up pills that ISSUE A NEW CHAT TURN are deliberately not part of the kit — model-written pills stay QuickReplies / SuggestedActions.",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "small",
+          "children": [
+            {
+              "type": "Title",
+              "text": "10. Follow-up-Vorschläge – klickbare Folgefragen"
+            },
+            {
+              "type": "Text",
+              "text": "Ein kleines, aber praktisches Element: Du kannst eine vorgeschlagene Seite anklicken, um direkt weiterzulesen."
+            },
+            {
+              "type": "Surface",
+              "title": "Weitere Widget-Demos ausprobieren",
+              "children": [
+                {
+                  "type": "Stack",
+                  "gap": "xsmall",
+                  "children": [
+                    {
+                      "type": "Link",
+                      "text": "3D-Sonnensystem",
+                      "url": "https://science.nasa.gov/solar-system/"
+                    },
+                    {
+                      "type": "Link",
+                      "text": "SaaS-Dashboard",
+                      "url": "https://developers.openai.com/apps-sdk"
+                    },
+                    {
+                      "type": "Link",
+                      "text": "Routenplaner",
+                      "url": "https://www.google.com/maps/dir/M%C3%BCnster/K%C3%B6ln"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Text",
+              "text": "Hier sind außerdem native Folgefrage-Elemente:"
+            },
+            {
+              "type": "Stack",
+              "gap": "xsmall",
+              "children": [
+                {
+                  "type": "Link",
+                  "text": "Interaktives 3D-Sonnensystem zeigen",
+                  "url": "https://science.nasa.gov/solar-system/"
+                },
+                {
+                  "type": "Link",
+                  "text": "Weitere Widget-Typen vergleichen",
+                  "url": "https://developers.openai.com/apps-sdk"
+                },
+                {
+                  "type": "Link",
+                  "text": "Reisedashboard demonstrieren",
+                  "url": "https://www.muenster.de/tourismus.html"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 720
+    },
+    {
+      "name": "text-link-unsafe-url",
+      "description": "A Link whose url is javascript: — the text shows without a link (the node reports failed INVALID_PROP).",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "xsmall",
+          "children": [
+            {
+              "type": "Link",
+              "text": "Artikel öffnen",
+              "url": "https://www.antenne-muenster.de/"
+            },
+            {
+              "type": "Link",
+              "text": "Kein Link (javascript:)",
+              "url": "javascript:alert(1)"
+            }
+          ]
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

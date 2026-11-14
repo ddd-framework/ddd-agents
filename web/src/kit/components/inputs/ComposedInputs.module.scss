@@ -1,0 +1,63 @@
+@import "../../../styles/spacings";
+
+// The kit inputs — layout only; the controls are the component library's and take the theme tokens themselves.
+
+// The segmented control: the component-library bar sizes to its tabs and never stretches over the card.
+.tabsBar {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+// The slider's track takes the whole width of the field; the thumb never pokes out of the card.
+.sliderTrack {
+  padding: 0 $x1;
+  min-width: 0;
+
+  // The component library paints the rail in `--agents-bg-var` — on a nested tile of that same colour it vanishes and every slider reads
+  // as "full". The divider token keeps the empty part of the track visible on both surface levels and in every theme.
+  :global(.vng-slider-container .MuiSlider-root .MuiSlider-rail) {
+    background-color: var(--agents-divider-gl);
+  }
+}
+
+.datePicker {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// The calendar glyph at the field's end: a hint only, the field under it keeps the click.
+.datePickerIcon {
+  position: absolute;
+  top: 50%;
+  right: $x1_5;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.button {
+  display: flex;
+  min-width: 0;
+
+  // The component library's wrapper around the button: may shrink below the label's length, so a long label wraps
+  > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.buttonFullWidth {
+  display: flex;
+  width: 100%;
+}
+
+// A radio option: the label over its muted explanation.
+.radioOptionText {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

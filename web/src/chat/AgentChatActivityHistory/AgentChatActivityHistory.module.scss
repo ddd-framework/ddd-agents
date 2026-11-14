@@ -1,0 +1,11 @@
+@import "../../styles/spacings";
+@import "../conversation-tokens";
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  max-width: $chat-content-max-width;
+  padding-left: $x2;
+  border-left: 2px solid var(--agents-divider-gl);
+}

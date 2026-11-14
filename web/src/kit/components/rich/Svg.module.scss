@@ -1,0 +1,22 @@
+@import "../../../styles/spacings";
+
+// The graphic scales with its box (the sanitiser dropped the fixed width and height in favour of the viewBox) and is
+// centred; a regular graphic stops at a readable height, a graphic in a compact cell at a thumbnail's.
+.graphic {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  color: var(--agents-fg);
+
+  :global(svg) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 22.5rem;
+  }
+}
+
+.compactGraphic :global(svg) {
+  max-height: $x6;
+}

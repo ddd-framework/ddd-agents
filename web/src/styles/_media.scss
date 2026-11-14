@@ -1,0 +1,50 @@
+// The chat's media conditions: a compile-time breakpoint table and the `media()` mixin the chat rules
+// call. Same table as the app's `src/styles/partials/_breakpoints.scss` and the same output as the `include-media`
+// library the app's `src/styles/_media-mixins.scss` pulls in for the forms the chat writes: `>=name`, `>name`, `<=name`,
+// `<name`, several conditions joined with `and`. `>` adds 1px, `<` subtracts 1px. The package's other rules use the
+// table in `_breakpoints.scss` (another set of values, kept apart by its own name here).
+@use "sass:list";
+@use "sass:map";
+@use "sass:string";
+
+$agents-chat-breakpoints: (
+  phone: 325px,
+  mobile: 767px,
+  tablet: 1025px,
+  desktop: 1200px,
+  wide: 1440px,
+) !default;
+
+@function agents-media-condition($expression) {
+  $operators: (">=", "<=", ">", "<");
+  @each $operator in $operators {
+    @if string.index($expression, $operator) == 1 {
+      $name: string.unquote(string.slice($expression, string.length($operator) + 1));
+      @if not map.has-key($agents-chat-breakpoints, $name) {
+        @error "agents media(): unknown breakpoint `#{$name}`.";
+      }
+      $width: map.get($agents-chat-breakpoints, $name);
+      @if $operator == ">=" {
+        @return "(min-width: #{$width})";
+      } @else if $operator == ">" {
+        @return "(min-width: #{$width + 1px})";
+      } @else if $operator == "<=" {
+        @return "(max-width: #{$width})";
+      } @else {
+        @return "(max-width: #{$width - 1px})";
+      }
+    }
+  }
+  @error "agents media(): `#{$expression}` is not one of >=name, >name, <=name, <name.";
+}
+
+@mixin media($conditions...) {
+  $query: "";
+  @each $condition in $conditions {
+    $part: agents-media-condition($condition);
+    $query: if($query == "", $part, "#{$query} and #{$part}");
+  }
+  @media #{string.unquote($query)} {
+    @content;
+  }
+}

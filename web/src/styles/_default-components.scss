@@ -1,0 +1,849 @@
+// The look of the package's default components (`provider/components/default-components.tsx`): the `agents-…` classes
+// they write. Only package variables (`_variables.scss`) and the package spacing constants; an app that replaces a
+// component never renders its classes. Plain class rules, outside any cascade layer, so a global element reset of the
+// app (`button { … }`) does not undo them; an app restyles a default with its own class rule of equal specificity
+// loaded after this stylesheet, or replaces the component.
+@use "sass:list";
+@import "spacings";
+@import "surfaces";
+
+$agents-control-height-small: $x3 + $x0_5;
+$agents-control-height-medium: $x4 + $x0_5;
+$agents-control-height-large: $x6;
+$agents-control-radius: $x1;
+$agents-pill-radius: 999px;
+$agents-focus-ring: 0 0 0 $x0_25 var(--agents-bg-surface), 0 0 0 $x0_5 var(--agents-fg-cta);
+$agents-motion: 150ms ease;
+$agents-progress-height: 0.75 * $x1;
+$agents-chip-padding-inline: 0.75 * $x1;
+$agents-focus-glow-spread: 0.375 * $x1;
+
+@mixin agents-reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+  }
+}
+
+// ── Text ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+$agents-text-roles: (
+  "title": (1.25rem, 700, 1.3),
+  "intro": (1.0625rem, 600, 1.4),
+  "body": (0.9375rem, 400, 1.5),
+  "help": (0.875rem, 400, 1.45),
+  "caption": (0.75rem, 400, 1.4),
+);
+
+.agents-text {
+  margin: 0;
+  font-family: inherit;
+  color: var(--agents-fg);
+  overflow-wrap: anywhere;
+}
+
+@each $role, $metrics in $agents-text-roles {
+  .agents-text--#{$role} {
+    font-size: list.nth($metrics, 1);
+    font-weight: list.nth($metrics, 2);
+    line-height: list.nth($metrics, 3);
+  }
+}
+
+.agents-text--weight-regular {
+  font-weight: 400;
+}
+
+.agents-text--weight-medium {
+  font-weight: 500;
+}
+
+.agents-text--weight-bold {
+  font-weight: 700;
+}
+
+.agents-text--ellipsis {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+}
+
+.agents-text--new-lines {
+  white-space: pre-line;
+}
+
+// The widget type scale (`WidgetText`, `HeroValue`).
+$agents-widget-text-variants: (
+  "hero": (2rem, 700, 1.1),
+  "headline": (1.25rem, 700, 1.25),
+  "gaugeValue": (1.5rem, 700, 1.15),
+  "value": (1rem, 600, 1.35),
+  "caption": (0.8125rem, 400, 1.4),
+  "label": (0.75rem, 500, 1.35),
+  "micro": (0.6875rem, 500, 1.3),
+);
+
+.agents-widget-text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@each $variant, $metrics in $agents-widget-text-variants {
+  .agents-widget-text--#{$variant} {
+    font-size: list.nth($metrics, 1);
+    font-weight: list.nth($metrics, 2);
+    line-height: list.nth($metrics, 3);
+  }
+}
+
+.agents-widget-text--hero,
+.agents-widget-text--headline,
+.agents-widget-text--gaugeValue,
+.agents-widget-text--value {
+  color: var(--agents-fg);
+}
+
+.agents-widget-text--caption,
+.agents-widget-text--label {
+  color: var(--agents-fg-light);
+}
+
+.agents-widget-text--micro {
+  color: var(--agents-fg-lightest);
+}
+
+.agents-widget-text--default {
+  color: var(--agents-fg);
+}
+
+.agents-widget-text--light {
+  color: var(--agents-fg-light);
+}
+
+.agents-widget-text--cta {
+  color: var(--agents-fg-cta);
+}
+
+.agents-widget-text--weight-regular {
+  font-weight: 400;
+}
+
+.agents-widget-text--weight-medium {
+  font-weight: 500;
+}
+
+.agents-widget-text--weight-bold {
+  font-weight: 700;
+}
+
+.agents-widget-text--uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.agents-widget-text--tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.agents-widget-text--strikethrough {
+  text-decoration: line-through;
+}
+
+.agents-hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $x1;
+  min-width: 0;
+}
+
+.agents-hero-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--agents-fg);
+}
+
+// ── Icon fallback ───────────────────────────────────────────────────────────────────────────────────────────────────
+// No icon font: each name draws a text glyph, an unknown name a small dot.
+
+$agents-icon-glyphs: (
+  "add": "+",
+  "arrowDown": "↓",
+  "arrowLeft": "←",
+  "arrowRight": "→",
+  "arrowUp": "↑",
+  "caretDown": "▾",
+  "caretLeft": "‹",
+  "caretUp": "▴",
+  "check": "✓",
+  "clock": "◷",
+  "close": "×",
+  "closeCanvas": "×",
+  "dash": "–",
+  "download": "↓",
+  "edit": "✎",
+  "exclamation": "!",
+  "help": "?",
+  "info": "i",
+  "link": "↗",
+  "location": "◉",
+  "lock": "⚿",
+  "mail": "✉",
+  "maximize": "⤢",
+  "message": "❝",
+  "minimize": "⤡",
+  "newTab": "↗",
+  "pause": "❙❙",
+  "phone": "☏",
+  "play": "▶",
+  "question": "?",
+  "refresh": "↻",
+  "remove": "−",
+  "search": "⌕",
+  "star": "☆",
+  "starActive": "★",
+  "trash": "×",
+  "upload": "↑",
+  "warning": "!",
+);
+
+.agents-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  color: inherit;
+  vertical-align: middle;
+
+  &::before {
+    content: "•";
+  }
+}
+
+@each $name, $glyph in $agents-icon-glyphs {
+  .agents-icon[data-icon="#{$name}"]::before {
+    content: $glyph;
+  }
+}
+
+.agents-icon--small {
+  font-size: 0.875rem;
+}
+
+.agents-icon--large {
+  font-size: 1.5rem;
+}
+
+// ── Button ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $x0_5;
+  box-sizing: border-box;
+  min-height: $agents-control-height-medium;
+  margin: 0;
+  padding: 0 $x2;
+  border: 0;
+  border-radius: $agents-control-radius;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color $agents-motion,
+    box-shadow $agents-motion,
+    color $agents-motion;
+  @include agents-reduced-motion;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: $agents-focus-ring;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &[aria-busy="true"] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+}
+
+.agents-button--primary {
+  background: var(--agents-fg-cta);
+  color: var(--agents-fg-on-dark);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--agents-fg-cta) 86%, var(--agents-fg));
+  }
+}
+
+.agents-button--default {
+  background: var(--agents-bg-surface);
+  color: var(--agents-fg);
+  box-shadow: inset 0 0 0 1px var(--agents-brd-gl);
+
+  &:hover:not(:disabled) {
+    background: var(--agents-bg-var);
+  }
+}
+
+.agents-button--muted {
+  background: rgba(var(--agents-fg-rgb), 0.06);
+  color: var(--agents-fg);
+
+  &:hover:not(:disabled) {
+    background: rgba(var(--agents-fg-rgb), 0.1);
+  }
+}
+
+.agents-button--shimmer {
+  background: linear-gradient(110deg, var(--agents-accent1-500), var(--agents-fg-cta));
+  color: var(--agents-fg-on-dark);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(110deg, var(--agents-fg-cta), var(--agents-accent1-500));
+  }
+}
+
+.agents-button--small {
+  min-height: $agents-control-height-small;
+  padding: 0 $x1_5;
+  font-size: 0.8125rem;
+}
+
+.agents-button--extraLarge {
+  min-height: $agents-control-height-large;
+  padding: 0 $x3;
+  font-size: 1rem;
+}
+
+.agents-button--rounded {
+  border-radius: $agents-pill-radius;
+}
+
+.agents-button--pressed {
+  background: rgba(var(--agents-fg-cta-rgb), 0.12);
+  color: var(--agents-fg-cta);
+}
+
+.agents-button--on-dark {
+  background: rgba(var(--agents-bg-dark-rgb), 0.55);
+  color: var(--agents-fg-on-dark);
+
+  &:hover:not(:disabled) {
+    background: rgba(var(--agents-bg-dark-rgb), 0.7);
+  }
+}
+
+.agents-button--blurred {
+  backdrop-filter: blur($x1);
+}
+
+.agents-button--inverted {
+  background: var(--agents-bg-surface);
+  color: var(--agents-fg-cta);
+}
+
+.agents-button--full-width {
+  width: 100%;
+}
+
+.agents-button--wraps-label {
+  height: auto;
+  padding-top: $x1;
+  padding-bottom: $x1;
+  white-space: normal;
+  text-align: left;
+}
+
+// ── Interactive surface ─────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-interactive-surface {
+  position: relative;
+}
+
+.agents-interactive-surface--hoverable {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(var(--agents-fg-rgb), 0);
+    pointer-events: none;
+    transition: background-color $agents-motion;
+    @include agents-reduced-motion;
+  }
+
+  &:hover::after {
+    background: rgba(var(--agents-fg-rgb), 0.04);
+  }
+
+  &:active::after {
+    background: rgba(var(--agents-fg-rgb), 0.08);
+  }
+}
+
+// ── Loading: skeleton, spinner, progress bar ────────────────────────────────────────────────────────────────────────
+
+@keyframes agents-skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes agents-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.agents-skeleton {
+  display: block;
+  background: rgba(var(--agents-fg-rgb), 0.08);
+  animation: agents-skeleton-pulse 1.4s ease-in-out infinite;
+  @include agents-reduced-motion;
+}
+
+.agents-loading-spinner {
+  display: inline-block;
+  box-sizing: border-box;
+  width: $x2_5;
+  height: $x2_5;
+  border: $x0_25 solid rgba(var(--agents-fg-rgb), 0.15);
+  border-top-color: var(--agents-fg-cta);
+  border-radius: 50%;
+  animation: agents-spin 0.8s linear infinite;
+  @include agents-reduced-motion;
+}
+
+.agents-progress-bar {
+  display: block;
+  height: $agents-progress-height;
+}
+
+// ── Tooltip ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-tooltip__panel {
+  z-index: 10;
+  margin-bottom: $x0_5;
+  padding: $x0_5 $x1;
+  border-radius: $x0_5;
+  background: var(--agents-bg-surface);
+  color: var(--agents-fg);
+  box-shadow: $card-shadow;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.agents-tooltip__panel--dark {
+  background: var(--agents-neutral-700);
+  color: var(--agents-fg-on-dark);
+}
+
+// ── Glow frame ──────────────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-glow-frame {
+  position: relative;
+  border-radius: $card-radius;
+  // A frame with a `borderWidth` and no `color` (the chat's composer) draws its border in the glow's tint, not in the
+  // text colour a bare `border-style` would fall back to.
+  border-color: rgba(var(--agents-fg-cta-rgb), 0.35);
+  box-shadow:
+    0 0 0 1px rgba(var(--agents-fg-cta-rgb), 0.35),
+    0 0 $x2 rgba(var(--agents-fg-cta-rgb), 0.2);
+}
+
+// ── Trend delta, status badge, segment bar ──────────────────────────────────────────────────────────────────────────
+
+.agents-trend-delta {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--agents-fg-light);
+}
+
+.agents-trend-delta--good {
+  color: var(--agents-success-900);
+}
+
+.agents-trend-delta--bad {
+  color: var(--agents-danger-900);
+}
+
+$agents-status-tones: (
+  "neutral": (var(--agents-fg-light), var(--agents-fg-light)),
+  "info": (var(--agents-info-900), var(--agents-info-500)),
+  "success": (var(--agents-success-900), var(--agents-success-500)),
+  "warning": (var(--agents-warning-900), var(--agents-warning-500)),
+  "danger": (var(--agents-danger-900), var(--agents-danger-500)),
+);
+
+.agents-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  max-width: 100%;
+  padding: $x0_25 $x1;
+  border-radius: $agents-pill-radius;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+@each $tone, $colours in $agents-status-tones {
+  .agents-status-badge--#{$tone} {
+    color: list.nth($colours, 1);
+    background: color-mix(in srgb, #{list.nth($colours, 2)} 14%, transparent);
+  }
+}
+
+.agents-status-badge--small {
+  padding: $x0_125 $agents-chip-padding-inline;
+  font-size: 0.75rem;
+}
+
+.agents-segment-bar {
+  background: rgba(var(--agents-fg-rgb), 0.08);
+}
+
+// ── Form controls ───────────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-text-input,
+.agents-text-area {
+  display: grid;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.agents-text-input__label,
+.agents-text-area__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--agents-fg-light);
+}
+
+.agents-text-input input,
+.agents-text-area textarea,
+.agents-select,
+.agents-date-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: $agents-control-height-medium;
+  margin: 0;
+  padding: $x1 $x1_5;
+  border: 1px solid var(--agents-brd-gl);
+  border-radius: $agents-control-radius;
+  background: var(--agents-bg-surface);
+  color: var(--agents-fg);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  transition:
+    border-color $agents-motion,
+    box-shadow $agents-motion;
+  @include agents-reduced-motion;
+
+  &::placeholder {
+    color: var(--agents-fg-lightest);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--agents-fg-cta);
+    box-shadow: 0 0 0 $agents-focus-glow-spread rgba(var(--agents-fg-cta-rgb), 0.18);
+  }
+
+  &:disabled {
+    background: var(--agents-bg-var);
+    color: var(--agents-fg-lightest);
+  }
+}
+
+.agents-text-area textarea {
+  resize: vertical;
+}
+
+.agents-text-area__counter {
+  justify-self: end;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--agents-fg-lightest);
+}
+
+.agents-checkbox,
+.agents-radio-group__option {
+  display: inline-flex;
+  align-items: center;
+  gap: $x1;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--agents-fg);
+  cursor: pointer;
+
+  input {
+    flex: none;
+    width: $x2;
+    height: $x2;
+    margin: 0;
+    accent-color: var(--agents-fg-cta);
+  }
+}
+
+.agents-radio-group {
+  gap: $x1;
+}
+
+.agents-range-slider,
+.agents-progress-bar {
+  width: 100%;
+  accent-color: var(--agents-fg-cta);
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: $x0_25;
+  padding: $x0_25;
+  border-radius: $agents-pill-radius;
+  background: var(--agents-bg-var);
+}
+
+.agents-tabs__tab {
+  margin: 0;
+  padding: $x0_5 $x1_5;
+  border: 0;
+  border-radius: $agents-pill-radius;
+  background: transparent;
+  color: var(--agents-fg-light);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  transition:
+    background-color $agents-motion,
+    color $agents-motion;
+  @include agents-reduced-motion;
+
+  &:hover {
+    color: var(--agents-fg);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: $agents-focus-ring;
+  }
+}
+
+.agents-tabs__tab--selected {
+  background: var(--agents-bg-surface);
+  color: var(--agents-fg);
+  box-shadow: 0 1px $x0_25 rgba(var(--agents-shadow-rgb), 0.12);
+}
+
+// ── Split view ──────────────────────────────────────────────────────────────────────────────────────────────────────
+
+.agents-split-view__main,
+.agents-split-view__side {
+  min-width: 0;
+  overflow: auto;
+}
+
+.agents-split-view__side {
+  border-left: 1px solid var(--agents-divider-gl);
+  background: var(--agents-bg-surface);
+}
+
+.agents-split-view__toggle {
+  flex: none;
+  width: $x1_5;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--agents-bg-var);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--agents-divider-gl);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 $x0_25 var(--agents-fg-cta);
+  }
+}
+
+// ── Map placeholder, Markdown, conversation search results ──────────────────────────────────────────────────────────
+
+.agents-map-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg-light);
+  font-size: 0.8125rem;
+}
+
+.agents-markdown {
+  color: var(--agents-fg);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  p,
+  ul,
+  ol,
+  blockquote,
+  pre,
+  table {
+    margin: 0 0 $x1_5;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: $x2 0 $x1;
+    line-height: 1.3;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.0625rem;
+  }
+
+  h4 {
+    font-size: 0.9375rem;
+  }
+
+  ul,
+  ol {
+    padding-left: $x3;
+  }
+
+  li + li {
+    margin-top: $x0_5;
+  }
+
+  a {
+    color: var(--agents-fg-cta);
+  }
+
+  code {
+    padding: $x0_125 $x0_5;
+    border-radius: $x0_5;
+    background: var(--agents-bg-var);
+    font-size: 0.875em;
+  }
+
+  pre {
+    padding: $x1_5;
+    border-radius: $agents-control-radius;
+    background: var(--agents-bg-var);
+    overflow: auto;
+
+    code {
+      padding: 0;
+      background: none;
+    }
+  }
+
+  blockquote {
+    padding-left: $x1_5;
+    border-left: $x0_5 solid var(--agents-divider-gl);
+    color: var(--agents-fg-light);
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: $x0_5 $x1;
+    border-bottom: 1px solid var(--agents-divider-gl);
+    text-align: left;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--agents-divider-gl);
+  }
+}
+
+.agents-conversation-search-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agents-conversation-search-results__group {
+  display: grid;
+  gap: $x0_5;
+  padding: $x1_5 0;
+
+  & + & {
+    border-top: 1px solid var(--agents-divider-gl);
+  }
+}
+
+.agents-conversation-search-results__hit {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: $x0_5 $x1;
+  border: 0;
+  border-radius: $x0_5;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--agents-bg-var);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 $x0_25 var(--agents-fg-cta);
+  }
+}

@@ -1,0 +1,110 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The ConceptExplainer frame on the modern surface:
+// one elevated card, the picture on a flat tile, $x* spacing, --fn-* tokens, no borders.
+.widget {
+  gap: $x2;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.wrappingText {
+  overflow-wrap: anywhere;
+}
+
+// The picture of the current state — a flat tile inside the card (the second and last background level).
+.scene {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: $card-padding;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $x0_5;
+  text-align: center;
+}
+
+.controlBlock {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+}
+
+// Label and the current state's name on one line (ChatGPT's "Day   0,0 days"), the track under it at full width.
+.sliderRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: $x1_5;
+  row-gap: $x0_5;
+}
+
+.sliderValue {
+  font-variant-numeric: tabular-nums;
+}
+
+// The component library thumb overhangs the track ends; the padding keeps it inside the card.
+.sliderTrack {
+  padding: 0 $x1_5;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $x1;
+}
+
+// Effect-free choices (a step, a variant) — pills are allowed for these. Selected = one inner ring + 8 % tint.
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: $x4;
+  padding: $x0_5 $x1_5;
+  border: none;
+  border-radius: $x4;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg);
+  cursor: pointer;
+  font: inherit;
+  transition: box-shadow 150ms ease-out;
+
+  &:hover {
+    box-shadow: inset 0 0 0 $x0_25 var(--agents-divider-gl);
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.pillSelected,
+.pillSelected:hover {
+  box-shadow: inset 0 0 0 $x0_25 var(--agents-fg-cta);
+  background: rgba(var(--agents-fg-cta-rgb), 0.08);
+}
+
+// The source and what the figures are, one line each (two long sentences do not join on one line).
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  margin-top: auto;
+}

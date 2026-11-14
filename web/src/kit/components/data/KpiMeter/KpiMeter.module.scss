@@ -1,0 +1,7 @@
+@import "../../../../styles/spacings";
+
+// The track is a tint of the text colour, so it reads on the elevated tile and on the flat nested tile alike.
+.meter {
+  --agents-kpi-meter-track: color-mix(in srgb, var(--agents-fg) 10%, transparent);
+  padding-top: $x0_5;
+}

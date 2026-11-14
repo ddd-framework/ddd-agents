@@ -1,0 +1,20 @@
+@import "../../../styles/spacings";
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: $x1_5;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+}

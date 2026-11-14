@@ -1,0 +1,97 @@
+@import "../../../styles/spacings";
+
+// One run of text: a paragraph block, or an inline run inside another Text / a compact cell. Inline children follow
+// the text in the line flow (a badge or a source chip after the last word), so the line wraps like a sentence.
+.text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--agents-fg);
+}
+
+.paragraph {
+  display: block;
+}
+
+.inline {
+  display: inline;
+}
+
+// A clamped run is a line-clamp box of its own; the full text is on its title. One class per line count (1–10, the
+// node's `maxLines` range), no inline style.
+.clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@for $lineCount from 1 through 10 {
+  .clampedAt#{$lineCount}Lines {
+    -webkit-line-clamp: $lineCount;
+    line-clamp: $lineCount;
+  }
+}
+
+// "Show more" / "Show less" under a clamped paragraph: a quiet text button, the inset focus ring of the kit.
+.clampToggle {
+  display: block;
+  margin-top: $x0_5;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--agents-fg-light);
+  text-underline-offset: $x0_5;
+
+  &:hover {
+    text-decoration-style: solid;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+    border-radius: $x0_5;
+  }
+}
+
+.inlineChild {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+  margin-inline-start: $x0_5;
+
+  .paragraph > &:first-child {
+    margin-inline-start: 0;
+  }
+}
+
+.inlineSkeleton {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+// The text roles of the kit's one tone list (`composed-view-tones.ts`): muted secondary text, and the judgement tones (900 text tone through light-dark()). The component library's Text
+// paints its own colour, so the role travels as a custom property the run is told to use (`color` prop).
+.neutral {
+  --agents-text-node-tone-color: var(--agents-fg);
+}
+
+.muted {
+  --agents-text-node-tone-color: var(--agents-fg-light);
+}
+
+.success {
+  --agents-text-node-tone-color: light-dark(var(--agents-success-900), var(--agents-success-500));
+}
+
+.warning {
+  --agents-text-node-tone-color: light-dark(var(--agents-warning-900), var(--agents-warning-500));
+}
+
+.danger {
+  --agents-text-node-tone-color: light-dark(var(--agents-danger-900), var(--agents-danger-500));
+}
+
+.info {
+  --agents-text-node-tone-color: light-dark(var(--agents-info-900), var(--agents-info-500));
+}

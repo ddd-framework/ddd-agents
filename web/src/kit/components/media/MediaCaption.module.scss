@@ -1,0 +1,12 @@
+@import "../../../styles/spacings";
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.wrap {
+  overflow-wrap: anywhere;
+}

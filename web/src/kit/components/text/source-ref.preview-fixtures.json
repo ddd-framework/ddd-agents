@@ -1,0 +1,51 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-source-ref-news",
+      "description": "Screenshot 46's source line in a regular slot: every source with favicon and link.",
+      "payload": {
+        "view": {
+          "type": "SourceRef",
+          "sources": [
+            {
+              "name": "WDR",
+              "url": "https://www1.wdr.de/nachrichten/westfalen-lippe/index.html"
+            },
+            {
+              "name": "Antenne Münster",
+              "url": "https://www.antenne-muenster.de/"
+            },
+            {
+              "name": "Westfälische Nachrichten",
+              "url": "https://www.wn.de/muenster"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 720
+    },
+    {
+      "name": "text-source-ref-licensed-image",
+      "description": "An image source with author and licence (the attribution line lane L22 fills from Wikimedia Commons).",
+      "payload": {
+        "view": {
+          "type": "SourceRef",
+          "sources": [
+            {
+              "name": "Wikimedia Commons",
+              "url": "https://commons.wikimedia.org/wiki/File:Cologne_Cathedral.jpg",
+              "title": "Kölner Dom, Westfassade",
+              "author": "Raimond Spekking",
+              "license": "CC BY-SA 4.0",
+              "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

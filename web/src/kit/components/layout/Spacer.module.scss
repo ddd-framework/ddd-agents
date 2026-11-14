@@ -1,0 +1,29 @@
+@import "../../../styles/spacings";
+
+// Empty room: the size is a block size in a column and an inline size in a row (it counts in the flex direction).
+.spacer {
+  flex: 0 0 auto;
+}
+
+.small {
+  min-height: $x1;
+  min-width: $x1;
+}
+
+.medium {
+  min-height: $x2;
+  min-width: $x2;
+}
+
+.large {
+  min-height: $x4;
+  min-width: $x4;
+}
+
+// All the free room of the row or column: the nodes after it go to the far end.
+// It takes only room that is left over: it has no minimum, so a row whose items just fit never wraps for it.
+.grow {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+}

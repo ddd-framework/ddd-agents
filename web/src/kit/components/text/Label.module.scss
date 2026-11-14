@@ -1,0 +1,7 @@
+// The section label of the design checklist — WidgetLabel's look.
+.label {
+  color: var(--agents-fg-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}

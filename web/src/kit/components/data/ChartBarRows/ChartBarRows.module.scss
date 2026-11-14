@@ -1,0 +1,68 @@
+@import "../../../../styles/spacings";
+
+// The bars of a bar chart with a change per bar: category, track, value, change — one row per category, the track takes the free width.
+.rows {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.row > * {
+  padding: $x0_5 0;
+  vertical-align: middle;
+}
+
+// The category: as wide as its longest name (a party, a channel — short names), the track takes the rest.
+.label {
+  width: 1%;
+  padding-right: $x2;
+  text-align: left;
+  font-weight: inherit;
+  white-space: nowrap;
+}
+
+.track {
+  width: 100%;
+}
+
+// The track on the neutral fill, the bar in the row's chart colour from the start.
+.bar {
+  position: relative;
+  display: block;
+  height: $x2;
+  border-radius: $x1;
+  background: light-dark(var(--agents-neutral-200), var(--agents-neutral-700));
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--agents-chart-bar-fraction, 0%);
+    border-radius: inherit;
+    background: var(--agents-chart-bar-color, var(--agents-chart-01));
+  }
+}
+
+.value {
+  padding-left: $x2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.delta {
+  padding-left: $x3;
+  text-align: right;
+  white-space: nowrap;
+}
+
+// A name and a figure never break ("Freie Wähler", "36 %") — over the component library's Text's own wrapping class, hence the
+// row in the selector.
+.row .labelText {
+  white-space: nowrap;
+}
+
+.row .figure {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

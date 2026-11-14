@@ -1,0 +1,6 @@
+// Shared layout contract for widgets in the conversation and standalone captures.
+// Widgets use this name for container queries and this width for cqw units.
+@mixin conversation-widget-container {
+  container-type: inline-size;
+  container-name: chatPane;
+}

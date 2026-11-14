@@ -1,0 +1,13 @@
+@import "../styles/spacings";
+
+// The ComposedView root: a plain column that stacks the tree's title and its root node. The tree's own nodes carry
+// every surface (a Surface node is the card surface) — the root adds none, so a
+// composition that is only a table does not sit in a second box.
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+  width: 100%;
+}
+

@@ -1,0 +1,31 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-caption-under-value",
+      "description": "A Caption as the sub-line of a value and as a method note (the KPI caption role of screenshot 52).",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "xsmall",
+          "children": [
+            {
+              "type": "Label",
+              "text": "Besucher"
+            },
+            {
+              "type": "Title",
+              "text": "7.420"
+            },
+            {
+              "type": "Caption",
+              "text": "Letzte 7 Tage · errechnet aus Organic + Paid + Direct"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 360
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+@import "../../../styles/breakpoints";
+
+// The `Map` node. The map is media flush with its frame: the card radius
+// clips its corners, no border, no shadow of its own. Controls on the map are elevated chips on `--agents-bg-surface`.
+
+$radius-pill: 999px;
+// One carousel card: wide enough for a name and a "★ 4.3 · Restaurant" line next to the thumbnail.
+$carousel-card-width: 36 * $x1;
+$carousel-thumbnail-size: 8 * $x1;
+$row-thumbnail-size: 6 * $x1;
+$full-screen-list-width: 40 * $x1;
+
+.frame {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: $card-radius;
+  background: var(--agents-bg-var);
+  isolation: isolate;
+}
+
+.mapLayer {
+  position: absolute;
+  inset: 0;
+}
+
+// The map could not load: a flat panel in the map's place, the cards stay over it.
+.mapUnavailable {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  // Clear of the route chip and the expand control in the top corners.
+  padding: 7 * $x1 $card-padding $card-padding;
+  background: var(--agents-bg-var);
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+}
+
+// --- Markers (a dark pill over a haloed label) ---
+
+.marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $x0_5;
+  // The advanced marker sits on its bottom edge: move the group down so the pill's centre is on the point.
+  transform: translateY(calc(100% - #{$x2}));
+  pointer-events: none;
+}
+
+.markerPill {
+  display: flex;
+  border-radius: $radius-pill;
+  box-shadow: $card-shadow;
+  transition: transform 150ms ease;
+}
+
+.markerPillInteractive {
+  pointer-events: auto;
+}
+
+.markerSelected .markerPill {
+  transform: scale(1.2);
+}
+
+.markerLabel {
+  display: -webkit-box;
+  max-width: 16 * $x1;
+  overflow: hidden;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  pointer-events: none;
+  text-shadow:
+    0 $x0_125 $x0_25 var(--agents-bg),
+    0 (-$x0_125) $x0_25 var(--agents-bg),
+    $x0_125 0 $x0_25 var(--agents-bg),
+    (-$x0_125) 0 $x0_25 var(--agents-bg);
+}
+
+// --- Controls on the map ---
+
+.routeChip {
+  position: absolute;
+  top: $x1_5;
+  left: $x1_5;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: $x0_5;
+  max-width: calc(100% - #{9 * $x1});
+  padding: $x0_5 $x1_5;
+  border-radius: $radius-pill;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+}
+
+.routeChipIcon {
+  flex-shrink: 0;
+  color: var(--agents-fg-light);
+}
+
+.expandButton {
+  position: absolute;
+  top: $x1_5;
+  right: $x1_5;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5 * $x1;
+  height: 5 * $x1;
+  padding: 0;
+  border: none;
+  border-radius: $radius-pill;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+  color: var(--agents-fg);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--agents-fg-cta);
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}
+
+// --- The carousel along the bottom edge: horizontal, snapping, the map stays visible above it ---
+
+// The row's frame on the map: it holds the paging buttons over the row's two ends.
+.carouselViewport {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.carousel {
+  display: flex;
+  gap: $x1_5;
+  padding: $x1_5;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// The previous / next buttons over the row's ends (the kit Carousel's arrows).
+.carouselArrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+}
+
+.carouselArrowPrevious {
+  left: $x0_5;
+}
+
+.carouselArrowNext {
+  right: $x0_5;
+}
+
+.carouselArrowButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $x4;
+  height: $x4;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--agents-fg);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}
+
+.carouselItem {
+  flex: 0 0 auto;
+  width: min(#{$carousel-card-width}, 80%);
+  scroll-snap-align: start;
+}
+
+// --- One point card (carousel card or full-screen row) ---
+
+.card {
+  position: relative;
+  border-radius: $card-radius;
+}
+
+.cardCarousel {
+  height: 100%;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+}
+
+.cardRow {
+  border-radius: $card-radius-compact;
+}
+
+.cardSelected {
+  box-shadow: inset 0 0 0 $x0_25 var(--agents-fg-cta);
+}
+
+.cardCarousel.cardSelected {
+  box-shadow:
+    inset 0 0 0 $x0_25 var(--agents-fg-cta),
+    $card-shadow;
+}
+
+.cardInner {
+  display: flex;
+  align-items: center;
+  gap: $x1_5;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: $card-padding-compact;
+  text-align: left;
+}
+
+.cardButton {
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: inherit;
+  }
+}
+
+.cardThumbnail {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: $carousel-thumbnail-size;
+  height: $carousel-thumbnail-size;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg-light);
+
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.cardRow .cardThumbnail {
+  width: $row-thumbnail-size;
+  height: $row-thumbnail-size;
+}
+
+.cardThumbnailIcon {
+  color: var(--agents-fg-lightest);
+}
+
+.cardText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $x0_25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: $x0_25;
+  min-width: 0;
+}
+
+.cardStar {
+  flex-shrink: 0;
+  color: var(--agents-fg);
+}
+
+// --- Full screen (the mapFullScreen canvas): the map beside the list; stacked on a narrow pane ---
+
+// The canvas body around the renderer: it fills the flush pane, so the map reaches its edges.
+.fullScreenBody {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  > * {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+// The body's notice when the anchor message no longer carries the map.
+.fullScreenNotice {
+  padding: $card-padding;
+}
+
+.fullScreen {
+  container-type: inline-size;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 60 * $x1;
+  background: var(--agents-bg-surface);
+}
+
+.fullScreenMap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: var(--agents-bg-var);
+}
+
+.fullScreenList {
+  display: flex;
+  flex: 0 0 $full-screen-list-width;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+  padding: $card-padding;
+  overflow-y: auto;
+  background: var(--agents-bg-surface);
+}
+
+.fullScreenHeader {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+}
+
+.fullScreenRows {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+
+  > [role="listitem"] + [role="listitem"] {
+    border-top: $x0_125 solid var(--agents-divider-gl);
+    padding-top: $x0_5;
+  }
+}
+
+@container (max-width: #{map-get($breakpoints, tablet)}) {
+  .fullScreen {
+    flex-direction: column;
+  }
+
+  .fullScreenMap {
+    flex: 0 0 55%;
+    min-height: 32 * $x1;
+  }
+
+  .fullScreenList {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markerPill {
+    transition: none;
+  }
+}

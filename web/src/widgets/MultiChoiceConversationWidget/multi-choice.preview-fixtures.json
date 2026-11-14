@@ -1,0 +1,103 @@
+{
+  "wireName": "MultiChoice",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "Choice pills with a confirm — the reservation time pills of the ChatGPT reference.",
+      "payload": {
+        "question": "Which channels should we post on?",
+        "options": [
+          {
+            "label": "Instagram",
+            "value": "Instagram"
+          },
+          {
+            "label": "Facebook",
+            "value": "Facebook",
+            "sublabel": "Your page with 1,200 followers"
+          },
+          {
+            "label": "TikTok",
+            "value": "TikTok"
+          }
+        ],
+        "confirmAction": "{values}"
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "pick Instagram",
+          "click": {
+            "text": "Instagram"
+          }
+        },
+        {
+          "name": "pick Facebook",
+          "click": {
+            "text": "Facebook"
+          }
+        }
+      ]
+    },
+    {
+      "name": "render-report-error",
+      "description": "A payload without an options list reports failed INVALID_PROP.",
+      "payload": {
+        "question": "Which channels?"
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "kassel-dental-services",
+      "description": "Which services the November posts of the practice should feature — several may be picked, the confirm sends them.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "question": "Welche Leistungen sollen die November-Posts zeigen?",
+        "options": [
+          {
+            "label": "Prophylaxe / professionelle Zahnreinigung",
+            "value": "Prophylaxe",
+            "sublabel": "Passt zu den Prophylaxe-Wochen"
+          },
+          {
+            "label": "Implantologie",
+            "value": "Implantologie"
+          },
+          {
+            "label": "Bleaching",
+            "value": "Bleaching"
+          },
+          {
+            "label": "Kinderzahnheilkunde",
+            "value": "Kinderzahnheilkunde"
+          },
+          {
+            "label": "Angstpatienten-Behandlung",
+            "value": "Angstpatienten-Behandlung"
+          }
+        ],
+        "confirmAction": "{values}"
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "pick Prophylaxe",
+          "click": {
+            "text": "Prophylaxe / professionelle Zahnreinigung"
+          }
+        },
+        {
+          "name": "pick Bleaching",
+          "click": {
+            "text": "Bleaching"
+          }
+        }
+      ]
+    }
+  ]
+}

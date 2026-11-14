@@ -1,0 +1,42 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The sandbox frame inside the widget's card: flush, the compact radius, no border; the visualization paints its own
+// background (a transparent frame shows the nested-tile colour while it loads).
+.frameArea {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+}
+
+.frameBox {
+  position: relative;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  transition: height 200ms ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+// Kept laid out and painted (opacity, not visibility) so the browser does not throttle the frame's timers while the
+// skeleton covers it.
+.frameBox[data-frame-phase="loading"] .frame {
+  opacity: 0;
+}
+
+.loadingCover {
+  position: absolute;
+  inset: 0;
+  display: block;
+}

@@ -1,0 +1,55 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "input-basket-value",
+      "description": "A number field and a text field.",
+      "payload": {
+        "state": {
+          "basketValue": 70,
+          "note": ""
+        },
+        "view": {
+          "type": "Stack",
+          "gap": "medium",
+          "children": [
+            {
+              "type": "Input",
+              "label": "Basket value (€)",
+              "inputType": "number",
+              "value": {
+                "$state": "basketValue"
+              },
+              "onChange": {
+                "set": "basketValue"
+              }
+            },
+            {
+              "type": "Input",
+              "label": "Campaign name",
+              "placeholder": "Autumn sale",
+              "maxLength": 40,
+              "value": {
+                "$state": "note"
+              },
+              "onChange": {
+                "set": "note"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "type a basket value",
+          "fill": {
+            "selector": "input[type=number]",
+            "value": "85"
+          }
+        }
+      ]
+    }
+  ]
+}

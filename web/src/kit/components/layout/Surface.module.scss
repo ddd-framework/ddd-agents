@@ -1,0 +1,76 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The kit's titled surface on top of the modern `WidgetSurface` (level and radius come from there). Overflow stays
+// visible so a Popover in the header can float over the body; the media slot clips its own corners instead.
+.surface[data-surface-level] {
+  overflow: visible;
+  gap: $x2;
+}
+
+.compact[data-surface-level] {
+  gap: $x1;
+}
+
+// Media flush with the top and sides of the surface: it cancels the padding and takes the surface's top corners.
+.media {
+  margin: calc(-1 * #{$card-padding}) calc(-1 * #{$card-padding}) 0;
+  border-radius: $card-radius $card-radius 0 0;
+  overflow: hidden;
+}
+
+.compactMedia {
+  margin: calc(-1 * #{$card-padding-compact}) calc(-1 * #{$card-padding-compact}) 0;
+  border-radius: $card-radius-compact $card-radius-compact 0 0;
+}
+
+// Title left, header controls right; the controls wrap under the title when the pane is narrow.
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $x1 $x1_5;
+  min-width: 0;
+}
+
+// The titles take the free room but start from nothing, so a short header control (a badge, two tabs) stays at the
+// end of the title row while the titles wrap; only when the titles would get narrower than 18 steps does the control
+// move under them.
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  flex: 1 1 0;
+  min-width: min(100%, #{18 * $x1});
+  overflow-wrap: anywhere;
+}
+
+.headerEnd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x1;
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+// The foot sits at the bottom of a stretched surface (a grid cell as tall as its neighbour).
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x1;
+  margin-top: auto;
+  min-width: 0;
+}

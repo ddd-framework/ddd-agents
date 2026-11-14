@@ -1,0 +1,68 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "video-youtube",
+      "description": "The YouTube walking tour of ChatGPT (45): a connector video with its derived thumbnail, length, channel and the watch link; play swaps in the embed.",
+      "payload": {
+        "title": "Video – YouTube-Stadtrundgang Münster",
+        "view": {
+          "type": "Video",
+          "title": "Münster, Germany 4k Walking Tour | Explore the Charming Streets & Landmarks",
+          "videoId": "x5-yoDUoz5k",
+          "durationSeconds": 1418,
+          "channel": "Duslin Travels",
+          "source": {
+            "name": "YouTube",
+            "url": "https://www.youtube.com"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "play in place",
+          "click": {
+            "selector": "button[aria-label^=\"Play the video\"]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "video-link",
+      "description": "A video with a plain url and its own thumbnail: play opens the watch page in a new tab.",
+      "payload": {
+        "view": {
+          "type": "Video",
+          "title": "Münster in 4K — a summer evening",
+          "url": "https://www.youtube.com/watch?v=x5-yoDUoz5k",
+          "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg",
+          "durationSeconds": 734,
+          "channel": "City Walks"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "video-loading",
+      "description": "The video is bound to a pending tool result: the 16:9 frame as a skeleton.",
+      "payload": {
+        "view": {
+          "type": "Video",
+          "title": "Pending video",
+          "videoId": {
+            "$from": {
+              "toolCall": "call_preview_1",
+              "path": "$.videos[0].videoId",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    }
+  ]
+}

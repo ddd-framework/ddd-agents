@@ -1,0 +1,45 @@
+@import "../../../styles/spacings";
+
+// One tile: the KPI block, the detail line, the source; the tile takes the width of its grid cell and never less
+// than its label needs to wrap. No `gap` of its own: the tile sits on a `WidgetSurface`, whose gap (`$x1_5`, `$x1` when
+// compact) it has always shown — a gap here competed with the surface's at equal specificity and won or lost by the
+// order the bundler emitted the two stylesheets in.
+.tile {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+// The written denominator of a score ("/100") at half the hero size, muted, on the hero's baseline.
+.denominator {
+  font-size: 0.5em;
+  color: var(--agents-fg-light);
+  letter-spacing: normal;
+}
+
+// The remark split off a score ("22 recenzii") leads the unit line, in the default text colour.
+.unitParts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $x0_5;
+  color: var(--agents-fg);
+
+  > :not(:first-child) {
+    color: var(--agents-fg-light);
+  }
+}
+
+.delta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x0_5;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+}

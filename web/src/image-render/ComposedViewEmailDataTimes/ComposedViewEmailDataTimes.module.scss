@@ -1,0 +1,7 @@
+@import "../../styles/spacings";
+
+// The one caption line under an e-mailed ComposedView: muted, wraps by available width, never cut.
+.dataTimes {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

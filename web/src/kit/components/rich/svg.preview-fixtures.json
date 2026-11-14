@@ -1,0 +1,243 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "svg-radar",
+      "description": "ChatGPT reference 14, the radar graphic alone (Svg node only, static markup): heading, caption, the five-axis polygon over its grid.",
+      "payload": {
+        "view": {
+          "type": "Svg",
+          "title": "Marketing Performance Radar",
+          "caption": "Interaktives Fünf-Achsen-Profil · Demo",
+          "label": "Radar: SEO 76, Content 62, Ads 48, Social 86, Email 70 of 100",
+          "markup": "<svg viewBox='0 0 200 200'><g fill='none' stroke='currentColor' stroke-opacity='0.2'><polygon points='100.0,20.0 176.1,75.3 147.0,164.7 53.0,164.7 23.9,75.3'/><polygon points='100.0,40.0 157.1,81.5 135.3,148.5 64.7,148.5 42.9,81.5'/><polygon points='100.0,60.0 138.0,87.6 123.5,132.4 76.5,132.4 62.0,87.6'/><polygon points='100.0,80.0 119.0,93.8 111.8,116.2 88.2,116.2 81.0,93.8'/><line x1='100' y1='100' x2='100.0' y2='20.0'/><line x1='100' y1='100' x2='176.1' y2='75.3'/><line x1='100' y1='100' x2='147.0' y2='164.7'/><line x1='100' y1='100' x2='53.0' y2='164.7'/><line x1='100' y1='100' x2='23.9' y2='75.3'/></g><polygon points='100.0,39.2 147.2,84.7 122.6,131.1 59.6,155.7 46.7,82.7' fill='#4a90d9' fill-opacity='0.22' stroke='#4a90d9' stroke-width='2' stroke-linejoin='round'/><g fill='#4a90d9'><circle r='3.5' cx='100.0' cy='39.2'/><circle r='3.5' cx='147.2' cy='84.7'/><circle r='3.5' cx='122.6' cy='131.1'/><circle r='3.5' cx='59.6' cy='155.7'/><circle r='3.5' cx='46.7' cy='82.7'/></g></svg>"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "svg-radar-sliders",
+      "description": "ChatGPT reference 14 in full: the radar drawn from a computed SVG text over five state values, with one Slider (lane L5) per axis inside a Surface (lane L1) — moving a slider reshapes the polygon.",
+      "payload": {
+        "state": {
+          "seo": 76,
+          "content": 62,
+          "ads": 48,
+          "social": 86,
+          "email": 70
+        },
+        "data": {
+          "axes": [
+            {
+              "key": "seo",
+              "label": "SEO",
+              "dx": 0,
+              "dy": -1
+            },
+            {
+              "key": "content",
+              "label": "Content",
+              "dx": 0.9511,
+              "dy": -0.309
+            },
+            {
+              "key": "ads",
+              "label": "Ads",
+              "dx": 0.5878,
+              "dy": 0.809
+            },
+            {
+              "key": "social",
+              "label": "Social",
+              "dx": -0.5878,
+              "dy": 0.809
+            },
+            {
+              "key": "email",
+              "label": "Email",
+              "dx": -0.9511,
+              "dy": -0.309
+            }
+          ]
+        },
+        "computed": {
+          "values": "[seo, content, ads, social, email]",
+          "shape": "join(map(axes, (a, i) => fixed(100 + a.dx * 0.8 * values[i], 1) + ',' + fixed(100 + a.dy * 0.8 * values[i], 1)), ' ')",
+          "grid": "join(map([1, 0.75, 0.5, 0.25], s => \"<polygon points='\" + join(map(axes, a => fixed(100 + a.dx * 80 * s, 1) + ',' + fixed(100 + a.dy * 80 * s, 1)), ' ') + \"'/>\"), '')",
+          "spokes": "join(map(axes, a => \"<line x1='100' y1='100' x2='\" + fixed(100 + a.dx * 80, 1) + \"' y2='\" + fixed(100 + a.dy * 80, 1) + \"'/>\"), '')",
+          "dots": "join(map(axes, (a, i) => \"<circle r='3.5' cx='\" + fixed(100 + a.dx * 0.8 * values[i], 1) + \"' cy='\" + fixed(100 + a.dy * 0.8 * values[i], 1) + \"'/>\"), '')",
+          "radar": "\"<svg viewBox='0 0 200 200'><g fill='none' stroke='currentColor' stroke-opacity='0.2'>\" + grid + spokes + \"</g><polygon points='\" + shape + \"' fill='#4a90d9' fill-opacity='0.22' stroke='#4a90d9' stroke-width='2' stroke-linejoin='round'/><g fill='#4a90d9'>\" + dots + \"</g></svg>\""
+        },
+        "view": {
+          "type": "Surface",
+          "title": "Marketing Performance Radar",
+          "subtitle": "Interaktives Fünf-Achsen-Profil · Demo",
+          "children": [
+            {
+              "type": "Svg",
+              "label": "Marketing performance radar over SEO, Content, Ads, Social and Email",
+              "markup": {
+                "$computed": "radar"
+              }
+            },
+            {
+              "type": "Stack",
+              "direction": "column",
+              "gap": "medium",
+              "children": [
+                {
+                  "type": "Slider",
+                  "label": "SEO",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "unit": "/100",
+                  "showValue": true,
+                  "value": {
+                    "$state": "seo"
+                  },
+                  "onChange": {
+                    "set": "seo"
+                  }
+                },
+                {
+                  "type": "Slider",
+                  "label": "Content",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "unit": "/100",
+                  "showValue": true,
+                  "value": {
+                    "$state": "content"
+                  },
+                  "onChange": {
+                    "set": "content"
+                  }
+                },
+                {
+                  "type": "Slider",
+                  "label": "Ads",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "unit": "/100",
+                  "showValue": true,
+                  "value": {
+                    "$state": "ads"
+                  },
+                  "onChange": {
+                    "set": "ads"
+                  }
+                },
+                {
+                  "type": "Slider",
+                  "label": "Social",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "unit": "/100",
+                  "showValue": true,
+                  "value": {
+                    "$state": "social"
+                  },
+                  "onChange": {
+                    "set": "social"
+                  }
+                },
+                {
+                  "type": "Slider",
+                  "label": "Email",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "unit": "/100",
+                  "showValue": true,
+                  "value": {
+                    "$state": "email"
+                  },
+                  "onChange": {
+                    "set": "email"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "move the SEO slider to the middle",
+          "click": {
+            "selector": "[class*='MuiSlider-root']"
+          }
+        },
+        {
+          "name": "raise SEO by one step",
+          "press": "ArrowRight"
+        }
+      ]
+    },
+    {
+      "name": "svg-unsafe-parts",
+      "description": "Error state: the markup carries a script, an onload handler and an outside image — they are removed, the rest is drawn (observed as data), the node reports failed INVALID_PROP.",
+      "payload": {
+        "view": {
+          "type": "Svg",
+          "title": "Sanitised graphic",
+          "markup": "<svg viewBox='0 0 100 100' onload='alert(1)'><script>alert(1)</script><image href='https://example.com/x.png' width='100' height='100'/><circle cx='50' cy='50' r='40' fill='#4a90d9'/></svg>"
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "svg-empty",
+      "description": "Empty state: empty markup renders nothing and reports empty.",
+      "payload": {
+        "view": {
+          "type": "Svg",
+          "markup": ""
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "svg-loading",
+      "description": "Loading state: the markup is bound to a pending tool result — the skeleton shows.",
+      "payload": {
+        "view": {
+          "type": "Svg",
+          "title": "Marketing Performance Radar",
+          "markup": {
+            "$from": {
+              "toolCall": "call_svg_1",
+              "path": "$.markup",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "svg-narrow",
+      "description": "The radar at the narrow width.",
+      "payload": {
+        "view": {
+          "type": "Svg",
+          "title": "Marketing Performance Radar",
+          "caption": "Interaktives Fünf-Achsen-Profil · Demo",
+          "markup": "<svg viewBox='0 0 200 200'><g fill='none' stroke='currentColor' stroke-opacity='0.2'><polygon points='100.0,20.0 176.1,75.3 147.0,164.7 53.0,164.7 23.9,75.3'/><polygon points='100.0,40.0 157.1,81.5 135.3,148.5 64.7,148.5 42.9,81.5'/><polygon points='100.0,60.0 138.0,87.6 123.5,132.4 76.5,132.4 62.0,87.6'/><polygon points='100.0,80.0 119.0,93.8 111.8,116.2 88.2,116.2 81.0,93.8'/><line x1='100' y1='100' x2='100.0' y2='20.0'/><line x1='100' y1='100' x2='176.1' y2='75.3'/><line x1='100' y1='100' x2='147.0' y2='164.7'/><line x1='100' y1='100' x2='53.0' y2='164.7'/><line x1='100' y1='100' x2='23.9' y2='75.3'/></g><polygon points='100.0,39.2 147.2,84.7 122.6,131.1 59.6,155.7 46.7,82.7' fill='#4a90d9' fill-opacity='0.22' stroke='#4a90d9' stroke-width='2' stroke-linejoin='round'/><g fill='#4a90d9'><circle r='3.5' cx='100.0' cy='39.2'/><circle r='3.5' cx='147.2' cy='84.7'/><circle r='3.5' cx='122.6' cy='131.1'/><circle r='3.5' cx='59.6' cy='155.7'/><circle r='3.5' cx='46.7' cy='82.7'/></g></svg>"
+        }
+      },
+      "expectedState": "data",
+      "width": 360
+    }
+  ]
+}

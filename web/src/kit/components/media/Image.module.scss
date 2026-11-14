@@ -1,0 +1,39 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+.image {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+// A thumbnail in a compact slot: a fixed 4:3 box at the height of a text row, so it never pushes the row.
+.imageCompact {
+  width: $x8;
+  flex: 0 0 auto;
+}
+
+// The pending binding: the picture's frame as a skeleton, with the frame's radius.
+.pendingFrame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+}
+
+.pendingFrameCompact {
+  width: $x8;
+  border-radius: $button-radius;
+}
+
+.pendingSkeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

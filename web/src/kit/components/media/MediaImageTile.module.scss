@@ -1,0 +1,132 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// One picture of the media kit: a frame in the picture's ratio on
+// `--agents-bg-disabled`, the picture absolutely positioned so its intrinsic size never pushes the layout, the source and
+// the hidden-count as theme-invariant dark chips over the corners.
+.frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-disabled);
+}
+
+.frameCompact {
+  border-radius: $button-radius;
+}
+
+.ratioSquare {
+  aspect-ratio: 1 / 1;
+}
+
+.ratioFourByThree {
+  aspect-ratio: 4 / 3;
+}
+
+.ratioThreeByTwo {
+  aspect-ratio: 3 / 2;
+}
+
+.ratioFiveByFour {
+  aspect-ratio: 5 / 4;
+}
+
+.ratioSixteenByNine {
+  aspect-ratio: 16 / 9;
+}
+
+.ratioThreeByFour {
+  aspect-ratio: 3 / 4;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// A logo is fitted, never cropped: contained on the surface colour with breathing room.
+.imageContain {
+  object-fit: contain;
+  padding: 12%;
+  box-sizing: border-box;
+  background: var(--agents-bg-surface);
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $x0_5;
+  padding: $x1_5;
+  text-align: center;
+}
+
+.fallbackText {
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+%darkChip {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  max-width: calc(100% - #{$x2});
+  padding: $x0_25 $x1;
+  border-radius: $x2;
+  background: rgba(var(--agents-bg-dark-rgb), 0.72);
+  pointer-events: none;
+}
+
+.sourceChip {
+  @extend %darkChip;
+  left: $x1;
+  bottom: $x1;
+}
+
+// Top right, so it never meets the source chip on a narrow tile.
+.hiddenCountChip {
+  @extend %darkChip;
+  top: $x1;
+  right: $x1;
+}
+
+// The click target covers the whole frame; the hover layer is the GlobalStateComponent's, the focus ring an inset one.
+.openButton {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: inherit;
+  }
+}

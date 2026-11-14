@@ -1,0 +1,123 @@
+@import "../../../styles/spacings";
+
+// The writing draft: the title (kind label, the model's
+// headline under it) above the card; the card (the WidgetSurface primitive, elevated) reads like the message itself —
+// To and Subject as a mail header over a hairline, then the text; the actions sit centred under the card. Sized
+// against its OWN width (container query), so the chat, a canvas pane, the preview and the e-mail capture all get
+// the narrow layout below the same width.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: writingDraft;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  padding: 0 $x0_5;
+  min-width: 0;
+}
+
+.card {
+  gap: $x2;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $x1;
+  padding-top: $x0_5;
+}
+
+.wrappingText {
+  overflow-wrap: anywhere;
+}
+
+// To / Subject, as a mail program heads a message.
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  padding-bottom: $x1_5;
+  border-bottom: $x0_125 solid var(--agents-divider-gl);
+}
+
+.headerLine {
+  display: grid;
+  grid-template-columns: $x8 minmax(0, 1fr);
+  align-items: baseline;
+  gap: $x1;
+}
+
+.emptyValue {
+  font-style: italic;
+}
+
+.editFields {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+}
+
+.body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  overflow-x: auto;
+
+  & :global([data-markdown-blocks-root]) > :first-child {
+    margin-top: 0;
+  }
+
+  & :global([data-markdown-blocks-root]) > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.bodyHeading {
+  margin: $x1_5 0 $x0_5;
+  color: var(--agents-fg);
+}
+
+.bodyLink {
+  color: var(--agents-fg);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--agents-fg-light);
+  text-underline-offset: $x0_5;
+
+  &:hover {
+    text-decoration-style: solid;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  margin-top: -$x1;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $x1;
+  margin-top: -$x1;
+}
+
+// Narrow: the label above its value in the mail header.
+@container writingDraft (max-width: 440px) {
+  .headerLine {
+    grid-template-columns: minmax(0, 1fr);
+    gap: $x0_25;
+  }
+}

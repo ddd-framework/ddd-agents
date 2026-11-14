@@ -1,0 +1,41 @@
+@import "../../../../styles/spacings";
+
+// Caption and source chip on one line that wraps by available width (footer rows wrap).
+.footnote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x0_5 $x1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+// Quiet provenance: pinned to the tile's foot under a hairline, so the footers of a row line up.
+.quiet {
+  margin-top: auto;
+  padding-top: $x1;
+  border-top: 1px solid var(--agents-divider-gl);
+}
+
+.sourceButton {
+  min-width: 0;
+  max-width: 100%;
+}
+
+// The source as a small flat chip on the nested background; a link opens in a new tab.
+.sourceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  max-width: 100%;
+  padding: $x0_25 $x1;
+  border-radius: $x1_5;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg-light);
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}

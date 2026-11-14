@@ -1,0 +1,16 @@
+@import "../../../styles/spacings";
+
+// A list on whatever surface holds it: no box, entries divided by hairlines. A numbered list counts its entries with a
+// CSS counter so short-form entries, ListItem children and repeated ones number as one sequence.
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.numbered {
+  counter-reset: data-list-entry;
+}

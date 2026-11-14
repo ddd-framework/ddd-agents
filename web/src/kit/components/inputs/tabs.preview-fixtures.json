@@ -1,0 +1,304 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "tabs-analytics-dashboard",
+      "description": "The nested analytics dashboard: a 7/30-day segmented control in the card header switches the KPIs, the visitor line and the channel bars (ChatGPT reference 05).",
+      "payload": {
+        "state": {
+          "period": "7d"
+        },
+        "data": {
+          "week": [
+            {
+              "day": "Mon",
+              "visitors": 980
+            },
+            {
+              "day": "Tue",
+              "visitors": 1120
+            },
+            {
+              "day": "Wed",
+              "visitors": 1040
+            },
+            {
+              "day": "Thu",
+              "visitors": 1260
+            },
+            {
+              "day": "Fri",
+              "visitors": 1130
+            },
+            {
+              "day": "Sat",
+              "visitors": 1460
+            },
+            {
+              "day": "Sun",
+              "visitors": 1210
+            }
+          ],
+          "month": [
+            {
+              "day": "W1",
+              "visitors": 7600
+            },
+            {
+              "day": "W2",
+              "visitors": 8100
+            },
+            {
+              "day": "W3",
+              "visitors": 8900
+            },
+            {
+              "day": "W4",
+              "visitors": 9500
+            }
+          ],
+          "channelsWeek": [
+            {
+              "channel": "Organic",
+              "share": 54
+            },
+            {
+              "channel": "Paid",
+              "share": 28
+            },
+            {
+              "channel": "Direct",
+              "share": 18
+            }
+          ],
+          "channelsMonth": [
+            {
+              "channel": "Organic",
+              "share": 51
+            },
+            {
+              "channel": "Paid",
+              "share": 31
+            },
+            {
+              "channel": "Direct",
+              "share": 18
+            }
+          ]
+        },
+        "computed": {
+          "plotted": "period == \"7d\" ? week : month",
+          "channels": "period == \"7d\" ? channelsWeek : channelsMonth",
+          "visitors": "sum(plotted, r => r.visitors)",
+          "visitorsDelta": "period == \"7d\" ? 12.4 : 9.1",
+          "conversionRate": "period == \"7d\" ? 4.6 : 4.3",
+          "conversionDelta": "period == \"7d\" ? 0.3 : 0.1"
+        },
+        "view": {
+          "type": "Surface",
+          "title": "Analytics",
+          "subtitle": "Interactive demo · example data",
+          "slots": {
+            "header": [
+              {
+                "type": "Tabs",
+                "options": [
+                  {
+                    "id": "7d",
+                    "label": "7 days"
+                  },
+                  {
+                    "id": "30d",
+                    "label": "30 days"
+                  }
+                ],
+                "value": {
+                  "$state": "period"
+                },
+                "onChange": {
+                  "set": "period"
+                }
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "Grid",
+              "columns": 2,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Visitors",
+                  "value": {
+                    "$computed": "visitors"
+                  },
+                  "format": "number",
+                  "delta": {
+                    "$computed": "visitorsDelta"
+                  },
+                  "deltaFormat": "percent",
+                  "higherIsBetter": true
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Conversion rate",
+                  "value": {
+                    "$computed": "conversionRate"
+                  },
+                  "format": "percent",
+                  "decimals": 1,
+                  "delta": {
+                    "$computed": "conversionDelta"
+                  },
+                  "deltaLabel": "pp",
+                  "higherIsBetter": true
+                }
+              ]
+            },
+            {
+              "type": "Chart",
+              "kind": "line",
+              "title": "Visitor trend",
+              "data": {
+                "$computed": "plotted"
+              },
+              "x": "day",
+              "series": [
+                {
+                  "field": "visitors",
+                  "label": "Visitors"
+                }
+              ],
+              "valueFormat": "number"
+            },
+            {
+              "type": "Chart",
+              "kind": "bar",
+              "horizontal": true,
+              "title": "Channels",
+              "caption": "Share of traffic",
+              "data": {
+                "$computed": "channels"
+              },
+              "x": "channel",
+              "series": [
+                {
+                  "field": "share",
+                  "label": "Share"
+                }
+              ],
+              "valueFormat": "percent"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "switch to 30 days",
+          "click": {
+            "text": "30 days"
+          }
+        },
+        {
+          "name": "back to 7 days",
+          "click": {
+            "text": "7 days"
+          }
+        }
+      ]
+    },
+    {
+      "name": "tabs-alone",
+      "description": "One segmented control on its own, with a label and three choices (Bear / Base / Bull).",
+      "payload": {
+        "state": {
+          "scenario": "base"
+        },
+        "view": {
+          "type": "Tabs",
+          "label": "Scenario",
+          "options": [
+            "Bear",
+            {
+              "id": "base",
+              "label": "Base"
+            },
+            {
+              "id": "bull",
+              "label": "Bull"
+            }
+          ],
+          "value": {
+            "$state": "scenario"
+          },
+          "onChange": {
+            "set": "scenario"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "pick Bull",
+          "click": {
+            "text": "Bull"
+          }
+        }
+      ]
+    },
+    {
+      "name": "tabs-loading",
+      "description": "The choices are bound to a tool result that has not arrived yet — the control's place is a skeleton.",
+      "payload": {
+        "state": {
+          "period": "7d"
+        },
+        "view": {
+          "type": "Tabs",
+          "label": "Period",
+          "options": {
+            "$from": {
+              "toolCall": "call_pending",
+              "path": "$.periods"
+            }
+          },
+          "value": {
+            "$state": "period"
+          },
+          "onChange": {
+            "set": "period"
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "tabs-no-options",
+      "description": "No usable choice — the control renders nothing inside its card and the block reports failed (INVALID_PROP). The preview sees the card (state data); the block's render report says failed.",
+      "payload": {
+        "view": {
+          "type": "Surface",
+          "title": "Analytics",
+          "children": [
+            {
+              "type": "Tabs",
+              "label": "Period",
+              "options": [
+                {
+                  "description": "no label"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

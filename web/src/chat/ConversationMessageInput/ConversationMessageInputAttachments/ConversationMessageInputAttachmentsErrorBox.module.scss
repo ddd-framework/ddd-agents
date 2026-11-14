@@ -1,0 +1,58 @@
+@import "../../../styles/spacings";
+
+.errorBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: $x1;
+  // Hug the content; longer messages wrap inside the available width instead of widening the box.
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: $x1;
+  padding: $x1 $x1 $x1_5 $x1_5;
+  border-radius: $x1;
+  overflow: hidden;
+  // Semitransparent error fill — reads on both the light and dark chat surface.
+  background: rgba(var(--agents-danger-500-rgb), 0.1);
+
+  // Hover pauses the countdown: the bar freezes here, the dismiss timeout via onMouseEnter — the
+  // same hover boundary drives both, so they stay in sync.
+  &:hover .countdownBar {
+    animation-play-state: paused;
+  }
+}
+
+.errorLines {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dismissButton {
+  flex: 0 0 auto;
+}
+
+// Countdown to the auto-dismiss: grows from zero to full width over the same duration as the
+// dismiss timeout (animation-duration is set inline from the prop).
+.countdownBar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: $x0_25;
+  background: var(--agents-danger-500);
+  animation-name: countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes countdown {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}

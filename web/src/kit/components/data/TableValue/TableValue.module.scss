@@ -1,0 +1,11 @@
+// Figures line up in a column: tabular digits; long text wraps and is never cut.
+.value {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.booleanValue {
+  display: inline-flex;
+  vertical-align: middle;
+  line-height: 0;
+}

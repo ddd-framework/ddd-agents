@@ -1,0 +1,15 @@
+@import "../../styles/spacings";
+
+// The inline results in the chat: one elevated surface with the headline
+// and the match count above the grouped results, like ChatGPT's feed card.
+.inlineResults {
+  gap: $x1;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

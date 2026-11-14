@@ -1,0 +1,26 @@
+@import "../../../styles/spacings";
+@import "../../conversation-tokens";
+
+.message {
+  max-width: min($chat-user-message-max-width, 100%);
+  background-color: var(--agents-assistant-400, red);
+  padding: $x1 $x1_5;
+  border-radius: $x1;
+  align-self: flex-end;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.whiteBubble {
+  background-color: var(--agents-bg, white);
+}
+
+.darkBubble {
+  background-color: var(--agents-chat-user-bubble-background);
+  padding: 1.25 * $x1 $x2;
+  border-radius: $x2_5;
+}
+
+.primaryBubble {
+  background-color: var(--agents-primary-500);
+}

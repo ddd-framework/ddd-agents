@@ -1,0 +1,37 @@
+// Central design tokens for the Conversation module.
+// Use these instead of inlining hex literals in component scss.
+// If a value belongs to the global design system, promote it to
+// html/theming/definitions/direct-channel/direct-channel.css instead of adding it here.
+
+// Generic-chat (unbranded) background gradient — used when no product brand color is present.
+$chat-generic-bg:
+  linear-gradient(236deg, #fff -0.85%, #eaf5fe 16.3%, #e9f3fd 22.63%, #e8f2fd 28.95%, #fde2ef 85.17%),
+  linear-gradient(165deg, #fff 13.02%, #e8f2fd 47.07%);
+
+@import "../styles/surfaces";
+// Alias of the card shadow; new code imports $card-shadow from styles/_surfaces.scss directly.
+$chat-card-shadow: $card-shadow;
+
+// Popup/menu shadow (MockCommandMenu).
+$chat-popup-shadow: 0 $x0_5 $x2 0 rgba(0, 0, 0, 0.12);
+
+// Translucent-white overlay for the selection pill inside a user bubble. Deliberately white
+// (NOT a theme background token): it lightens whatever bubble colour sits under it — product
+// colour, white, or dark — so the pill reads on every bubble theme. Flipping it to the
+// background colour would darken it on the dark bubble, so it stays white.
+$chat-selection-pill-overlay: rgba(255, 255, 255, 0.18);
+
+// Container-query breakpoint for compact chat pane.
+$chat-pane-narrow-breakpoint: 40rem;
+
+// Layout widths shared across Conversation subcomponents.
+// All expressed as multiples of $x1 (0.5rem / 8px) so they stay on the spacing grid.
+$chat-content-max-width: 100 * $x1;        // 800px
+$chat-messages-max-width: 150 * $x1;       // 1200px
+$chat-user-message-max-width: 75 * $x1;    // 600px
+$chat-suggestion-card-max-width: 40 * $x1; // 320px
+$chat-suggestion-card-min-height: 19 * $x1; // 152px (was 150px — rounded onto grid)
+$chat-drawer-width: 45 * $x1;              // 360px
+
+// Top padding under the floating header (used by the intro + message list).
+$chat-top-padding: 21 * $x1;               // 168px

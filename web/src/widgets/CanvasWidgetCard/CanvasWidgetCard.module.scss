@@ -1,0 +1,180 @@
+@import "../../styles/spacings";
+@import "../../styles/breakpoints";
+@import "../../styles/surfaces";
+
+// The single inline handle shared by every canvas widget: a clickable card raised above the chat background by a
+// shadow (no border) that opens the side canvas. The GlobalStateComponent root carries the surface and the hover layer; the button inside is
+// the click target. Shrinks to its content on a tablet-or-wider chat; full width below the tablet breakpoint
+// (mobile and the compact chat).
+
+.cardSurface {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  background: var(--agents-bg-surface);
+
+  &:hover {
+    .leadingIconBadge {
+      background: rgba(var(--agents-fg-cta-rgb), 0.18);
+    }
+
+    .openAffordance {
+      transform: translateX($x0_5);
+      background: rgba(var(--agents-fg-cta-rgb), 0.12);
+      border-color: transparent;
+    }
+
+    .openIcon,
+    .richOpenIcon {
+      color: var(--agents-fg-cta);
+    }
+
+    .richOpenIcon {
+      transform: translateX($x0_5);
+    }
+  }
+}
+
+.cardButton {
+  display: flex;
+  align-items: center;
+  gap: $x1_5;
+  width: 100%;
+  padding: $card-padding;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  // Inset: the card root clips overflow, an outside outline would be cut off.
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: $card-radius;
+  }
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+// Leading icon rendered in a tinted primary pill — gives the card a clear, branded "what's inside" glyph.
+.leadingIconBadge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $x4;
+  min-width: $x4;
+  height: $x4;
+  border-radius: $x1;
+  background: rgba(var(--agents-fg-cta-rgb), 0.12);
+  color: var(--agents-fg-cta);
+  transition: background 0.15s ease;
+}
+
+// Trailing "open the canvas" affordance — a quiet circular target that lights up with the accent on card hover.
+.openAffordance {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $x4;
+  min-width: $x4;
+  height: $x4;
+  border-radius: 50%;
+  border: 1px solid var(--agents-divider-gl);
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.openIcon {
+  color: var(--agents-fg-lightest);
+  transition:
+    color 0.15s ease,
+}
+
+// A named card of another business than the selected one: the business chip on its own row, at the card's right edge —
+// the corner where the chip floats on an inline widget.
+.cardOfAnotherBusiness {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $x1;
+  width: 100%;
+}
+
+// The rich card (a `thumbnail` is passed): the GlobalStateComponent root carries the card surface, its hover layer
+// clips to the radius; the button inside is a plain full-size click target. A shadow, no border, lifts it off the chat.
+// Shrinks to its content on a tablet-or-wider chat; full width below the tablet breakpoint — mobile and the compact chat.
+.richCard {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  background: var(--agents-bg-surface);
+
+  &:hover .richOpenIcon {
+    color: var(--agents-fg-cta);
+    transform: translateX($x0_5);
+  }
+}
+
+@container chatPane (max-width: #{map-get($breakpoints, tablet)}) {
+  .cardSurface {
+    width: 100%;
+  }
+}
+
+@media (max-width: #{map-get($breakpoints, tablet)}) {
+  .cardSurface {
+    width: 100%;
+  }
+}
+
+// The rich card (a `thumbnail` is passed): a roomier row for the thumbnail. The thumbnail hugs the corner at the
+// compact padding, so the card radius is concentric with it.
+.richCardSurface {
+  border-radius: $card-radius-around-thumbnail;
+}
+
+.richCardButton {
+  gap: $x2;
+  padding: $card-padding-compact;
+
+  &:focus-visible {
+    border-radius: $card-radius-around-thumbnail;
+  }
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  position: relative;
+  width: 12 * $x1;
+  height: 8 * $x1;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+}
+
+.richOpenIcon {
+  flex-shrink: 0;
+  color: var(--agents-fg-light);
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+// Narrow viewport: the real inline content (readable, interactive) stacked above the "Open in canvas" CTA.
+.mobile {
+  display: flex;
+  flex-direction: column;
+  gap: $x2;
+  width: 100%;
+}

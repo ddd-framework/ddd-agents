@@ -1,0 +1,23 @@
+{
+  "wireName": "ConceptExplainer",
+  "fixtures": [
+    {
+      "name": "unknown-type",
+      "description": "A type id no explainer type registers (ChatGPT's MOON_PHASES): one muted line, reported failed INVALID_PROP with the known types.",
+      "payload": {
+        "explainer": "MOON_PHASES"
+      },
+      "locale": "en",
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "empty",
+      "description": "A block that names no explainer: one muted line, reported empty.",
+      "payload": {},
+      "locale": "en",
+      "expectedState": "empty",
+      "width": 528
+    }
+  ]
+}

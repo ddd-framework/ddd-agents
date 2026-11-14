@@ -1,0 +1,8 @@
+// An icon sits on the text line it is in, never stretching it.
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 0;
+}

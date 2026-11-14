@@ -1,0 +1,69 @@
+@import "../../../styles/spacings";
+
+// The shared conversation markdown inside a widget: text at the body size, headings at most a section title, the
+// outer margins of the first and last block removed by the shared renderer itself.
+// A wide table scrolls inside the node instead of widening the card.
+.markdown {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  overflow-x: auto;
+
+  & :global(table) {
+    width: 100%;
+  }
+
+  // Tables in the widget's own rhythm: the first and last column flush with the text above (the shared renderer
+  // indents every cell by $x3), rows divided by one hairline, the header by the same hairline. The doubled class
+  // outranks the shared renderer's cell rule, whatever the stylesheet order.
+  &.markdown :global([data-markdown-blocks-root]) :is(th, td) {
+    padding: $x1 $x1_5;
+    border-bottom: 1px solid var(--agents-divider-gl);
+    vertical-align: top;
+    // Columns are sized by whole words (a phone showed "Sitz|e"); a word longer than its column still breaks.
+    overflow-wrap: break-word;
+  }
+
+  &.markdown :global([data-markdown-blocks-root]) :is(th, td):first-child {
+    padding-inline-start: 0;
+  }
+
+  &.markdown :global([data-markdown-blocks-root]) :is(th, td):last-child {
+    padding-inline-end: 0;
+  }
+
+  // The shared renderer trims the outer margins of its own blocks only, not of a component-library Text (a heading here).
+  & :global([data-markdown-blocks-root]) > :first-child {
+    margin-top: 0;
+  }
+
+  & :global([data-markdown-blocks-root]) > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.heading {
+  margin: $x2 0 $x1;
+  color: var(--agents-fg);
+}
+
+.link {
+  color: var(--agents-fg);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--agents-fg-light);
+  text-underline-offset: $x0_5;
+
+  &:hover {
+    text-decoration-style: solid;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+}

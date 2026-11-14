@@ -1,0 +1,136 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// Slides in one scrolling row: `--agents-carousel-visible` slides fit fully and the next one peeks in by a quarter slide, so
+// the owner sees there is more. The container query drops to one slide on a narrow pane (no media query).
+.carousel {
+  --agents-carousel-visible: 2;
+  --agents-layout-gap: #{$x1};
+
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  min-width: 0;
+}
+
+.visible1 {
+  --agents-carousel-visible: 1;
+}
+
+.visible2 {
+  --agents-carousel-visible: 2;
+}
+
+.visible3 {
+  --agents-carousel-visible: 3;
+}
+
+.visible4 {
+  --agents-carousel-visible: 4;
+}
+
+.viewport {
+  position: relative;
+  min-width: 0;
+}
+
+.track {
+  display: flex;
+  gap: var(--agents-layout-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  // The snap positions count from inside the shadow padding, so the first slide rests at scroll position 0.
+  scroll-padding-inline: $x0_5;
+  scrollbar-width: none;
+  // Room for a raised slide's shadow inside the scroll box, which clips it otherwise.
+  padding: $x0_5;
+  margin: calc(-1 * #{$x0_5});
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: $x1_5;
+  }
+}
+
+// The e-mail capture shows the first slides as they sit, without a scroll box.
+.frozenTrack {
+  overflow-x: hidden;
+}
+
+.slide {
+  flex: 0 0 calc((100% - var(--agents-layout-gap) * var(--agents-carousel-visible)) / (var(--agents-carousel-visible) + 0.25));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  scroll-snap-align: start;
+
+  > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.skeletonSlide {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  padding: $x1_5;
+  border-radius: $x1_5;
+  background: var(--agents-bg-var);
+}
+
+@container (max-width: 30rem) {
+  .slide {
+    flex-basis: calc((100% - var(--agents-layout-gap)) / 1.25);
+  }
+}
+
+// Previous / next: round icon buttons over the track's edges, only while there is something to scroll to.
+.arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  // Centred on the track's edge, so the button covers the peeking slide's border rather than its numbers.
+  transform: translate(var(--agents-carousel-arrow-shift), -50%);
+  border-radius: 50%;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+}
+
+.arrowPrevious {
+  --agents-carousel-arrow-shift: -50%;
+
+  left: 0;
+}
+
+.arrowNext {
+  --agents-carousel-arrow-shift: 50%;
+
+  right: 0;
+}
+
+.arrowButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $x4;
+  height: $x4;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--agents-fg);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}

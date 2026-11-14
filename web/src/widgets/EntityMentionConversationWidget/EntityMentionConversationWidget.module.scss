@@ -1,0 +1,7 @@
+@import "../../styles/spacings";
+
+.row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $x0_5;
+}

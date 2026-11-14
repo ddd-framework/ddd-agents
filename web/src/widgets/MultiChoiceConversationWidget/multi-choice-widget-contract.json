@@ -1,0 +1,43 @@
+{
+  "wireName": "MultiChoice",
+  "description": "The owner's answer on the multi-choice widget of an owner question. The confirm posts confirmAction as the owner's TEXT (sendMessageToChat): '{values}' becomes the picked options' labels in option order joined by ', ', '{count}' their number (default confirmAction 'Confirmed: {values}'; askOwner writes '{values}'), with the suffix the app declares appended when the widget belongs to another agent space than the active one (its agentSpaceId; the package default appends none, anotherAgentSpaceSuffixTemplate is empty). The backend reader is MultiChoiceConversationWidget (OwnerQuestionConversationWidget::readAnswer() / readPickFromFirstOwnerText()): the app's suffix is stripped when it names the widget's own agent space, the whole text is matched against one label first (a label may carry ', '), and only then split at ', ' with every part a label. Any owner text answers the widget; a text that matches no way is an answer without labels — so is a confirm under the default 'Confirmed: ' prefix today. The widget has no decline control. A stored contract: the confirm wording never changes without the readers accepting both.",
+  "anotherAgentSpaceSuffixTemplate": "",
+  "exampleBlocks": [
+    "```widget\n{\"type\":\"MultiChoice\",\"question\":\"Which channels should we post on?\",\"options\":[{\"label\":\"Instagram\",\"value\":\"Instagram\"},{\"label\":\"Facebook\",\"value\":\"Facebook\",\"sublabel\":\"Your page with 1,200 followers\"},{\"label\":\"TikTok\",\"value\":\"TikTok\"}],\"confirmAction\":\"{values}\",\"emittedBy\":\"tool:askOwner\"}\n```",
+    "```widget\n{\"type\":\"MultiChoice\",\"agentSpaceId\":412553,\"title\":\"What do you sell?\",\"options\":[{\"label\":\"Bread, rolls and cakes\",\"value\":\"bakery\"},{\"label\":\"Coffee\",\"value\":\"coffee\"}],\"confirmAction\":\"{values}\"}\n```"
+  ],
+  "exampleReactions": [
+    {
+      "exampleBlock": 0,
+      "messageType": "TEXT",
+      "confirmedValues": ["Instagram", "TikTok"],
+      "clickedOnWidgetOfAnotherAgentSpace": false,
+      "text": "Instagram, TikTok",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedLabels": ["Instagram", "TikTok"],
+      "expectedMeanings": []
+    },
+    {
+      "exampleBlock": 1,
+      "messageType": "TEXT",
+      "confirmedValues": ["bakery"],
+      "clickedOnWidgetOfAnotherAgentSpace": true,
+      "text": "Bread, rolls and cakes",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedLabels": ["Bread, rolls and cakes"],
+      "expectedMeanings": [],
+      "expectedAnotherAgentSpaceKey": 412553
+    },
+    {
+      "exampleBlock": 0,
+      "messageType": "TEXT",
+      "text": "Only Instagram for now, maybe TikTok later",
+      "expectsAnswer": true,
+      "expectsDecline": false,
+      "expectedLabels": [],
+      "expectedMeanings": []
+    }
+  ]
+}

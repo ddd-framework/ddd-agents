@@ -1,0 +1,3428 @@
+{
+    "version": 1,
+    "generatedBy": "ComposedViewNodeSchema::buildJson() — never edit by hand",
+    "budgets": {
+        "maxSourceBytes": 65536,
+        "maxNodes": 400,
+        "maxDepth": 12,
+        "maxStateKeys": 40,
+        "maxStateStringLength": 500,
+        "maxComputedExpressions": 40,
+        "maxExpressionSourceLength": 600,
+        "maxExpressionAstNodes": 200,
+        "maxComputedDependencyDepth": 8,
+        "maxOperationsPerUpdate": 50000,
+        "maxCollectionItems": 1000,
+        "maxAllocatedItemsPerEvaluation": 5000,
+        "maxRepeatRows": 200,
+        "maxRenderedNodes": 2000,
+        "maxInlineArrayItems": 500,
+        "maxInlineCells": 3000,
+        "maxTextLength": 4000,
+        "maxActions": 20,
+        "maxInputUpdatesPerSecond": 30,
+        "maxSourceRequestsPerTreePerMinute": 20
+    },
+    "categories": [
+        "inline",
+        "block",
+        "data",
+        "media",
+        "input",
+        "layout",
+        "heavy"
+    ],
+    "sizeClasses": [
+        "compact",
+        "regular",
+        "full"
+    ],
+    "actionTypes": [
+        "copy",
+        "resetState",
+        "openEntity",
+        "openUrl"
+    ],
+    "bindingKinds": [
+        "state",
+        "computed",
+        "data",
+        "item",
+        "from",
+        "source"
+    ],
+    "findingCodes": [
+        "INVALID_NODE",
+        "INVALID_PROP",
+        "UNKNOWN_BINDING",
+        "INVALID_EXPRESSION",
+        "INVALID_STATE",
+        "INVALID_ACTION",
+        "BUDGET_EXCEEDED",
+        "INLINE_VALUE_WITHOUT_SOURCE",
+        "INVALID_INITIAL_CHOICE",
+        "UNREAD_STATE",
+        "UNKNOWN_ITEM_KEY",
+        "INVALID_SLOT_NODE_COUNT",
+        "WIDGET_LIFTED"
+    ],
+    "noteFindingCodes": [
+        "INLINE_VALUE_WITHOUT_SOURCE",
+        "INVALID_INITIAL_CHOICE",
+        "UNREAD_STATE",
+        "UNKNOWN_ITEM_KEY",
+        "INVALID_SLOT_NODE_COUNT",
+        "WIDGET_LIFTED"
+    ],
+    "nodeTypes": {
+        "Badge": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "a small status chip with a tone (success, warning, danger, info, neutral)",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the status, in the owner's language — one or two words"
+                },
+                {
+                    "name": "tone",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "neutral",
+                        "muted",
+                        "success",
+                        "warning",
+                        "danger",
+                        "info",
+                        "default",
+                        "positive",
+                        "negative"
+                    ],
+                    "description": "neutral (default), muted (secondary text), success (green), warning (amber), danger (red) or info (blue)"
+                }
+            ],
+            "slots": []
+        },
+        "Button": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "label",
+            "summary": "a button that runs one of the tree's actions (copy, resetState, openUrl, openEntity) or writes a value to state",
+            "props": [
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the button does (\"Copy result\")"
+                },
+                {
+                    "name": "onClick",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"action\": \"<action name>\"} or {\"set\": \"<state name>\"} with value"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what a {\"set\": …} click writes"
+                },
+                {
+                    "name": "variant",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "primary",
+                        "secondary"
+                    ],
+                    "description": "primary for the one main action (default), secondary beside it"
+                },
+                {
+                    "name": "icon",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "copy",
+                        "reset",
+                        "link",
+                        "add",
+                        "check",
+                        "next",
+                        "calendar",
+                        "info"
+                    ],
+                    "description": "a glyph before the label (copy, reset, link, add, check, next, calendar, info)"
+                },
+                {
+                    "name": "fullWidth",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the button takes the whole width"
+                }
+            ],
+            "slots": []
+        },
+        "Caption": {
+            "categories": [
+                "inline",
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "muted secondary text: a sub-line, a unit, a date, a method note",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the secondary text, in the owner's language"
+                }
+            ],
+            "slots": []
+        },
+        "Carousel": {
+            "categories": [
+                "layout"
+            ],
+            "providesItemScope": true,
+            "textContentProp": null,
+            "summary": "slides side by side with previous / next buttons; each child is a slide, or the children repeat per item of `items`",
+            "props": [
+                {
+                    "name": "items",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the list the children repeat over, one slide per item ($item binds a field of the item)"
+                },
+                {
+                    "name": "visibleItems",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "description": "how many slides are fully visible at once (1 to 4, default 2); the next one peeks in"
+                },
+                {
+                    "name": "showArrows",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "show the previous / next buttons (default true)"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the slides are, for screen readers (e.g. \"Visitors per channel\")"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 1,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the slides (one node each) or, with `items`, the template of one slide"
+                }
+            ],
+            "itemsProp": "items"
+        },
+        "Chart": {
+            "categories": [
+                "data"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a line, area, bar, pie, donut, scatter, heatmap, funnel or radar chart over rows; bars with a change per bar; a sparkline in a compact slot",
+            "props": [
+                {
+                    "name": "kind",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "line",
+                        "area",
+                        "bar",
+                        "pie",
+                        "donut",
+                        "scatter",
+                        "heatmap",
+                        "funnel",
+                        "radar"
+                    ],
+                    "description": "line, area, bar, pie, donut, scatter, heatmap, funnel or radar"
+                },
+                {
+                    "name": "data",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the rows (objects), usually a binding: {\"$data\":…}, {\"$computed\":…}, {\"$from\":…}"
+                },
+                {
+                    "name": "x",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the row field of the category / time axis (the slice name of a pie, the row of a heatmap, the stage of a funnel, the axis of a radar)"
+                },
+                {
+                    "name": "series",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the plotted fields: [{\"field\",\"label\",\"visible\"?}] — one for a pie or a funnel, one column each for a heatmap"
+                },
+                {
+                    "name": "horizontal",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "bar only: horizontal bars, for a ranking or a poll"
+                },
+                {
+                    "name": "stacked",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "bar and area only: the series stacked"
+                },
+                {
+                    "name": "valueFormat",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "number",
+                        "percent",
+                        "currency",
+                        "compact",
+                        "date",
+                        "text"
+                    ],
+                    "description": "how the values are shown on the axis and in the tooltip (default number)"
+                },
+                {
+                    "name": "currency",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the ISO currency code for valueFormat currency (default EUR)"
+                },
+                {
+                    "name": "min",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the lowest value of the value axis (default: from the data)"
+                },
+                {
+                    "name": "max",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the highest value of the value axis (default: from the data)"
+                },
+                {
+                    "name": "xLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the title of the category axis"
+                },
+                {
+                    "name": "yLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the title of the value axis"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a heading above the chart"
+                },
+                {
+                    "name": "caption",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a muted line under the chart (the period, what the values mean)"
+                },
+                {
+                    "name": "source",
+                    "types": [
+                        "object"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "where the values come from ({\"name\",\"url\"}), shown as the source line"
+                },
+                {
+                    "name": "deltaField",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "bar only: the row field of the change against an earlier measurement, shown signed at the right of each bar (plus green, minus red)"
+                },
+                {
+                    "name": "deltaUnit",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "pp",
+                        "%"
+                    ],
+                    "description": "what the change counts: pp (percentage points, the figure alone) or % (default: the figure alone)"
+                },
+                {
+                    "name": "deltaLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the line under the bars that says what the change compares with (\"Right: change in percentage points since January 2026\")"
+                }
+            ],
+            "slots": [],
+            "sourcing": {
+                "needsSource": true,
+                "namesSources": false,
+                "rowsProps": [
+                    "data"
+                ],
+                "figureProps": []
+            }
+        },
+        "Checkbox": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "label",
+            "summary": "one checkbox that writes true or false to a state value",
+            "props": [
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the box switches on"
+                },
+                {
+                    "name": "checked",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "whether it is ticked, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes true or false"
+                },
+                {
+                    "name": "description",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one muted line under the label"
+                }
+            ],
+            "slots": []
+        },
+        "Code": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "code",
+            "summary": "a block of source code with syntax highlighting, a copy button and a line-wrap toggle",
+            "props": [
+                {
+                    "name": "code",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the source code, line breaks as \\n"
+                },
+                {
+                    "name": "language",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the language for the highlighting: php, javascript, typescript, json, html, css, scss, sql, bash, python, java, kotlin, swift, go, rust, ruby, csharp, cpp, c, yaml, xml, markdown, diff, dockerfile, graphql, ini, plaintext; another name shows plain text"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a file name or a short label shown in the header instead of the language name"
+                },
+                {
+                    "name": "wrap",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "true wraps long lines from the start (the owner can toggle it); default false scrolls them"
+                }
+            ],
+            "slots": []
+        },
+        "DatePicker": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a date field with a calendar that writes the picked day (YYYY-MM-DD) to a state value",
+            "props": [
+                {
+                    "name": "value",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the picked day as YYYY-MM-DD, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes the day as YYYY-MM-DD"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short label above the field"
+                },
+                {
+                    "name": "min",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the earliest day that can be picked, YYYY-MM-DD"
+                },
+                {
+                    "name": "max",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the latest day that can be picked, YYYY-MM-DD"
+                }
+            ],
+            "slots": []
+        },
+        "Diagram": {
+            "categories": [
+                "heavy"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "source",
+            "summary": "a diagram drawn from Mermaid source (flowchart, sequence, state, timeline), with an optional heading and caption",
+            "props": [
+                {
+                    "name": "source",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the Mermaid source, line breaks as \\n, e.g. \"flowchart TD\\n  A[Request] --> B{Widget found?}\\n  B -- Yes --> C[Select widget]\""
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short heading above the diagram"
+                },
+                {
+                    "name": "caption",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one muted line under the heading: what the diagram shows"
+                }
+            ],
+            "slots": []
+        },
+        "Divider": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a hairline between two parts, horizontal or vertical",
+            "props": [
+                {
+                    "name": "orientation",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "horizontal",
+                        "vertical"
+                    ],
+                    "description": "horizontal (default, in a column) or vertical (between the items of a row)"
+                }
+            ],
+            "slots": []
+        },
+        "EntityLink": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "an entity's name (a competitor, a review, a keyword) that opens its detail panel through an openEntity action",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the entity's name as the owner reads it (\"Pizzeria Roma\")"
+                },
+                {
+                    "name": "action",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the name of this tree's openEntity action whose ref is the entity's reference from a tool result"
+                },
+                {
+                    "name": "variant",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "link",
+                        "title",
+                        "chip"
+                    ],
+                    "description": "link = the name inline in a sentence or cell (default), title = the name as the bold headline of a Surface, chip = a small pill with a detail glyph"
+                }
+            ],
+            "slots": []
+        },
+        "Favicon": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "the small site icon of a domain, in front of a source or a result",
+            "props": [
+                {
+                    "name": "url",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a page address or a bare domain (wdr.de) whose site icon is shown"
+                },
+                {
+                    "name": "name",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the site name, read aloud and shown on hover"
+                }
+            ],
+            "slots": []
+        },
+        "Flow": {
+            "categories": [
+                "layout"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "small items (badges, labels, chips) that flow like words and wrap onto more lines",
+            "props": [
+                {
+                    "name": "gap",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "none",
+                        "xsmall",
+                        "small",
+                        "medium",
+                        "large"
+                    ],
+                    "description": "the space between the items: none, xsmall, small (default), medium or large"
+                },
+                {
+                    "name": "align",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "start",
+                        "center",
+                        "end"
+                    ],
+                    "description": "where the items of a line sit vertically: start, center (default) or end"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "compact",
+                    "description": "the items, each at its own width"
+                }
+            ]
+        },
+        "Form": {
+            "categories": [
+                "layout"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a form around inputs: its submit sends the field values to you as the owner's answer (optional decline)",
+            "props": [
+                {
+                    "name": "name",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the form id its submit names: letters, digits, `_` or `-`, at most 64, unique in the tree (e.g. \"holidayHours\")"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the form heading, in the owner's language"
+                },
+                {
+                    "name": "description",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one line under the heading: what the answer is used for"
+                },
+                {
+                    "name": "submitLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the submit button label, in the owner's language (default \"Send\")"
+                },
+                {
+                    "name": "declineLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "a decline button label (e.g. \"Not now\"); without it the form has no decline"
+                },
+                {
+                    "name": "fields",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the state names the submit sends, in this order; default: every state name the form's inputs bind"
+                },
+                {
+                    "name": "requiredFields",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "state names that must be filled (not empty, a checkbox ticked) before the form submits"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the form body: inputs and the text and layout around them"
+                },
+                {
+                    "name": "header",
+                    "acceptsCategories": [
+                        "inline"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": 2,
+                    "sizeClass": "compact",
+                    "description": "at most two small items at the end of the heading: a badge, a popover that explains the method"
+                }
+            ],
+            "submitsInputs": true
+        },
+        "Grid": {
+            "categories": [
+                "layout"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "equal columns (1 to 4), one child per cell; drops to fewer columns on a narrow screen",
+            "props": [
+                {
+                    "name": "columns",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "description": "the most columns side by side (1 to 4, default 2)"
+                },
+                {
+                    "name": "gap",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "none",
+                        "xsmall",
+                        "small",
+                        "medium",
+                        "large"
+                    ],
+                    "description": "the space between the children: none, xsmall, small, medium (default, between rows and tiles) or large (between sections)"
+                },
+                {
+                    "name": "minColumnWidth",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "compact",
+                        "regular"
+                    ],
+                    "description": "the narrowest a cell may get before the grid shows fewer columns: compact (KPI tiles) or regular (charts, images, text tiles); default compact when every cell is a KpiTile, Pressable, Badge, Icon, Favicon or Button, else regular"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout",
+                        "heavy"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the cells, one node each, filled row by row; 1 column = full cells, 2 = regular, 3–4 = compact",
+                    "sizeClassFromProp": "columns",
+                    "sizeClassesByPropValue": {
+                        "1": "full",
+                        "2": "regular",
+                        "3": "compact",
+                        "4": "compact"
+                    },
+                    "acceptsHeavyWhenCompact": true
+                }
+            ]
+        },
+        "Icon": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "one design-system icon (check, close, warning, star, arrows, …) in a tone",
+            "props": [
+                {
+                    "name": "name",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "check",
+                        "close",
+                        "warning",
+                        "info",
+                        "help",
+                        "question",
+                        "exclamation",
+                        "add",
+                        "remove",
+                        "dash",
+                        "star",
+                        "starActive",
+                        "like",
+                        "prize",
+                        "arrowUp",
+                        "arrowDown",
+                        "arrowLeft",
+                        "arrowRight",
+                        "caretUp",
+                        "caretDown",
+                        "calendar",
+                        "clock",
+                        "location",
+                        "pinFilled",
+                        "directions",
+                        "maps",
+                        "phone",
+                        "mail",
+                        "link",
+                        "newTab",
+                        "lock",
+                        "lockOpen",
+                        "user",
+                        "business",
+                        "search",
+                        "lineChart",
+                        "barChart",
+                        "budget",
+                        "google",
+                        "image",
+                        "photo",
+                        "play",
+                        "pause",
+                        "document",
+                        "edit",
+                        "trash",
+                        "download",
+                        "upload",
+                        "refresh",
+                        "settings",
+                        "notification",
+                        "messageGood",
+                        "messageBad",
+                        "messageNeutral",
+                        "message",
+                        "shield",
+                        "tag",
+                        "ai",
+                        "visibility",
+                        "desktop",
+                        "mobile",
+                        "tablet",
+                        "event",
+                        "post",
+                        "news",
+                        "home"
+                    ],
+                    "description": "the icon (check, close, warning, info, star, arrowUp, …)"
+                },
+                {
+                    "name": "tone",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "neutral",
+                        "muted",
+                        "success",
+                        "warning",
+                        "danger",
+                        "info",
+                        "default",
+                        "positive",
+                        "negative"
+                    ],
+                    "description": "its colour: neutral (default), muted (secondary text), success (green), warning (amber), danger (red) or info (blue)"
+                },
+                {
+                    "name": "size",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "small",
+                        "medium",
+                        "large"
+                    ],
+                    "description": "default small"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the icon means, for screen readers and the tooltip"
+                }
+            ],
+            "slots": []
+        },
+        "Image": {
+            "categories": [
+                "media"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "one picture with alt text, an optional title, caption and source chip; opens in a lightbox",
+            "props": [
+                {
+                    "name": "src",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the image URL (https, or a data:image URI)"
+                },
+                {
+                    "name": "alt",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the image shows, in one short sentence (read aloud by screen readers, shown when the image fails)"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the bold line under the image"
+                },
+                {
+                    "name": "caption",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the muted line under the title"
+                },
+                {
+                    "name": "source",
+                    "types": [
+                        "object"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "where the image was found ({\"name\",\"url\"}), shown as a chip over the image"
+                },
+                {
+                    "name": "aspectRatio",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "1:1",
+                        "4:3",
+                        "3:2",
+                        "5:4",
+                        "16:9",
+                        "3:4"
+                    ],
+                    "description": "the frame the image is cropped to (default 4:3)"
+                },
+                {
+                    "name": "fit",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "cover",
+                        "contain"
+                    ],
+                    "description": "cover crops a photo to the frame (default), contain shows a logo whole"
+                }
+            ],
+            "slots": []
+        },
+        "ImageGroup": {
+            "categories": [
+                "media"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a gallery of pictures as a grid, a carousel or a magazine layout; each opens in a lightbox",
+            "props": [
+                {
+                    "name": "images",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the pictures: [{\"src\",\"alt\",\"title\"?,\"caption\"?,\"source\"?:{\"name\",\"url\"}}], src and alt required per picture"
+                },
+                {
+                    "name": "layout",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "grid",
+                        "carousel",
+                        "magazine"
+                    ],
+                    "description": "grid (default), carousel or magazine (one hero over tiles)"
+                },
+                {
+                    "name": "aspectRatio",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "1:1",
+                        "4:3",
+                        "3:2",
+                        "5:4",
+                        "16:9",
+                        "3:4"
+                    ],
+                    "description": "the frame of each tile (default 4:3; the carousel and the magazine hero use 16:9 when unset)"
+                },
+                {
+                    "name": "maxVisible",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "grid only: how many tiles show before the last one counts the rest (default 4)"
+                }
+            ],
+            "slots": []
+        },
+        "Input": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a one-line text or number field that writes what is typed to a state value",
+            "props": [
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the current text or number, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes what is typed"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short label above the field"
+                },
+                {
+                    "name": "placeholder",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "shown while the field is empty"
+                },
+                {
+                    "name": "inputType",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "text",
+                        "number",
+                        "email",
+                        "url"
+                    ],
+                    "description": "what is typed (default text)"
+                },
+                {
+                    "name": "maxLength",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the most characters the field takes"
+                }
+            ],
+            "slots": []
+        },
+        "KpiTile": {
+            "categories": [
+                "data"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "one headline number as a tile: label, hero value, unit, change with a good/bad arrow, detail line",
+            "props": [
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the number is, above it (\"Visitors\", \"MRR month 12\")"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "number",
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the number (formatted by `format`) or an already written value (\"4,32 %\")"
+                },
+                {
+                    "name": "format",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "number",
+                        "percent",
+                        "currency",
+                        "compact",
+                        "date",
+                        "text"
+                    ],
+                    "description": "how a numeric value is shown (default number)"
+                },
+                {
+                    "name": "currency",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the ISO currency code for format currency (default EUR)"
+                },
+                {
+                    "name": "decimals",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the fraction digits of a numeric value (default: up to 2)"
+                },
+                {
+                    "name": "signed",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "a positive value gets a plus sign (a growth rate)"
+                },
+                {
+                    "name": "unit",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a lower-case unit line under the number (\"visits\", \"per month\")"
+                },
+                {
+                    "name": "delta",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the change against the comparison period, signed (+5, -0.49)"
+                },
+                {
+                    "name": "deltaFormat",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "number",
+                        "percent",
+                        "currency"
+                    ],
+                    "description": "how the change is shown (default number)"
+                },
+                {
+                    "name": "deltaLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the change compares with (\"vs. September\")"
+                },
+                {
+                    "name": "higherIsBetter",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "false for a number where less is better (a rank, a churn rate) — the arrow colour follows (default true)"
+                },
+                {
+                    "name": "tone",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "neutral",
+                        "muted",
+                        "success",
+                        "warning",
+                        "danger",
+                        "info",
+                        "default",
+                        "positive",
+                        "negative"
+                    ],
+                    "description": "the judgement colour of the hero value itself (default neutral)"
+                },
+                {
+                    "name": "detail",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a muted line under the tile (\"All channels\", \"simulated\")"
+                },
+                {
+                    "name": "source",
+                    "types": [
+                        "object"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "where the number comes from ({\"name\",\"url\"}), shown as the source line"
+                }
+            ],
+            "slots": [],
+            "sourcing": {
+                "needsSource": true,
+                "namesSources": false,
+                "rowsProps": [],
+                "figureProps": [
+                    "value"
+                ]
+            }
+        },
+        "Label": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "a short label above a value, an input or a group",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the label, in the owner's language — a few words"
+                }
+            ],
+            "slots": []
+        },
+        "Link": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "a text link that opens an http(s) page in a new tab",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the link text, in the owner's language"
+                },
+                {
+                    "name": "url",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the http(s) address it opens in a new tab"
+                }
+            ],
+            "slots": []
+        },
+        "List": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a hairline-divided list: items (strings or title/description/meta/value) or ListItem children",
+            "props": [
+                {
+                    "name": "items",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the short form: strings, or {\"title\",\"description\"?,\"meta\"?,\"value\"?}"
+                },
+                {
+                    "name": "marker",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "none",
+                        "bullet",
+                        "number",
+                        "check"
+                    ],
+                    "description": "bullet, number, check or none (default none)"
+                },
+                {
+                    "name": "emptyText",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the line shown when the list has no entries"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [],
+                    "acceptsNodeTypes": [
+                        "ListItem",
+                        "Repeat"
+                    ],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "ListItem nodes and Repeats of ListItems"
+                }
+            ]
+        },
+        "ListItem": {
+            "categories": [],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "one List entry: title, description, meta, value, plus nodes under it and at its end",
+            "props": [
+                {
+                    "name": "title",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the entry, bold"
+                },
+                {
+                    "name": "description",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a line under the title"
+                },
+                {
+                    "name": "meta",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a muted line (a date, a source)"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a figure at the end of the entry"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "nodes shown under the title"
+                },
+                {
+                    "name": "trailing",
+                    "acceptsCategories": [
+                        "inline",
+                        "input",
+                        "data"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": 2,
+                    "sizeClass": "compact",
+                    "description": "at the end of the entry: a badge, an icon, a sparkline"
+                }
+            ]
+        },
+        "Map": {
+            "categories": [
+                "heavy"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "an interactive map: labelled points with rating badges, a carousel of the points, an optional route line, full-screen expand",
+            "props": [
+                {
+                    "name": "points",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the places, each {\"label\",\"lat\",\"lng\"} with optional \"rating\" (0–5), \"subtitle\" (category), \"detail\" (a status line such as opening state) with \"detailTone\" (a tone of the kit: success for open, danger for closed, warning for closing soon; also neutral, muted, info), \"image\" (an http(s) photo URL) and \"action\" (the name of an openEntity action of this tree)"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the points are (e.g. \"Cafés in Münster\"), the heading of the full-screen list"
+                },
+                {
+                    "name": "route",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "draw a route line through the points in their order and number the markers"
+                },
+                {
+                    "name": "routePath",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the route line as [{\"lat\",\"lng\"}, …] when a tool returned the real path; without it the line joins the points directly"
+                },
+                {
+                    "name": "routeLabel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one short line on the route, e.g. its duration or length, shown on the map"
+                },
+                {
+                    "name": "carousel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "auto",
+                        "hidden"
+                    ],
+                    "description": "the carousel of the points along the bottom edge: auto (shown, default) or hidden"
+                },
+                {
+                    "name": "minHeight",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the map height in CSS pixels (240–560, default 330)"
+                },
+                {
+                    "name": "pointAction",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the name of the action a point without its own \"action\" runs — over $from points a row-bound openEntity action ({\"type\":\"openEntity\",\"ref\":{\"$item\":\"entityRef\"}}) opens each row's entity"
+                }
+            ],
+            "slots": []
+        },
+        "Markdown": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "markdown",
+            "summary": "formatted text: a safe Markdown subset (no HTML, no images), http(s) links in a new tab",
+            "props": [
+                {
+                    "name": "markdown",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the formatted text (Markdown without HTML, images or code fences), in the owner's language"
+                }
+            ],
+            "slots": []
+        },
+        "Math": {
+            "categories": [
+                "block",
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "latex",
+            "summary": "a formula typeset from LaTeX, as a centred block or inline in a sentence, with an optional heading and caption",
+            "props": [
+                {
+                    "name": "latex",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the formula in LaTeX math notation, without $ delimiters, e.g. \"CR = \\frac{N_{Conversions}}{N_{Visitors}} \\times 100\\%\""
+                },
+                {
+                    "name": "display",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "block",
+                        "inline"
+                    ],
+                    "description": "\"block\" (default) centres the formula on its own line, \"inline\" sets it inside a line of text"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short heading above a block formula (\"Conversion rate\"), shown with a LaTeX badge"
+                },
+                {
+                    "name": "caption",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one muted line under a block formula: what the symbols mean, or a worked example"
+                }
+            ],
+            "slots": []
+        },
+        "Popover": {
+            "categories": [
+                "inline"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "a small button (label + info icon) that opens a floating explanation on click",
+            "props": [
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the button text (e.g. \"Method\")"
+                },
+                {
+                    "name": "text",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the explanation as plain text"
+                },
+                {
+                    "name": "icon",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "info",
+                        "help",
+                        "none"
+                    ],
+                    "description": "the icon before the label: info (default), help or none"
+                },
+                {
+                    "name": "placement",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "start",
+                        "end"
+                    ],
+                    "description": "which edge of the button the panel lines up with: start or end (default — for a button at the right of a title row)"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "content",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "compact",
+                    "description": "the explanation, when it is more than one plain text"
+                }
+            ]
+        },
+        "Pressable": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "makes its content one clickable area that sets a state value or runs an action",
+            "props": [
+                {
+                    "name": "onClick",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} (writes `value`) or {\"action\": \"<action name>\"}"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the value a {\"set\": …} click writes into the state"
+                },
+                {
+                    "name": "isSelected",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "draw the selection ring (bind a computed comparison, e.g. channel == \"Organic\")"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the click does, for screen readers (e.g. \"Show the organic channel\")"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "layout"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 1,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "what the clickable area shows (no inputs, no other pressable)"
+                }
+            ]
+        },
+        "Quote": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "a quotation: the quoted words, who said them and where they were published",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the quoted words, verbatim"
+                },
+                {
+                    "name": "attribution",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "who said or wrote it"
+                },
+                {
+                    "name": "source",
+                    "types": [
+                        "object"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "where it was published ({\"name\",\"url\"}), shown as a link after the attribution"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the quoted content, when it is more than one plain text"
+                }
+            ]
+        },
+        "RadioGroup": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "radio buttons: one of a few explained choices, the picked one written to a state value",
+            "props": [
+                {
+                    "name": "options",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the choices: a list of labels, or of {\"id\", \"label\", \"description\", \"disabled\"} objects; the picked id (or label) is written to the state"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the picked choice, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes the picked id"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short label above the group"
+                },
+                {
+                    "name": "direction",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "column",
+                        "row"
+                    ],
+                    "description": "the buttons under each other (default) or side by side"
+                }
+            ],
+            "slots": [],
+            "optionsProp": "options"
+        },
+        "Repeat": {
+            "categories": [
+                "data"
+            ],
+            "providesItemScope": true,
+            "textContentProp": null,
+            "summary": "its children once per item, $item bound to the item (table rows, list items, tiles)",
+            "props": [
+                {
+                    "name": "items",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the list to repeat over, usually a binding ({\"$data\":…}, {\"$computed\":…})"
+                },
+                {
+                    "name": "limit",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "show the first N items only"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout"
+                    ],
+                    "acceptsNodeTypes": [
+                        "TableRow",
+                        "ListItem"
+                    ],
+                    "minChildren": 1,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the nodes rendered once per item"
+                }
+            ],
+            "sourcing": {
+                "needsSource": false,
+                "namesSources": false,
+                "rowsProps": [
+                    "items"
+                ],
+                "figureProps": []
+            },
+            "itemsProp": "items"
+        },
+        "Select": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a drop-down: one of a longer list of choices, the picked one written to a state value",
+            "props": [
+                {
+                    "name": "options",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the choices: a list of labels, or of {\"id\", \"label\", \"description\", \"disabled\"} objects; the picked id (or label) is written to the state"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the picked choice, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes the picked id"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short label above the control"
+                },
+                {
+                    "name": "placeholder",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "shown while nothing is picked"
+                }
+            ],
+            "slots": [],
+            "optionsProp": "options"
+        },
+        "Slider": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a slider between min and max that writes the number to a state value and shows it formatted",
+            "props": [
+                {
+                    "name": "min",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the smallest value"
+                },
+                {
+                    "name": "max",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the largest value"
+                },
+                {
+                    "name": "step",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the step between two values (default 1)"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the current value, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes the number"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the number is, shown left of the value"
+                },
+                {
+                    "name": "unit",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "written after the shown value (\"%\", \"€\", \"km\")"
+                },
+                {
+                    "name": "decimals",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "decimal places of the shown value (default: as many as the step has)"
+                },
+                {
+                    "name": "showValue",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "show the formatted value beside the label (default true)"
+                }
+            ],
+            "slots": []
+        },
+        "SourceRef": {
+            "categories": [
+                "inline",
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "the source line of the shown values: each source with icon and link, licence and author when given",
+            "props": [
+                {
+                    "name": "sources",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the sources, each {\"name\", \"url\"?, \"title\"?, \"author\"?, \"license\"?, \"licenseUrl\"?} — name = the publisher or site"
+                }
+            ],
+            "slots": [],
+            "sourcing": {
+                "needsSource": false,
+                "namesSources": true,
+                "rowsProps": [],
+                "figureProps": []
+            }
+        },
+        "Spacer": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "empty room: a fixed step, or all the free room of a row (grow)",
+            "props": [
+                {
+                    "name": "size",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "small",
+                        "medium",
+                        "large"
+                    ],
+                    "description": "the extra space: small, medium (default) or large"
+                },
+                {
+                    "name": "grow",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "take all the free room of the row or column, pushing the following nodes to the end"
+                }
+            ],
+            "slots": []
+        },
+        "Stack": {
+            "categories": [
+                "layout"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a row or a column of nodes with one gap step between them; rows wrap on a narrow screen",
+            "props": [
+                {
+                    "name": "direction",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "row",
+                        "column"
+                    ],
+                    "description": "row (side by side) or column (one under the other, the default)"
+                },
+                {
+                    "name": "gap",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "none",
+                        "xsmall",
+                        "small",
+                        "medium",
+                        "large"
+                    ],
+                    "description": "the space between the children: none, xsmall, small, medium (default, between rows and tiles) or large (between sections)"
+                },
+                {
+                    "name": "align",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "start",
+                        "center",
+                        "end",
+                        "stretch",
+                        "baseline"
+                    ],
+                    "description": "cross-axis alignment: start, center, end, stretch (the column default) or baseline"
+                },
+                {
+                    "name": "justify",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "start",
+                        "center",
+                        "end",
+                        "between"
+                    ],
+                    "description": "main-axis distribution: start (default), center, end or between (first and last at the edges, e.g. a title left and a control right)"
+                },
+                {
+                    "name": "wrap",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "a row continues on the next line when it does not fit (default true)"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout",
+                        "heavy"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the nodes of the row or column, in order"
+                }
+            ]
+        },
+        "Surface": {
+            "categories": [
+                "layout"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a titled surface grouping nodes, with optional media, header controls, body and footer",
+            "props": [
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the title of the surface, in the owner's language"
+                },
+                {
+                    "name": "subtitle",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one muted line under the title (what the numbers are, the period)"
+                },
+                {
+                    "name": "density",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "regular",
+                        "compact"
+                    ],
+                    "description": "regular (default) or compact (smaller padding, for tiles in a grid or carousel)"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "media",
+                    "acceptsCategories": [
+                        "media"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": 1,
+                    "sizeClass": "full",
+                    "description": "one image or video flush with the top of the surface"
+                },
+                {
+                    "name": "header",
+                    "acceptsCategories": [
+                        "inline",
+                        "input"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": 3,
+                    "sizeClass": "compact",
+                    "description": "controls and badges at the end of the title row (tabs, a badge, a popover)"
+                },
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input",
+                        "layout",
+                        "heavy"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the body, one node under the other"
+                },
+                {
+                    "name": "footer",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "input"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "compact",
+                    "description": "a caption line or small actions at the foot"
+                }
+            ]
+        },
+        "Svg": {
+            "categories": [
+                "data",
+                "media"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a sanitised vector graphic from SVG markup (no scripts, no external references); the markup may follow the state through a computed text",
+            "props": [
+                {
+                    "name": "markup",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one <svg> element with a viewBox, e.g. \"<svg viewBox='0 0 200 200'>…</svg>\"; bind it to a computed text to make the drawing follow the state"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "what the graphic shows, in one sentence (read out by screen readers)"
+                },
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short heading above the graphic"
+                },
+                {
+                    "name": "caption",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "one muted line under the heading"
+                }
+            ],
+            "slots": []
+        },
+        "Table": {
+            "categories": [
+                "data"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a table: columns + rows, or TableRow / Repeat children whose TableCells hold other nodes",
+            "props": [
+                {
+                    "name": "columns",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the short form: [{\"key\",\"label\",\"align\"?,\"format\"?,\"decimals\"?,\"currency\"?,\"unit\"?}] — the header row and how each cell is shown"
+                },
+                {
+                    "name": "rows",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the short form: the rows (objects with the column keys), usually a binding"
+                },
+                {
+                    "name": "caption",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a muted line under the table (what the figures are, the date)"
+                },
+                {
+                    "name": "emptyText",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the line shown when the short form has no rows"
+                },
+                {
+                    "name": "source",
+                    "types": [
+                        "object",
+                        "array"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "where the figures come from ({\"name\",\"url\"}, or a list of them when the values come from several pages), shown as the source line"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [],
+                    "acceptsNodeTypes": [
+                        "TableRow",
+                        "Repeat"
+                    ],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "TableRow nodes and Repeats of TableRows, in display order"
+                }
+            ],
+            "sourcing": {
+                "needsSource": true,
+                "namesSources": false,
+                "rowsProps": [
+                    "rows"
+                ],
+                "figureProps": []
+            }
+        },
+        "TableCell": {
+            "categories": [],
+            "providesItemScope": false,
+            "textContentProp": "value",
+            "summary": "one table cell: a formatted value, a share bar or heat tint, and compact nodes (icon, badge, sparkline)",
+            "props": [
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the cell text or number, usually {\"$item\":\"field\"}"
+                },
+                {
+                    "name": "format",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "number",
+                        "percent",
+                        "currency",
+                        "compact",
+                        "date",
+                        "text"
+                    ],
+                    "description": "how a numeric value is shown (default number)"
+                },
+                {
+                    "name": "currency",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the ISO currency code for format currency (default EUR)"
+                },
+                {
+                    "name": "decimals",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the fraction digits of a numeric value (default: up to 2)"
+                },
+                {
+                    "name": "unit",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "a unit written after the value"
+                },
+                {
+                    "name": "align",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "start",
+                        "center",
+                        "end"
+                    ],
+                    "description": "start, center or end (numbers: end)"
+                },
+                {
+                    "name": "tone",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "neutral",
+                        "muted",
+                        "success",
+                        "warning",
+                        "danger",
+                        "info",
+                        "default",
+                        "positive",
+                        "negative"
+                    ],
+                    "description": "the judgement colour of the value (success: a +2 in green, danger: a -3 in red)"
+                },
+                {
+                    "name": "signed",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "a positive number gets a plus sign (a change column)"
+                },
+                {
+                    "name": "bar",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a share bar in the cell, the filled part from 0 to 1"
+                },
+                {
+                    "name": "heat",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "tints the cell by intensity from 0 to 1 (a heatmap cell); no value = an empty cell"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline",
+                        "block",
+                        "data",
+                        "media",
+                        "input"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "compact",
+                    "description": "nodes shown in the cell after the value (compact: a chart is a sparkline, an image a thumbnail)"
+                }
+            ],
+            "sourcing": {
+                "needsSource": false,
+                "namesSources": false,
+                "rowsProps": [],
+                "figureProps": [
+                    "value"
+                ]
+            }
+        },
+        "TableRow": {
+            "categories": [],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "one table row of TableCells; header for the column titles, emphasis for a total row",
+            "props": [
+                {
+                    "name": "header",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the column header row"
+                },
+                {
+                    "name": "emphasis",
+                    "types": [
+                        "boolean"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "a total or summary row, shown bold"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [],
+                    "acceptsNodeTypes": [
+                        "TableCell"
+                    ],
+                    "minChildren": 1,
+                    "maxChildren": null,
+                    "sizeClass": "regular",
+                    "description": "the TableCell nodes, one per column"
+                }
+            ]
+        },
+        "Tabs": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a segmented control: a few short choices side by side, the picked one written to a state value",
+            "props": [
+                {
+                    "name": "options",
+                    "types": [
+                        "array"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the choices: a list of labels, or of {\"id\", \"label\", \"description\", \"disabled\"} objects; the picked id (or label) is written to the state"
+                },
+                {
+                    "name": "value",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the picked choice, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes the picked id"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short label above the control"
+                }
+            ],
+            "slots": [],
+            "optionsProp": "options"
+        },
+        "Text": {
+            "categories": [
+                "inline",
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "plain text, a paragraph or an inline run; its children are inline nodes on the same line",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the text, in the owner's language (a Text with only children may leave it out)"
+                },
+                {
+                    "name": "weight",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "regular",
+                        "medium",
+                        "bold"
+                    ],
+                    "description": "regular (default), medium or bold"
+                },
+                {
+                    "name": "tone",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": [
+                        "neutral",
+                        "muted",
+                        "success",
+                        "warning",
+                        "danger",
+                        "info",
+                        "default",
+                        "positive",
+                        "negative"
+                    ],
+                    "description": "neutral (default), muted (secondary text), success (green), warning (amber), danger (red) or info (blue)"
+                },
+                {
+                    "name": "maxLines",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "clamp the text at this many lines (1–10); the full text shows on hover"
+                }
+            ],
+            "slots": [
+                {
+                    "name": "children",
+                    "acceptsCategories": [
+                        "inline"
+                    ],
+                    "acceptsNodeTypes": [],
+                    "minChildren": 0,
+                    "maxChildren": null,
+                    "sizeClass": "compact",
+                    "description": "inline nodes that follow the text on the same line"
+                }
+            ]
+        },
+        "Textarea": {
+            "categories": [
+                "input"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "a multi-line text field that writes what is typed to a state value",
+            "props": [
+                {
+                    "name": "value",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the current text, usually {\"$state\": \"<name>\"}"
+                },
+                {
+                    "name": "onChange",
+                    "types": [
+                        "event"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "{\"set\": \"<state name>\"} — writes what is typed"
+                },
+                {
+                    "name": "label",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "a short label above the field"
+                },
+                {
+                    "name": "placeholder",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "shown while the field is empty"
+                },
+                {
+                    "name": "rows",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the visible lines (default 3)"
+                },
+                {
+                    "name": "maxLength",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the most characters the field takes, shown as a counter"
+                }
+            ],
+            "slots": []
+        },
+        "Title": {
+            "categories": [
+                "block"
+            ],
+            "providesItemScope": false,
+            "textContentProp": "text",
+            "summary": "a heading: the title of the view or of one section of it",
+            "props": [
+                {
+                    "name": "text",
+                    "types": [
+                        "string",
+                        "number"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the heading, in the owner's language"
+                },
+                {
+                    "name": "level",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": [
+                        "widget",
+                        "section"
+                    ],
+                    "description": "widget = the title of the whole view (default), section = the title of one part of it"
+                }
+            ],
+            "slots": []
+        },
+        "Video": {
+            "categories": [
+                "media"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "one video: title, thumbnail, length, and a videoId or url that plays it",
+            "props": [
+                {
+                    "name": "title",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the video title, as the source names it"
+                },
+                {
+                    "name": "videoId",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the id the video connector returned (plays embedded)"
+                },
+                {
+                    "name": "url",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "an http(s) link that opens the video, when there is no videoId"
+                },
+                {
+                    "name": "thumbnail",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the thumbnail image URL"
+                },
+                {
+                    "name": "durationSeconds",
+                    "types": [
+                        "number"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "the length in seconds"
+                },
+                {
+                    "name": "channel",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "who published it"
+                },
+                {
+                    "name": "source",
+                    "types": [
+                        "object"
+                    ],
+                    "isRequired": false,
+                    "isBindable": true,
+                    "allowedValues": null,
+                    "description": "where the video was found ({\"name\",\"url\"}), shown as the source line"
+                }
+            ],
+            "slots": []
+        },
+        "Widget": {
+            "categories": [
+                "heavy"
+            ],
+            "providesItemScope": false,
+            "textContentProp": null,
+            "summary": "an existing domain widget embedded in the tree (only widgets declared embeddable)",
+            "props": [
+                {
+                    "name": "widget",
+                    "types": [
+                        "string"
+                    ],
+                    "isRequired": true,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the wire name of an embeddable domain widget"
+                },
+                {
+                    "name": "fields",
+                    "types": [
+                        "object"
+                    ],
+                    "isRequired": false,
+                    "isBindable": false,
+                    "allowedValues": null,
+                    "description": "the widget's own payload fields, as its fence would carry them next to `type`"
+                }
+            ],
+            "slots": []
+        }
+    },
+    "embeddableWidgets": {
+        "CustomVisualization": {
+            "sizeClass": "full"
+        }
+    },
+    "widgetTypes": [
+        "ComposedView",
+        "ConversationSearchResults",
+        "CustomVisualization",
+        "EntityMention",
+        "MultiChoice",
+        "QuickReplies",
+        "SuggestedActions",
+        "ToolTrace",
+        "WebSearchResults"
+    ],
+    "dataSources": {},
+    "entityTypes": []
+}

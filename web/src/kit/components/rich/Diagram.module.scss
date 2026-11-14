@@ -1,0 +1,33 @@
+@import "../../../styles/spacings";
+
+// The drawn diagram scales down to its box and is centred; Mermaid sets its own max-width, so a small diagram never
+// grows past its natural size.
+.diagramArea {
+  min-width: 0;
+}
+
+.diagram {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+
+  :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  // Mermaid draws square boxes; the kit's boxes take the compact radius (a CSS geometry property, no colour).
+  :global(.node rect),
+  :global(.node .label-container) {
+    rx: $x1;
+    ry: $x1;
+  }
+
+  // Edge labels ("Ja" / "Nein") read as small pills on the node colour.
+  :global(.edgeLabel rect),
+  :global(.labelBkg) {
+    rx: $x1_5;
+    ry: $x1_5;
+  }
+}

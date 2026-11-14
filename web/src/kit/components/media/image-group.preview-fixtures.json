@@ -1,0 +1,228 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "image-group-grid",
+      "description": "The Cologne Cathedral gallery of ChatGPT (44): four tiles (two per row at the chat width — the 220px tile floor of the design checklist), the last one counting the hidden pictures; a tile opens the lightbox (Storybook — the preview page mounts no modal root).",
+      "payload": {
+        "title": "Kölner Dom",
+        "view": {
+          "type": "ImageGroup",
+          "images": [
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/K%C3%B6lner_Dom_nachts_2013.jpg/960px-K%C3%B6lner_Dom_nachts_2013.jpg",
+              "alt": "Cologne Cathedral lit up at night",
+              "title": "Außenfassade bei Nacht",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Dom_%28Deutzer_Br%C3%BCcke%29.jpg/960px-Dom_%28Deutzer_Br%C3%BCcke%29.jpg",
+              "alt": "Cologne Cathedral seen from the Deutz bridge over the Rhine",
+              "title": "Blick von der Deutzer Brücke",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/K%C3%B6lner_Dom_-_Westfassade-1091.jpg/960px-K%C3%B6lner_Dom_-_Westfassade-1091.jpg",
+              "alt": "The west front of Cologne Cathedral with its two spires",
+              "title": "Westfassade",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/2025-06-10-Dom_Burgmauer-3409.jpg/960px-2025-06-10-Dom_Burgmauer-3409.jpg",
+              "alt": "Cologne Cathedral above the old city wall",
+              "title": "Dom und Burgmauer",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg",
+              "alt": "The Historic Town Hall on the Prinzipalmarkt in Münster",
+              "title": "Historisches Rathaus",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/M%C3%BCnster%2C_Prinzipalmarkt%2C_Arkaden_--_2021_--_8931-3.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Arkaden_--_2021_--_8931-3.jpg",
+              "alt": "The arcades of the Prinzipalmarkt in Münster",
+              "title": "Arkaden am Prinzipalmarkt",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/M%C3%BCnster%2C_Prinzipalmarkt%2C_Historisches_Rathaus%2C_Giebel_--_2021_--_9481.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Historisches_Rathaus%2C_Giebel_--_2021_--_9481.jpg",
+              "alt": "The gable of the Historic Town Hall in Münster",
+              "title": "Rathausgiebel",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            }
+          ],
+          "layout": "grid",
+          "maxVisible": 4,
+          "aspectRatio": "4:3"
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        { "name": "open the lightbox", "click": { "selector": "button[aria-label^=\"Open the picture\"]" } }
+      ]
+    },
+    {
+      "name": "image-group-carousel",
+      "description": "The photo carousel of ChatGPT (09): one large picture with its text, previous / next and the position.",
+      "payload": {
+        "title": "Fotogalerien und Bilder-Karussells",
+        "view": {
+          "type": "ImageGroup",
+          "layout": "carousel",
+          "images": [
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Stadtweinhaus_und_Rathaus_--_2023_--_7969-73.jpg",
+              "alt": "The Historic Town Hall and the Stadtweinhaus on the Prinzipalmarkt in Münster",
+              "title": "Historisches Rathaus",
+              "caption": "Gotische Architektur am Prinzipalmarkt",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/M%C3%BCnster%2C_Prinzipalmarkt%2C_Arkaden_--_2021_--_8931-3.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Arkaden_--_2021_--_8931-3.jpg",
+              "alt": "The arcades of the Prinzipalmarkt in Münster",
+              "title": "Arkaden am Prinzipalmarkt",
+              "caption": "Die Bogengänge der Kaufmannshäuser",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/M%C3%BCnster%2C_Prinzipalmarkt%2C_Historisches_Rathaus%2C_Giebel_--_2021_--_9481.jpg/960px-M%C3%BCnster%2C_Prinzipalmarkt%2C_Historisches_Rathaus%2C_Giebel_--_2021_--_9481.jpg",
+              "alt": "The gable of the Historic Town Hall in Münster",
+              "title": "Rathausgiebel",
+              "caption": "Der Schaugiebel von 1395",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "next picture",
+          "click": {
+            "selector": "button[aria-label=\"Next picture\"]"
+          }
+        },
+        {
+          "name": "next picture again",
+          "click": {
+            "selector": "button[aria-label=\"Next picture\"]"
+          }
+        },
+        {
+          "name": "previous picture",
+          "click": {
+            "selector": "button[aria-label=\"Previous picture\"]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "image-group-magazine",
+      "description": "The NASA magazine layout of ChatGPT (15): one hero over two tiles, each with title, caption and source chip.",
+      "payload": {
+        "title": "NASA-Fotogalerie im Magazin-Layout",
+        "view": {
+          "type": "ImageGroup",
+          "layout": "magazine",
+          "images": [
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/NASA%E2%80%99s_Webb_Reveals_Cosmic_Cliffs%2C_Glittering_Landscape_of_Star_Birth.jpg/960px-NASA%E2%80%99s_Webb_Reveals_Cosmic_Cliffs%2C_Glittering_Landscape_of_Star_Birth.jpg",
+              "alt": "The Cosmic Cliffs in the Carina Nebula, imaged by the James Webb Space Telescope",
+              "title": "Cosmic Cliffs – Carinanebel",
+              "caption": "Sternentstehungsregion in ungefähr 7.600 Lichtjahren Entfernung.",
+              "source": {
+                "name": "NASA Science",
+                "url": "https://science.nasa.gov"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Pillars_of_Creation_%28NIRCam_Image%29.jpg/960px-Pillars_of_Creation_%28NIRCam_Image%29.jpg",
+              "alt": "The Pillars of Creation in the Eagle Nebula, NIRCam image",
+              "title": "Pillars of Creation",
+              "caption": "Adlernebel · ESA/Webb",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            },
+            {
+              "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Southern_Ring_Nebula_%28NIRCam_Image%29.png/960px-Southern_Ring_Nebula_%28NIRCam_Image%29.png",
+              "alt": "The Southern Ring planetary nebula, NIRCam image",
+              "title": "Southern Ring",
+              "caption": "Planetarischer Nebel · NASA",
+              "source": {
+                "name": "commons.wikimedia.org",
+                "url": "https://commons.wikimedia.org"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "image-group-loading",
+      "description": "The pictures are bound to a pending tool result: skeleton tiles in the tiles' shape.",
+      "payload": {
+        "view": {
+          "type": "ImageGroup",
+          "images": {
+            "$from": {
+              "toolCall": "call_preview_1",
+              "path": "$.images[*]",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "image-group-empty",
+      "description": "A gallery without pictures: one muted line, reported empty NO_DATA.",
+      "payload": {
+        "view": {
+          "type": "ImageGroup",
+          "images": []
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    }
+  ]
+}

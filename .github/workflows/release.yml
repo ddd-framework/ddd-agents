@@ -1,0 +1,83 @@
+name: Release
+
+# Pushing a tag vX.Y.Z (the version in composer.json and web/package.json) builds, verifies and PUBLISHES the frontend
+# package in web/ on npm via trusted publishing (OIDC, no token) with provenance. Only this workflow file in this
+# repository may publish. The Composer package is released by the same tag (Packagist reads it from the repository).
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+    steps:
+      - uses: actions/checkout@v4
+      # No `registry-url` here: it writes an .npmrc with a placeholder token, which npm then sends instead of exchanging
+      # the OIDC token (E401). The default registry is npmjs.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Enable corepack (pnpm version from package.json)
+        run: npm i -g corepack@latest && corepack enable
+      # Trusted publishing (OIDC) needs a recent npm.
+      - name: Install npm with trusted publishing
+        run: |
+          npm install -g npm@11
+          node -e '
+            const [major, minor] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && minor < 15)) { console.error(`npm ${process.argv[1]} < 11.15.0`); process.exit(1); }
+          ' "$(npm --version)"
+      - name: Tag matches the version in web/package.json and composer.json
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          PHP_VERSION=$(node -p "require('../composer.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match web/package.json version ${VERSION}" >&2
+            exit 1
+          fi
+          if [ "${PHP_VERSION}" != "${VERSION}" ]; then
+            echo "composer.json version ${PHP_VERSION} does not match web/package.json version ${VERSION}" >&2
+            exit 1
+          fi
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Published manifest has no workspace-only specifiers
+        run: |
+          if grep -E '"(workspace|link|file):' package.json; then
+            echo "package.json contains workspace:/link:/file: specifiers" >&2
+            exit 1
+          fi
+      - name: Pack
+        run: pnpm pack --pack-destination "$RUNNER_TEMP"
+      - name: Tarball has every exports target
+        run: |
+          mkdir -p "$RUNNER_TEMP/extracted"
+          tar -xzf "$(ls "$RUNNER_TEMP"/mgamadeus-ddd-agents-*.tgz)" -C "$RUNNER_TEMP/extracted"
+          node scripts/check-package.mjs "$RUNNER_TEMP/extracted/package"
+      # The verified tarball itself is published (no rebuild). Prerelease versions (x.y.z-…) need an explicit dist-tag.
+      - name: Publish (trusted publishing, provenance)
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          case "$VERSION" in *-*) DIST_TAG=next ;; *) DIST_TAG=latest ;; esac
+          unset NODE_AUTH_TOKEN
+          if npm view "@mgamadeus/ddd-agents@${VERSION}" version --registry https://registry.npmjs.org >/dev/null 2>&1; then
+            echo "@mgamadeus/ddd-agents@${VERSION} is already on npm, nothing to publish"
+            exit 0
+          fi
+          npm publish "$(ls "$RUNNER_TEMP"/mgamadeus-ddd-agents-*.tgz)" --provenance --tag "$DIST_TAG" --access public --registry https://registry.npmjs.org

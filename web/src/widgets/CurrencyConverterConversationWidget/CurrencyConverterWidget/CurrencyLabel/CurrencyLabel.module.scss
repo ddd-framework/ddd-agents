@@ -1,0 +1,28 @@
+@import "../../../../styles/spacings";
+
+.currency {
+  display: flex;
+  align-items: center;
+  gap: $x1;
+  min-width: 0;
+}
+
+// The round badge the currency's flag sits in: a flat tile on the card, like the mock's flag disc.
+.flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: $x5;
+  height: $x5;
+  border-radius: 50%;
+  background: var(--agents-bg-var);
+  font-size: $x2_5;
+  line-height: 1;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

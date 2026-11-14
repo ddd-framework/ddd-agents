@@ -1,0 +1,32 @@
+{
+  "wireName": "ToolTrace",
+  "fixtures": [
+    {
+      "name": "render-report-mounted",
+      "description": "A readable trace mounts (a fence always carries an object, so the unreadable path is spec-only).",
+      "payload": {
+        "name": "Navigate",
+        "input": {
+          "destination": "APP.NAV.EXAMPLE.TASKS"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "default",
+      "description": "The muted trace line of a navigation the assistant made for the practice owner: it opened the reviews page of the app.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "name": "Navigate",
+        "input": {
+          "destination": "APP.NAV.EXAMPLE.REVIEWS"
+        }
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

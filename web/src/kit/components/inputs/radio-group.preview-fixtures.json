@@ -1,0 +1,76 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "radio-group-goal",
+      "description": "Three explained choices under each other (ChatGPT's RadioGroup of the base kit).",
+      "payload": {
+        "state": {
+          "goal": "calls"
+        },
+        "view": {
+          "type": "RadioGroup",
+          "label": "What should the campaign bring?",
+          "options": [
+            {
+              "id": "calls",
+              "label": "More calls",
+              "description": "Phone calls from your Google profile"
+            },
+            {
+              "id": "visits",
+              "label": "More visits",
+              "description": "Route requests to your shop"
+            },
+            {
+              "id": "web",
+              "label": "More website visits"
+            }
+          ],
+          "value": {
+            "$state": "goal"
+          },
+          "onChange": {
+            "set": "goal"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "pick visits",
+          "click": {
+            "text": "More visits"
+          }
+        }
+      ]
+    },
+    {
+      "name": "radio-group-row",
+      "description": "Side by side.",
+      "payload": {
+        "state": {
+          "size": "M"
+        },
+        "view": {
+          "type": "RadioGroup",
+          "direction": "row",
+          "options": [
+            "S",
+            "M",
+            "L"
+          ],
+          "value": {
+            "$state": "size"
+          },
+          "onChange": {
+            "set": "size"
+          }
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

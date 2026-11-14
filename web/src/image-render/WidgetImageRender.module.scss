@@ -1,0 +1,22 @@
+@import "../styles/conversation-widget-container";
+
+:global(html), :global(body) {
+  margin: 0;
+  padding: 0;
+}
+
+.root {
+  @include conversation-widget-container;
+  width: var(--agents-widget-image-width);
+  display: flow-root;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--agents-fg);
+  background: var(--agents-bg);
+
+  &, * {
+    animation: none !important;
+    transition: none !important;
+    caret-color: transparent !important;
+  }
+}

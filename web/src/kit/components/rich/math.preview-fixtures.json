@@ -1,0 +1,152 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "math-conversion-rate",
+      "description": "ChatGPT reference 49, the formula block alone (Math node only): heading, LaTeX badge, the formula, the worked example under a hairline.",
+      "payload": {
+        "view": {
+          "type": "Math",
+          "title": "Conversion Rate",
+          "latex": "CR = \\frac{N_{\\text{Conversions}}}{N_{\\text{Visitors}}} \\times 100\\%",
+          "caption": "Beispiel: 750 Conversions bei 25.000 Besuchern ergeben 3 %."
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "math-and-code-composition",
+      "description": "ChatGPT reference 49 in full: the formula card (Surface with a LaTeX badge, two Math nodes, the example line), the sentence, then the PHP Code block — composed with the layout and text components of lanes L1/L2.",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "direction": "column",
+          "gap": "medium",
+          "children": [
+            {
+              "type": "Surface",
+              "title": "Conversion Rate",
+              "slots": {
+                "header": [
+                  {
+                    "type": "Badge",
+                    "text": "LaTeX"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "Math",
+                  "latex": "CR = \\frac{N_{\\text{Conversions}}}{N_{\\text{Visitors}}} \\times 100\\%"
+                },
+                {
+                  "type": "Divider"
+                },
+                {
+                  "type": "Text",
+                  "text": "Beispiel: 750 Conversions bei 25.000 Besuchern ergeben 3 %.",
+                  "tone": "muted"
+                },
+                {
+                  "type": "Math",
+                  "latex": "CR = \\frac{750}{25\\,000} \\times 100\\% = 3\\%"
+                }
+              ]
+            },
+            {
+              "type": "Text",
+              "text": "Das gleiche als PHP 8 mit strenger Typisierung:"
+            },
+            {
+              "type": "Code",
+              "code": "<?php\n\ndeclare(strict_types=1);\n\nfunction conversionRate(\n    int $conversions,\n    int $visitors\n): float {\n    return $visitors > 0\n        ? ($conversions / $visitors) * 100.0\n        : 0.0;\n}\n\necho conversionRate(750, 25000); // 3",
+              "language": "php"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "wrap lines",
+          "click": {
+            "text": "Wrap lines"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math-inline",
+      "description": "An inline formula (display inline) — the ChatGPT reference shows block formulas only; this covers the inline rendering.",
+      "payload": {
+        "view": {
+          "type": "Math",
+          "latex": "E = mc^2",
+          "display": "inline"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "math-invalid-latex",
+      "description": "Error state: LaTeX KaTeX cannot read — the source and one muted line show (observed as data), the node reports failed RENDER_FAILED.",
+      "payload": {
+        "view": {
+          "type": "Math",
+          "title": "Conversion Rate",
+          "latex": "CR = \\frac{N_{Conversions}{N_{Visitors}}"
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "math-empty",
+      "description": "Empty state: an empty formula renders nothing and reports empty.",
+      "payload": {
+        "view": {
+          "type": "Math",
+          "latex": ""
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "math-loading",
+      "description": "Loading state: the formula is bound to a tool result that has not arrived yet ($from pending) — the skeleton shows.",
+      "payload": {
+        "view": {
+          "type": "Math",
+          "title": "Conversion Rate",
+          "latex": {
+            "$from": {
+              "toolCall": "call_math_1",
+              "path": "$.formula",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "math-narrow",
+      "description": "The formula block at the narrow width.",
+      "payload": {
+        "view": {
+          "type": "Math",
+          "title": "Conversion Rate",
+          "latex": "CR = \\frac{N_{\\text{Conversions}}}{N_{\\text{Visitors}}} \\times 100\\%",
+          "caption": "Beispiel: 750 Conversions bei 25.000 Besuchern ergeben 3 %."
+        }
+      },
+      "expectedState": "data",
+      "width": 360
+    }
+  ]
+}

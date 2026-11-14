@@ -1,0 +1,76 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The cell's content: value, then the compact nodes, on one line that wraps.
+.content {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x0_5 $x1;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.start {
+  justify-content: flex-start;
+}
+
+.center {
+  justify-content: center;
+}
+
+.end {
+  justify-content: flex-end;
+}
+
+// A cell with a share bar takes the whole cell width, so the bar can grow.
+.withBar {
+  display: grid;
+  grid-template-columns: minmax($x6, 1fr) minmax($x6, auto);
+  justify-items: end;
+  width: 100%;
+}
+
+// A share bar: the track on the nested background, the fill in the first chart colour; it takes the free width of the
+// cell, the value keeps its own.
+.bar {
+  position: relative;
+  justify-self: stretch;
+  height: $x1_5;
+  border-radius: $x1;
+  background: light-dark(var(--agents-neutral-200), var(--agents-neutral-700));
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--agents-table-cell-bar, 0%);
+    border-radius: inherit;
+    background: var(--agents-chart-01);
+  }
+}
+
+// A heat cell: a compact tile tinted by intensity, the value centred on it.
+.heatCell {
+  padding: $x0_5 $x0_25;
+}
+
+.heat {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: $x5;
+  padding: $x1;
+  border-radius: $card-radius-compact;
+  background: color-mix(in srgb, var(--agents-chart-01) var(--agents-table-cell-heat, 0%), var(--agents-bg-var));
+}
+
+.heatEmpty {
+  background: var(--agents-bg-var);
+}
+
+.dash {
+  color: var(--agents-fg-lightest);
+}

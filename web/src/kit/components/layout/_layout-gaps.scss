@@ -1,0 +1,21 @@
+@import "../../../styles/spacings";
+
+// The gap steps of the layout nodes (`ComposedViewLayoutSpacing::GAPS`): the model names a step, the design owns the
+// size. medium = between rows and tiles, large = between sections.
+$layout-gaps: (
+  "None": 0,
+  "Xsmall": $x0_5,
+  "Small": $x1,
+  "Medium": $x1_5,
+  "Large": $x2,
+);
+
+// One `.gap<Step>` class per step; it sets `gap` and the `--agents-layout-gap` the grid and carousel arithmetic read.
+@mixin layout-gap-classes {
+  @each $step, $size in $layout-gaps {
+    .gap#{$step} {
+      --agents-layout-gap: #{$size};
+      gap: $size;
+    }
+  }
+}

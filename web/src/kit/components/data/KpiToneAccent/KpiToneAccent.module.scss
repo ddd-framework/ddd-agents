@@ -1,0 +1,30 @@
+@import "../../../../styles/spacings";
+
+// A round badge tinted from the tone's 500 fill, so it reads on both surface levels and in the dark scheme. It overhangs
+// the caption's line box, so a tile with an accent keeps its value level with the tiles beside it.
+.accent {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: $x3;
+  height: $x3;
+  margin-block: -$x0_5;
+  border-radius: 50%;
+}
+
+.success {
+  background: color-mix(in srgb, var(--agents-success-500) 16%, transparent);
+}
+
+.warning {
+  background: color-mix(in srgb, var(--agents-warning-500) 18%, transparent);
+}
+
+.danger {
+  background: color-mix(in srgb, var(--agents-danger-500) 16%, transparent);
+}
+
+.info {
+  background: color-mix(in srgb, var(--agents-info-500) 16%, transparent);
+}

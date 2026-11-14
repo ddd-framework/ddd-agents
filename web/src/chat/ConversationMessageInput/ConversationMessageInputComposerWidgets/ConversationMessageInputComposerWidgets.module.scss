@@ -1,0 +1,29 @@
+@import "../../../styles/spacings";
+
+// Same grid-rows 0fr→1fr reveal as the attachments strip (ConversationMessageInputAttachmentsPreviewStrip): animates
+// the unknown content height smoothly; the inner wrapper clips while collapsing.
+.stripReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition:
+    grid-template-rows 250ms ease,
+    opacity 200ms ease;
+  opacity: 0;
+}
+
+.stripRevealOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.stripRevealInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $x1;
+  padding: $x1 $x1 $x0_5 0;
+}

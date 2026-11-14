@@ -1,0 +1,58 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+.markerRow {
+  display: flex;
+  justify-content: center;
+  margin: $x2 0;
+}
+
+/* A pill on the chat background: the elevated surface (no border), a round badge carrying the call's state */
+.markerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: $x1;
+  padding: $x0_5 $x2 $x0_5 $x0_5;
+  border-radius: $x3;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+  color: var(--agents-fg);
+  white-space: nowrap;
+}
+
+.markerIcon {
+  display: grid;
+  place-items: center;
+  width: $x3;
+  height: $x3;
+  border-radius: 50%;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg-light);
+
+  svg {
+    width: $x1_75;
+    height: $x1_75;
+    fill: currentColor;
+  }
+
+  .markerChip[data-state="started"] & {
+    background: var(--agents-success-500);
+    color: var(--agents-fg-on-dark);
+  }
+
+  .markerChip[data-state="notConnected"] &,
+  .markerChip[data-state="declined"] &,
+  .markerChip[data-state="missed"] & {
+    background: var(--agents-danger-100);
+    color: var(--agents-danger-500);
+  }
+}
+
+.markerDuration {
+  color: var(--agents-fg-light);
+  font-variant-numeric: tabular-nums;
+
+  span {
+    color: inherit;
+  }
+}

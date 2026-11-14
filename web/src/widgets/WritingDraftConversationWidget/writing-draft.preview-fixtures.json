@@ -1,0 +1,129 @@
+{
+  "wireName": "WritingDraft",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "The e-mail draft of ref 47 (ChatGPT WritingArtifact variant=email): headline, recipient and subject rows, the text; the owner opens the editor, changes the text, finishes, and goes back to the original.",
+      "payload": {
+        "kind": "email",
+        "subject": "Kurze Anfrage",
+        "recipient": "not specified",
+        "body": "Guten Tag,\n\nich interessiere mich für Ihr Angebot und hätte gerne einige weitere Informationen zu Preisen, Verfügbarkeit und Konditionen.\n\nKönnten Sie mir die entsprechenden Unterlagen zusenden?\n\nVielen Dank und freundliche Grüße"
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "edit",
+          "click": {
+            "selector": "[data-testid='writing-draft-edit']"
+          }
+        },
+        {
+          "name": "type-recipient",
+          "fill": {
+            "selector": "[data-testid='writing-draft-recipient-input'] input",
+            "value": "info@dentallabor-kassel.de"
+          }
+        },
+        {
+          "name": "type-text",
+          "fill": {
+            "selector": "[data-testid='writing-draft-body-input'] textarea:not([aria-hidden='true'])",
+            "value": "Guten Tag,\n\nwir benötigen bis Freitag ein Angebot für zwei Keramikkronen.\n\nVielen Dank und freundliche Grüße\nDr. Lena Hoffmann"
+          }
+        },
+        {
+          "name": "done",
+          "click": {
+            "selector": "[data-testid='writing-draft-done']"
+          }
+        },
+        {
+          "name": "reset",
+          "click": {
+            "selector": "[data-testid='writing-draft-reset']"
+          }
+        }
+      ],
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "email-with-recipient",
+      "description": "An e-mail with a real address and Markdown formatting (bold, a list, a link) from the dental practice: the open-in-mail action is offered.",
+      "payload": {
+        "kind": "email",
+        "title": "Terminerinnerung an Prophylaxe-Patienten",
+        "recipient": "patienten@zahnarzt-hoffmann-kassel.de",
+        "subject": "Ihre Prophylaxe im November",
+        "body": "Liebe Patientinnen und Patienten,\n\nim **November** bieten wir Prophylaxe-Wochen an:\n\n- professionelle Zahnreinigung in 60 Minuten\n- Termine auch am Samstagvormittag\n- Erinnerung per SMS am Vortag\n\nTermine buchen Sie unter [zahnarzt-hoffmann-kassel.de](https://zahnarzt-hoffmann-kassel.de).\n\nIhre Zahnarztpraxis Dr. Lena Hoffmann\nWilhelmshöher Allee 120, 34119 Kassel"
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "post",
+      "description": "A social post draft in English: no recipient or subject rows, no mail action; copy and edit only.",
+      "payload": {
+        "kind": "post",
+        "title": "Prophylaxe weeks post",
+        "body": "**Prophylaxis weeks in November!** Book a professional cleaning at Zahnarztpraxis Dr. Lena Hoffmann on Wilhelmshöher Allee — Saturday mornings included."
+      },
+      "locale": "en",
+      "expectedState": "data",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "chatgpt-shape",
+      "description": "ChatGPT's own WritingArtifact field names as a weak model would copy them (variant, content.text, to): read through the aliases.",
+      "payload": {
+        "variant": "E-Mail",
+        "subject": "Termin nächste Woche",
+        "to": [
+          "info@dentallabor-kassel.de"
+        ],
+        "content": {
+          "format": "markdown",
+          "text": "Hallo Herr Weber,\n\npasst Ihnen Dienstag um 10 Uhr für die Abholung der Abformungen?\n\nBeste Grüße\nDr. Lena Hoffmann"
+        }
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "empty",
+      "description": "A block without a text: one muted line, reported empty (NO_DATA).",
+      "payload": {
+        "kind": "email",
+        "subject": "Kurze Anfrage"
+      },
+      "locale": "de",
+      "expectedState": "empty",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    },
+    {
+      "name": "unreadable-body",
+      "description": "A body written as an object instead of a text: one muted line, reported failed (INVALID_PROP).",
+      "payload": {
+        "kind": "letter",
+        "body": {
+          "paragraphs": [
+            "Sehr geehrte Damen und Herren,",
+            "…"
+          ]
+        }
+      },
+      "locale": "de",
+      "expectedState": "error",
+      "width": 528,
+      "dataSet": "kassel-dental-practice"
+    }
+  ]
+}

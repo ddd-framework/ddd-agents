@@ -1,0 +1,268 @@
+@import "../styles/spacings";
+@import "../styles/media";
+@import "./conversation-tokens";
+
+.chat {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, var(--agents-assistant-100) 0%, white 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.genericChat {
+  background: $chat-generic-bg;
+}
+
+.iconContainer {
+  border-radius: $x0_5;
+  aspect-ratio: 1;
+  width: $x4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--agents-assistant-600);
+}
+
+.contentWrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-anchor: none;
+}
+
+.chatCanvasOpen {
+  @include media(">=desktop") {
+    width: calc(100% - $chat-drawer-width);
+  }
+}
+
+// The shell's own re-open control on a narrow viewport (no divider there): a small pill over the chat, fed by
+// `lastClosedCanvas`. Sits under the host's floating top bar and clear of the chat's right edge.
+.canvasReopenControl {
+  position: absolute;
+  top: $x1 * 9;
+  right: $x2;
+  z-index: 3;
+}
+
+.splitViewRoot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+
+  // The canvas pane's width: ConversationView sets `--agents-canvas-width-set` (the default split, or the committed pull); while the
+  // customer pulls the edge (CanvasResizeHandle) the split follows the pointer through `--agents-canvas-width-drag`, nothing gets selected.
+  --agents-canvas-width: var(--agents-canvas-width-set);
+
+  &[data-resizing] {
+    --agents-canvas-width: var(--agents-canvas-width-drag);
+
+    user-select: none;
+    cursor: col-resize;
+  }
+}
+
+.splitViewPane {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+// Boxed canvas (side-split only): inset the pane so the canvas floats as a card clear of the floating top bar. The inset
+// is `CANVAS_BOXED_INSET_PX`, which ConversationView hands over as `--agents-canvas-inset` (the pull tab sits on the card's edge).
+.splitViewPaneBoxed {
+  padding: var(--agents-canvas-inset);
+  box-sizing: border-box;
+}
+
+.extensionIntro {
+  padding: $chat-top-padding $x3 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.extensionIntroTitle {
+  margin: $x2 0 $x1;
+}
+
+.input {
+  width: calc(100% - $x6);
+  max-width: $chat-content-max-width;
+  margin-bottom: $x2;
+  position: relative;
+  z-index: 10;
+}
+
+.sectionBackgroundSvg {
+  width: calc(100vw * 0.3);
+  transform: rotate(-15deg);
+  aspect-ratio: 1/1;
+  position: absolute;
+  bottom: -10%;
+  right: -$x6;
+  opacity: 0.2;
+  filter: blur($x0_5);
+  pointer-events: none;
+}
+
+.suggestions {
+  width: 100%;
+  padding: $x6 0;
+  display: flex;
+  flex-direction: row;
+  gap: $x2;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatMessages {
+  composes: narrow from "../renderer/conversation-widget-layout.module.scss";
+  display: flex;
+  max-width: $chat-messages-max-width;
+  // Hosts can shrink the clearance under the floating header (e.g. A host compact
+  // panel sets --agents-chat-top-padding); default keeps the full 168px.
+  padding: var(--agents-chat-top-padding, #{$chat-top-padding}) $x3 0;
+  // Published for content a host renders into the list (renderAfterMessage): the activity history cancels it while
+  // it grows in, so the rows below never jump by it.
+  --chat-messages-gap: #{$x3};
+  gap: var(--chat-messages-gap);
+  flex-direction: column;
+  z-index: 2;
+
+  @include media("<=mobile") {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: $x1;
+    padding-right: $x1;
+  }
+
+  // The composed `.narrow` only collapses the column to full width at <=768px;
+  // on the tablet-ish panes between 768px and the desktop breakpoint the 60%
+  // column leaves a wide empty margin on each side. As the pane approaches
+  // mobile, reclaim that margin and let the column run full width (padding still
+  // keeps content off the edges).
+  @container chatPane (max-width: 64rem) {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @container chatPane (max-width: #{$chat-pane-narrow-breakpoint}) {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    // Hosts can widen the inset (e.g. A host compact panel sets --agents-chat-narrow-padding
+    // so content clears the rounded corners); default keeps the current 4px.
+    padding-left: var(--agents-chat-narrow-padding, #{$x0_5});
+    padding-right: var(--agents-chat-narrow-padding, #{$x0_5});
+  }
+}
+
+// Per-message anchor row (ConversationMessageList). A flex column so user bubbles keep `align-self: flex-end` and assistant
+// messages keep full width — visually identical to the un-wrapped layout, the outer `gap` still spaces the rows.
+// `scroll-margin-top` keeps a scrolled-to message clear of the ~88px floating agent top bar.
+.messageRow {
+  display: flex;
+  flex-direction: column;
+  scroll-margin-top: calc(#{$x9} + #{$x3});
+  border-radius: $x1;
+
+  // Transient flash when a search result scrolls this message into view (data-flash toggled for ~2s).
+  &[data-flash="true"] {
+    animation: messageRowFlash 2s ease-out;
+  }
+}
+
+@keyframes messageRowFlash {
+  0% {
+    background-color: var(--agents-bg-hover-primary);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.messagesBottom {
+  margin-top: $x5;
+}
+
+.genericIllustrationContainer {
+  pointer-events: none;
+
+  & img {
+    --agents-illustration-width: calc(100vh / 2);
+    --agents-illustration-overlap: calc(100vh / 3);
+
+    position: absolute;
+    filter: blur($x2);
+    opacity: 0.2;
+
+    bottom: calc(var(--agents-illustration-width) / -3);
+
+    &:nth-child(1) {
+      left: calc(-1 * var(--agents-illustration-overlap));
+      width: var(--agents-illustration-width);
+      height: var(--agents-illustration-width);
+      transform: rotate(-4.841deg);
+      aspect-ratio: 1;
+    }
+
+    &:nth-child(2) {
+      left: 0;
+      width: var(--agents-illustration-width);
+      height: var(--agents-illustration-width);
+      transform: rotate(-4.841deg);
+      aspect-ratio: 1;
+    }
+
+    &:nth-child(3) {
+      left: var(--agents-illustration-overlap);
+      width: var(--agents-illustration-width);
+      height: var(--agents-illustration-width);
+      transform: rotate(8.973deg);
+      aspect-ratio: 1;
+    }
+
+    &:nth-child(4) {
+      left: calc(2 * var(--agents-illustration-overlap));
+      width: var(--agents-illustration-width);
+      height: var(--agents-illustration-width);
+      transform: rotate(8.973deg);
+      aspect-ratio: 1;
+
+    }
+
+    &:nth-child(5) {
+      left: calc(3 * var(--agents-illustration-overlap));
+      width: var(--agents-illustration-width);
+      height: var(--agents-illustration-width);
+      transform: rotate(-4.841deg);
+      aspect-ratio: 1;
+    }
+
+    &:nth-child(6) {
+      left: calc(4 * var(--agents-illustration-overlap));
+      width: var(--agents-illustration-width);
+      height: var(--agents-illustration-width);
+      transform: rotate(-4.841deg);
+      aspect-ratio: 1;
+    }
+  }
+}

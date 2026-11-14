@@ -1,0 +1,147 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "widget-embedded-weather-forecast",
+      "description": "The Widget node: the embeddable WeatherForecast inside a Stack under a Title and a Caption — today's weather at the dental practice in Kassel (cloudy at 9 °C, rain from 16:00), answered by the WeatherForecast hydration.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "small",
+          "children": [
+            {
+              "type": "Title",
+              "text": "Wetter heute an der Praxis"
+            },
+            {
+              "type": "Caption",
+              "text": "Wilhelmshöher Allee 120, Kassel – Regen ab etwa 16 Uhr"
+            },
+            {
+              "type": "Widget",
+              "widget": "WeatherForecast",
+              "fields": {
+                "agentSpaceId": 7
+              }
+            }
+          ]
+        }
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "hydration": {
+        "WeatherForecast": {
+          "forecast": {
+            "placeName": "Kassel",
+            "observedAt": "2026-10-25T09:30:00+01:00",
+            "timezone": "Europe/Berlin",
+            "sourceName": "Xweather",
+            "condition": "CLOUDY",
+            "conditionText": "Bewölkt",
+            "temperatureC": 9.1,
+            "feelsLikeC": 7.4,
+            "windKmh": 17,
+            "precipitationMm": 0.0,
+            "isDaylight": true,
+            "hours": [
+              {
+                "at": "2026-10-25T10:00:00+01:00",
+                "condition": "CLOUDY",
+                "temperatureC": 9.8,
+                "precipitationProbabilityPercent": 20,
+                "windKmh": 18
+              },
+              {
+                "at": "2026-10-25T11:00:00+01:00",
+                "condition": "PARTLY_CLOUDY",
+                "temperatureC": 10.9,
+                "precipitationProbabilityPercent": 15,
+                "windKmh": 19
+              },
+              {
+                "at": "2026-10-25T12:00:00+01:00",
+                "condition": "PARTLY_CLOUDY",
+                "temperatureC": 11.8,
+                "precipitationProbabilityPercent": 10,
+                "windKmh": 21
+              },
+              {
+                "at": "2026-10-25T13:00:00+01:00",
+                "condition": "PARTLY_CLOUDY",
+                "temperatureC": 12.4,
+                "precipitationProbabilityPercent": 10,
+                "windKmh": 22
+              },
+              {
+                "at": "2026-10-25T14:00:00+01:00",
+                "condition": "CLOUDY",
+                "temperatureC": 12.6,
+                "precipitationProbabilityPercent": 25,
+                "windKmh": 22
+              },
+              {
+                "at": "2026-10-25T15:00:00+01:00",
+                "condition": "CLOUDY",
+                "temperatureC": 12.1,
+                "precipitationProbabilityPercent": 35,
+                "windKmh": 24
+              },
+              {
+                "at": "2026-10-25T16:00:00+01:00",
+                "condition": "RAIN",
+                "temperatureC": 11.3,
+                "precipitationProbabilityPercent": 60,
+                "windKmh": 26
+              },
+              {
+                "at": "2026-10-25T17:00:00+01:00",
+                "condition": "RAIN",
+                "temperatureC": 10.4,
+                "precipitationProbabilityPercent": 70,
+                "windKmh": 25
+              },
+              {
+                "at": "2026-10-25T18:00:00+01:00",
+                "condition": "CLOUDY",
+                "temperatureC": 9.6,
+                "precipitationProbabilityPercent": 45,
+                "windKmh": 21
+              },
+              {
+                "at": "2026-10-25T19:00:00+01:00",
+                "condition": "CLOUDY",
+                "temperatureC": 8.9,
+                "precipitationProbabilityPercent": 30,
+                "windKmh": 18
+              },
+              {
+                "at": "2026-10-25T20:00:00+01:00",
+                "condition": "PARTLY_CLOUDY",
+                "temperatureC": 8.2,
+                "precipitationProbabilityPercent": 20,
+                "windKmh": 15
+              },
+              {
+                "at": "2026-10-25T21:00:00+01:00",
+                "condition": "PARTLY_CLOUDY",
+                "temperatureC": 7.6,
+                "precipitationProbabilityPercent": 15,
+                "windKmh": 13
+              }
+            ],
+            "minTemperatureC": 6.0,
+            "maxTemperatureC": 13.0,
+            "sunrise": "07:38",
+            "sunset": "17:02",
+            "summaryText": "Vormittags freundlich, ab dem späten Nachmittag Regen, abends wieder trocken.",
+            "warnings": [],
+            "days": []
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,391 @@
+{
+    "description": "Signal-source parity: the backend registry ConversationSignalSources (the package's own sources only) written out for the frontend string lists. widgetClickSignalSources = carriesAnOwnerStatement (widget-click-signal-sources.ts); phoneCallLifecycleSignalSources = isPhoneCallLifecycle (the call marker chip and the unanswered-message walk); signalSourcesThatOweNoWork = owesWork false on a SIGNAL row (the unanswered-message walk). Generated — never edit by hand.",
+    "regenerate": "cd app && REGENERATE_SIGNAL_SOURCE_PARITY_FIXTURE=1 php vendor/bin/phpunit Tests/Domain/AI/Entities/Conversations/SignalSources/ConversationSignalSourceFrontendParityTest.php",
+    "lists": {
+        "widgetClickSignalSources": [
+            "FRONTEND_WIDGET_CLICK",
+            "OWNER_ACTION_CONFIRM"
+        ],
+        "phoneCallLifecycleSignalSources": [
+            "PHONE_CALL_ENDED",
+            "PHONE_CALL_STARTED"
+        ],
+        "signalSourcesThatOweNoWork": [
+            "FRONTEND_WIDGET_RENDER_REPORT",
+            "PHONE_CALL_ENDED",
+            "PHONE_CALL_STARTED",
+            "PLATFORM_WIDGET_EMITTED",
+            "REPEATED_TEXT_SUPPRESSED"
+        ]
+    },
+    "signalSources": {
+        "BACKGROUND_WORK_FINISHED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "BUDGET_CLOSING": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "CONTINUE_AFTER_PAUSE": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "DASHBOARD_WIDGET_CONTEXT": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "DELEGATIONS_SETTLED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "FRONTEND_CHANNEL_CONNECTION": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "OWNER",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "FRONTEND_NAVIGATION": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "OWNER",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "FRONTEND_WIDGET_CLICK": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "OWNER",
+            "carriesAnOwnerStatement": true,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "FRONTEND_WIDGET_INVALID": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "FRONTEND_WIDGET_RENDER_REPORT": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": false,
+            "marksAnOwnerReport": false
+        },
+        "INJECTION_REMOVED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "KICKOFF_OWNER_INBOUND": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "LOOP_NUDGE": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "MEMORY_CLARIFY": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "MEMORY_CONFLICT": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "MID_TURN_OWNER_INBOUND": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "MID_TURN_SIGNAL_REPLAY": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "ORCHESTRATOR_MESSAGE": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "OWNER_ACTION_CONFIRM": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "OWNER",
+            "carriesAnOwnerStatement": true,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "OWNER_CARD_EDIT_APPLIED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "OWNER_QUESTION_PICK": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "OWNER_REPORT": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": false,
+            "marksAnOwnerReport": true
+        },
+        "OWNER_REPORT_FORCED_CALL": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "OWNER_REPORT_WITH_QUESTION": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": false,
+            "marksAnOwnerReport": true
+        },
+        "OWNER_WIDGET_EDIT_APPLIED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "PHONE_CALL_ENDED": {
+            "enum": "PhoneConversationSignalSource",
+            "speaker": "OWNER",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": true,
+            "owesWork": false,
+            "marksAnOwnerReport": false
+        },
+        "PHONE_CALL_STARTED": {
+            "enum": "PhoneConversationSignalSource",
+            "speaker": "OWNER",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": true,
+            "owesWork": false,
+            "marksAnOwnerReport": false
+        },
+        "PHONE_CALL_UNANSWERED_FOLLOW_UP": {
+            "enum": "PhoneConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "PHONE_DELEGATION": {
+            "enum": "PhoneConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "PHONE_VOICEMAIL": {
+            "enum": "PhoneConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "PLAN_BOOKKEEPING": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "PLATFORM_WIDGET_EMITTED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": false,
+            "marksAnOwnerReport": false
+        },
+        "PURPOSE_CONSEQUENCE": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "PURPOSE_KICKOFF": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "REPEATED_TEXT_SUPPRESSED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": false,
+            "marksAnOwnerReport": false
+        },
+        "SUB_AGENT_RUN_ENDED": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "SUB_AGENT_RUN_ENDED_REPLAY": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "SUB_AGENT_RUN_ENDED_WITHOUT_RESUME": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "SUB_AGENT_RUN_ENDED_WITHOUT_RESUME_REPLAY": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "SUPERVISOR_CORRECTION": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "SUPERVISOR",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "SUPERVISOR_STEERING": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "SUPERVISOR",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "TASK_PLAN_OPEN_BOUNCE": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "TASK_PLAN_OPEN_BOUNCE_DECISION": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "TURN_CONTINUATION": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "AGENT",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "TURN_OBLIGATION_BOUNCE": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
+        "WIDGET_TREE_FINDINGS": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "LOOP",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        }
+    }
+}

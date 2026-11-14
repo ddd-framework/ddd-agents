@@ -1,0 +1,85 @@
+{
+  "wireName": "ConversationSearchResults",
+  "fixtures": [
+    {
+      "name": "render-report-empty",
+      "description": "No group with a readable hit reports empty NO_DATA.",
+      "payload": {
+        "query": "opening hours",
+        "groups": []
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "default",
+      "description": "The owner asked \"Was hatten wir zu den Prophylaxe-Wochen besprochen?\": three earlier chats of the practice match and render inline.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "query": "Prophylaxe-Wochen",
+        "title": "Frühere Chats zur Prophylaxe",
+        "groups": [
+          {
+            "conversationId": 84102,
+            "title": "Prophylaxe-Wochen im November planen",
+            "summary": "Ablauf und Posts für die Prophylaxe-Aktion im November abgestimmt.",
+            "created": "2026-10-24 16:05:00",
+            "updated": "2026-10-24 16:05:00",
+            "hits": [
+              {
+                "role": "USER",
+                "excerpt": "Wir wollen im November Prophylaxe-Wochen machen mit einem Aktionsangebot für die professionelle Zahnreinigung. Kannst du dazu Posts für Instagram und Facebook planen?",
+                "messageId": 912301,
+                "indexInConversation": 0,
+                "created": "2026-10-24 15:48:00"
+              },
+              {
+                "role": "ASSISTANT",
+                "excerpt": "Gern: drei Posts – Ankündigung am 29. Oktober, eine Erinnerung zur Monatsmitte und ein Team-Post mit ZFA Miriam zur professionellen Zahnreinigung.",
+                "messageId": 912305,
+                "indexInConversation": 2,
+                "created": "2026-10-24 15:52:00"
+              }
+            ]
+          },
+          {
+            "conversationId": 83560,
+            "title": "Antwort auf die 2-Sterne-Bewertung",
+            "summary": "Antwort auf die Bewertung zur Wartezeit nach der Prophylaxe-Sitzung formuliert.",
+            "created": "2026-10-12 10:31:00",
+            "updated": "2026-10-12 10:31:00",
+            "hits": [
+              {
+                "role": "USER",
+                "excerpt": "Die neue 2-Sterne-Bewertung beschwert sich über 40 Minuten Wartezeit bei der Prophylaxe. Wie antworten wir am besten?",
+                "messageId": 905118,
+                "indexInConversation": 0,
+                "created": "2026-10-12 10:20:00"
+              }
+            ]
+          },
+          {
+            "conversationId": 82944,
+            "title": "Leistungsseite Prophylaxe überarbeiten",
+            "summary": "Texte der Website-Seite Prophylaxe und die Keyword-Auswahl besprochen.",
+            "created": "2026-09-30 14:02:00",
+            "updated": "2026-09-30 14:02:00",
+            "hits": [
+              {
+                "role": "ASSISTANT",
+                "excerpt": "Für \"professionelle zahnreinigung kassel\" steht die Praxis seit Wochen auf Position 9 – ein eigener Abschnitt zu Ablauf und Kosten der Prophylaxe auf der Seite kann helfen.",
+                "messageId": 899407,
+                "indexInConversation": 4,
+                "created": "2026-09-30 13:55:00"
+              }
+            ]
+          }
+        ]
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

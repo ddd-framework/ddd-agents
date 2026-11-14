@@ -1,0 +1,55 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// A row inside one surface: leading (avatar, icon, thumbnail) | title over meta | trailing (status, action). Rows are
+// divided by a hairline, never boxed; a clickable row is a native button with the inset focus ring.
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $x1_5;
+  padding: $x1_5 0;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+
+  & + & {
+    border-top: 1px solid var(--agents-divider-gl);
+  }
+}
+
+.withoutLeading {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.clickable {
+  cursor: pointer;
+  border-radius: $card-radius-compact;
+
+  &:hover {
+    background: var(--agents-bg-var);
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: $x1;
+}

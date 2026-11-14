@@ -1,0 +1,14 @@
+@import "../../styles/spacings";
+
+// The closed-state surface in place of the composer. Width, centering and the gap to the pane's bottom edge come from
+// the slot this renders into (ConversationViewBody's `.input, .inputReplacement` rule).
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $x1;
+  padding: $x2 $x3;
+  border: 1px solid var(--agents-divider-gl);
+  border-radius: $x2;
+  background: var(--agents-bg-surface);
+}

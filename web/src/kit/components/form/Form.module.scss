@@ -1,0 +1,69 @@
+@import "../../../styles/spacings";
+
+// The Form node: heading → the inputs → the action row. The
+// surface comes from WidgetSurface (elevated at the root of the tree, flat inside another surface); the form adds only
+// its own column rhythm.
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $x2;
+  min-width: 0;
+  margin: 0;
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $x1;
+  min-width: 0;
+}
+
+.headerItems {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: $x1;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+// The native fieldset disables every native control of the body while the answer is sent or after it was given; its
+// browser border, padding and minimum width are taken away so the body lays out like any slot.
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  margin-top: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x1;
+}
+
+// A Form inside a Form contributes its body to the outer form, with the outer form's rhythm.
+.nestedBody {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+}

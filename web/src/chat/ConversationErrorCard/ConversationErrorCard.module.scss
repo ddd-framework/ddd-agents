@@ -1,0 +1,29 @@
+@import "../../styles/spacings";
+@import "../../styles/surfaces";
+@import "../../styles/media";
+
+.errorMessageContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--agents-bg-surface);
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  padding: $card-padding;
+  gap: $x2_5;
+  
+  @include media(">=mobile") {
+    flex-direction: row;
+    align-items: center;
+    gap: $x3;
+  }
+  @include media(">=tablet") {
+    gap: $x6;
+  }
+}
+
+.errorMessageTitle {
+  display: flex;
+  align-items: center;
+  gap: $x1;
+  margin-bottom: $x1;
+}

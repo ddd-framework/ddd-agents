@@ -1,0 +1,25 @@
+@import "../styles/spacings";
+
+// `composes ... from` makes the bundler embed a copy of conversation-widget-layout's rules
+// into this module's CSS — when conversation-widget-layout changes, this file must be
+// re-transformed too or the stale copy wins the cascade.
+.root {
+  composes: narrow from "./conversation-widget-layout.module.scss";
+}
+
+// Markdown links: keep the body-text color but mark them with a dotted underline
+// (the solid browser default reads as a heavier link). text-decoration wraps per line,
+// so multi-line links stay legible.
+.markdownLink {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: $x0_5;
+}
+
+// Give every non-empty widget vertical breathing room.
+// `:has(*)` skips side-effect widgets that render `null` (e.g. a mount-time widget that only opens its canvas),
+// so we don't get phantom gaps around invisible nodes. Vertical margins collapse
+// between adjacent widgets, so consecutive widgets still get a single $x6 gap.
+.conversationWidgetWrapper:has(*) {
+  margin-block: $x6;
+}

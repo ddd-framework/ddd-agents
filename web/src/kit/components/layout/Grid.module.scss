@@ -1,0 +1,52 @@
+@import "./layout-gaps";
+
+// Equal columns, at most `--agents-grid-columns` of them; a cell never gets narrower than `--agents-grid-min-column`, so on a narrow
+// pane the grid drops to fewer columns instead of squeezing (no media query — the container width decides). `min()`
+// keeps a single cell inside a pane narrower than the minimum.
+.grid {
+  --agents-grid-columns: 2;
+  --agents-grid-min-column: #{$x1 * 17};
+  --agents-layout-gap: #{$x1_5};
+
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      min(100%, max(var(--agents-grid-min-column), calc((100% - (var(--agents-grid-columns) - 1) * var(--agents-layout-gap)) / var(--agents-grid-columns)))),
+      1fr
+    )
+  );
+  align-items: stretch;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+.columns1 {
+  --agents-grid-columns: 1;
+}
+
+.columns2 {
+  --agents-grid-columns: 2;
+}
+
+.columns3 {
+  --agents-grid-columns: 3;
+}
+
+.columns4 {
+  --agents-grid-columns: 4;
+}
+
+// KPI tiles keep a compact minimum; charts and images need room (the media grid's 220px of the design checklist).
+.minColumnCompact {
+  --agents-grid-min-column: #{$x1 * 17};
+}
+
+.minColumnRegular {
+  --agents-grid-min-column: #{$x1 * 27.5};
+}
+
+@include layout-gap-classes;

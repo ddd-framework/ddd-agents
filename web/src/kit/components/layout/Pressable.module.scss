@@ -1,0 +1,54 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// One clickable area around kit nodes: the hoverable wrapper draws the hover layer, the native button owns click and
+// focus. The selection ring is an overlay above the content, so it stays visible over a raised Surface inside.
+.pressable {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  border-radius: $card-radius;
+}
+
+.button {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: $card-radius;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+
+  > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+  }
+}
+
+.selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: $card-radius;
+  box-shadow: inset 0 0 0 $x0_25 var(--agents-fg-cta);
+  background: rgba(var(--agents-fg-cta-rgb), 0.08);
+  pointer-events: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

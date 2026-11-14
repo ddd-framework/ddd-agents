@@ -1,0 +1,82 @@
+@import "../styles/spacings";
+@import "../styles/conversation-widget-container";
+
+// The preview page: the widget at the chat width on the chat background, the canvas pane beside it when a canvas is
+// open, the composer log below — the shot is taken of `.widget` alone. A window too narrow for both (the comparison
+// page's chat and narrow frames, where an overlay canvas still opens) wraps the canvas pane below the chat column
+// instead of scrolling the page sideways. The wrapped lines stack at the top (`align-content`): stretched over the
+// page's `min-height: 100vh` they would move the canvas pane down with the window height.
+.page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $x3;
+  align-items: flex-start;
+  align-content: flex-start;
+  min-height: 100vh;
+  padding: $x3;
+  background: var(--agents-bg-var);
+}
+
+.chatColumn {
+  // the chat pane's container (name + inline size), so chat-pane container queries and wide breakouts apply as in the chat
+  @include conversation-widget-container;
+  display: flex;
+  flex-direction: column;
+  gap: $x2;
+  flex: 0 0 auto;
+  width: var(--agents-widget-preview-width, 528px);
+  max-width: 100%;
+}
+
+.widget {
+  min-width: 0;
+}
+
+.canvasPane {
+  flex: 1 1 auto;
+  // the narrow width of the overlay canvas, never wider than the window (the comparison page's 360 px frame)
+  min-width: min(360px, 100%);
+  max-width: 760px;
+  // a fixed height like the chat's canvas panel: canvas bodies fill their panel (the post editor takes the full
+  // height), so a pane that followed the page's viewport would grow with every frame resize of the comparison page
+  height: 760px;
+  overflow: auto;
+  padding: $x2;
+  border-radius: $x2;
+  background: var(--agents-bg-surface);
+}
+
+.composerLog {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  padding: $x1_5;
+  border-radius: $x1_5;
+  background: var(--agents-bg-surface);
+}
+
+.composerEntry {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.stubVideo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: $x1_5;
+  align-items: center;
+}
+
+.stubVideoThumbnail {
+  width: 120px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: $x1;
+}
+
+.stubVideoText {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_25;
+  min-width: 0;
+}

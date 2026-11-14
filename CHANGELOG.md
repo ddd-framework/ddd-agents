@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-alpha.14
+
+- First pre-release of the frontend `@mgamadeus/ddd-agents` (npm, dist-tag `next`) from `web/`, released in lockstep
+  with the Composer package: the agent chat, the widget renderer, the composed-view kit, the conversation client and
+  the image render. Built with Vite, declarations from `tsc`; the package's own specs run in the package folder.
+- Release workflow: a tag `vX.Y.Z` publishes `web/` on npm by trusted publishing with provenance; CI builds and tests
+  `web/` on every push.
+
 ## 0.1.0-alpha.13
 
 - **Host work required.** The code no longer names tools of an application. Five method attributes replace the name

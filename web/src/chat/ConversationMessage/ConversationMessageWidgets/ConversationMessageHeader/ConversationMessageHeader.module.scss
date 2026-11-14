@@ -1,0 +1,23 @@
+@import "../../../../styles/spacings";
+
+.iconContainer {
+  border-radius: $x1 + $x0_25;
+  aspect-ratio: 1;
+  width: $x4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--agents-assistant-400, #3C28CC);
+
+  path {
+    fill: white !important;
+  }
+}
+
+.responseHeader {
+  display: flex;
+  flex-direction: row;
+  gap: $x1;
+  align-items: center;
+  margin-bottom: $x2;
+}

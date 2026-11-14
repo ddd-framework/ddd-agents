@@ -1,0 +1,69 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-favicon-sources",
+      "description": "Site icons in front of source names (screenshot 46): by page url, by bare domain, and a url that names no site (glyph).",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "xsmall",
+          "children": [
+            {
+              "type": "Stack",
+              "direction": "row",
+              "gap": "xsmall",
+              "align": "center",
+              "children": [
+                {
+                  "type": "Favicon",
+                  "url": "https://www1.wdr.de/nachrichten",
+                  "name": "WDR"
+                },
+                {
+                  "type": "Caption",
+                  "text": "WDR · 23. Oktober 2026"
+                }
+              ]
+            },
+            {
+              "type": "Stack",
+              "direction": "row",
+              "gap": "xsmall",
+              "align": "center",
+              "children": [
+                {
+                  "type": "Favicon",
+                  "url": "antenne-muenster.de",
+                  "name": "Antenne Münster"
+                },
+                {
+                  "type": "Caption",
+                  "text": "Antenne Münster · 24. Oktober 2026"
+                }
+              ]
+            },
+            {
+              "type": "Stack",
+              "direction": "row",
+              "gap": "xsmall",
+              "align": "center",
+              "children": [
+                {
+                  "type": "Favicon",
+                  "url": "kein-link"
+                },
+                {
+                  "type": "Caption",
+                  "text": "unbekannte Quelle"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

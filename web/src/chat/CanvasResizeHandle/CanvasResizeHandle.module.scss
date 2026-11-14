@@ -1,0 +1,171 @@
+@import "../../styles/spacings";
+
+$tab-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// The grab area: a strip down the canvas's edge plus the tab where it rests with a safe area all round (::before).
+.handle {
+  --agents-resize-length: #{$x0_5 * 1.5};
+  --agents-resize-thickness: #{$x1};
+  --agents-resize-bend: 0deg;
+  --agents-resize-tab-color: var(--agents-bg-disabled);
+  --agents-resize-tab-alpha: 0;
+  --agents-resize-tab-ease: #{$tab-ease};
+  --agents-resize-grow: 420ms;
+  --agents-resize-edge: #{$x1_5};
+  --agents-resize-safe: #{$x2};
+  --agents-resize-tab-width: #{$x1};
+  --agents-resize-tab-height: 68px;
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - var(--agents-canvas-width) + var(--agents-canvas-inset) - var(--agents-resize-edge) / 2);
+  z-index: 6;
+  width: var(--agents-resize-edge);
+  cursor: col-resize;
+  touch-action: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: calc(50% - var(--agents-resize-tab-height) / 2 - var(--agents-resize-safe));
+    left: calc(50% - var(--agents-resize-tab-width) / 2 - var(--agents-resize-safe));
+    width: calc(var(--agents-resize-tab-width) + var(--agents-resize-safe) * 2);
+    height: calc(var(--agents-resize-tab-height) + var(--agents-resize-safe) * 2);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  // Shown (the pointer near, on it, or dragging): one height throughout, grown in once.
+  &[data-near="true"],
+  &[data-tab="hover"],
+  &[data-tab="drag"],
+  &:focus-visible {
+    --agents-resize-length: 34px;
+    --agents-resize-tab-alpha: 0.6;
+  }
+
+  &[data-tab="hover"],
+  &:focus-visible {
+    --agents-resize-tab-color: var(--agents-fg-light);
+    --agents-resize-tab-alpha: 0.5;
+  }
+
+  &[data-tab="drag"] {
+    --agents-resize-tab-color: var(--agents-fg-light);
+    --agents-resize-tab-alpha: 0.6;
+  }
+
+  &[data-tab="armed"] {
+    --agents-resize-length: #{$x2_5};
+    --agents-resize-bend: 38deg;
+    --agents-resize-tab-color: var(--agents-fg-light);
+    --agents-resize-tab-alpha: 1;
+  }
+
+  &:focus-visible:not([data-tab="drag"], [data-tab="armed"]) {
+    --agents-resize-tab-color: var(--agents-fg-cta);
+    --agents-resize-tab-alpha: 1;
+  }
+}
+
+// The joint: the halves meet at the middle of the edge, moved by --agents-resize-tab-x and drawn towards the pointer (--agents-resize-magnet-x / --agents-resize-magnet-y).
+.tab {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translateX(var(--agents-resize-tab-x, 0px));
+  translate: var(--agents-resize-magnet-x, 0px) var(--agents-resize-magnet-y, 0px);
+  opacity: var(--agents-resize-tab-alpha);
+  transition:
+    transform 220ms var(--agents-resize-tab-ease),
+    translate 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 200ms ease;
+}
+
+.handle[data-tab="drag"] .tab,
+.handle[data-tab="armed"] .tab {
+  transition-duration: 160ms, 160ms;
+}
+
+.tabTop,
+.tabBottom {
+  position: absolute;
+  left: calc(var(--agents-resize-thickness) / -2);
+  width: var(--agents-resize-thickness);
+  height: calc(var(--agents-resize-length) + var(--agents-resize-thickness) / 2);
+  border-radius: calc(var(--agents-resize-thickness) / 2);
+  background: var(--agents-resize-tab-color);
+  transition:
+    height var(--agents-resize-grow) var(--agents-resize-tab-ease),
+    width 200ms ease,
+    left 200ms ease,
+    background-color 200ms ease,
+    rotate 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+// Arming: it shrinks first (the anticipation), then folds into the chevron.
+.handle[data-tab="armed"] :is(.tabTop, .tabBottom) {
+  transition:
+    height 160ms cubic-bezier(0.32, 0.72, 0, 1),
+    width 200ms ease,
+    left 200ms ease,
+    background-color 200ms ease,
+    rotate 280ms var(--agents-resize-tab-ease) 100ms;
+}
+
+// Armed: a circle grows out of the chevron's tip behind it, so it reads as a button over whatever is behind.
+.tabCircle {
+  --agents-resize-distance: #{$x7};
+  --agents-resize-shift: 7px;
+
+  position: absolute;
+  top: calc(var(--agents-resize-distance) / -2);
+  left: calc(var(--agents-resize-distance) / -2 - var(--agents-resize-shift));
+  width: var(--agents-resize-distance);
+  height: var(--agents-resize-distance);
+  border-radius: 50%;
+  background: var(--agents-bg);
+  box-shadow:
+    0 2px 10px rgba(var(--agents-shadow-rgb), 0.14),
+    0 0 0 1px rgba(var(--agents-shadow-rgb), 0.04);
+  transform-origin: calc(var(--agents-resize-distance) / 2 + var(--agents-resize-shift)) 50%;
+  scale: 0;
+  transition: scale 180ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.handle[data-tab="armed"] .tabCircle {
+  scale: 1;
+  transition: scale 360ms var(--agents-resize-tab-ease) 100ms;
+}
+
+.tabTop {
+  bottom: calc(var(--agents-resize-thickness) / -2);
+  transform-origin: 50% calc(100% - var(--agents-resize-thickness) / 2);
+  rotate: calc(var(--agents-resize-bend) * -1);
+}
+
+.tabBottom {
+  top: calc(var(--agents-resize-thickness) / -2);
+  transform-origin: 50% calc(var(--agents-resize-thickness) / 2);
+  rotate: var(--agents-resize-bend);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handle {
+    --agents-resize-tab-ease: ease;
+  }
+
+  .tab,
+  .tabTop,
+  .tabBottom,
+  .tabCircle,
+  .handle[data-tab="armed"] :is(.tabTop, .tabBottom, .tabCircle) {
+    transition-duration: 120ms;
+    transition-delay: 0s;
+  }
+}

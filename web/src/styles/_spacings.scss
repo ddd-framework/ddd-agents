@@ -1,0 +1,23 @@
+// Package spacing constants: compile-time values with arithmetic, not themable custom properties.
+// Same values as the app's `src/styles/_spacings.scss`, so the package compiles to the same CSS inside the app.
+$x0: 0;
+$x1: 0.5rem;
+$x0_125: 0.125 * $x1;
+$x0_25: 0.25 * $x1;
+$x0_5: 0.5 * $x1;
+$x1_5: 1.5 * $x1;
+$x1_75: 1.75 * $x1;
+$x2: 2 * $x1;
+$x2_5: 2.5 * $x1;
+$x3: 3 * $x1;
+$x4: 4 * $x1;
+$x5: 5 * $x1;
+$x6: 6 * $x1;
+$x7: 7 * $x1;
+$x8: 8 * $x1;
+$x9: 9 * $x1;
+
+// The older pixel names three package rules still read.
+$pico: 1px;
+$nano: 2px;
+$byte: 8px;

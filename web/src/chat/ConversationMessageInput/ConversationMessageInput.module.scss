@@ -1,0 +1,187 @@
+@import "../../styles/spacings";
+@import "../../styles/media";
+@import "../../styles/ai-variables";
+
+// The text's size and the collapsed pill's side padding; `.collapsedPillSizer` measures the pill with both.
+$input-font-size: $x2;
+$collapsed-pill-padding-inline: $x2;
+
+.inputContainer {
+  background: var(--agents-bg, #ffffff);
+  padding: $x2;
+  border-radius: var(--ai-border-radius);
+  width: 100%;
+  box-shadow: 0 0 0 var(--ai-border-size) var(--ai-stroke-color);
+  position: relative;
+}
+
+.aiGlow {
+  width: 100%;
+}
+
+.editableInput {
+  display: inline-block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: $input-font-size;
+  color: var(--agents-fg);
+  min-height: $x3;
+  max-height: 35vh;
+  overflow-y: auto;
+  padding: $x0_5 $x0_5 0;
+  margin: 0 0 $x1;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &[contenteditable="false"] {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.showPlaceholder:before {
+  content: attr(data-placeholder);
+  color: var(--agents-fg-lightest);
+  pointer-events: none;
+  display: inline;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: $x1;
+  padding-top: $x1;
+
+  svg path {
+    fill: currentColor;
+  }
+}
+
+// Left-pinned cluster of the actions row (e.g. the "+" attachments menu). margin-right: auto
+// pushes everything after it back to the right edge inside the flex-end row.
+.actionsStart {
+  display: flex;
+  align-items: center;
+  gap: $x1;
+  margin-right: auto;
+}
+
+.buttons {
+  display: flex;
+  gap: $x1;
+
+}
+
+.statusRow {
+  display: flex;
+  align-items: flex-start;
+  gap: $x1;
+  padding: 0 $x0_5 $x0_5;
+}
+
+.characterCounter {
+  flex: 0 0 auto;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+// Wrapper around the disabled send button while the message is over the cap.
+// The disabled button gets pointer-events: none so hover reliably reaches the
+// Popover's wrapper span in every browser (disabled controls swallow mouse
+// events in older Safari) — the not-allowed cursor therefore lives here.
+.sendBlocked {
+  cursor: not-allowed;
+
+  button:disabled {
+    pointer-events: none;
+  }
+}
+// The one-line form: pill, text and send on one row, growing with the text up to a few lines.
+.compact {
+  display: flex;
+  align-items: flex-end;
+  gap: $x1;
+  padding: $x1 $x1 $x1 $x2_5;
+  border-radius: var(--ai-border-radius);
+  transition:
+    padding 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    gap 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  > * {
+    transition:
+      opacity 0.2s ease,
+      max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  // Centred on the send button while it is one line (the row sits on its bottom edge so the button stays at the end
+  // of a longer message); from the second line on the text is the tallest item and fills the row anyway.
+  .editableInput {
+    flex: 1;
+    align-self: center;
+    min-width: 0;
+    min-height: $x3;
+    max-height: 132px;
+    margin: 0;
+    padding: $x0_5 0;
+  }
+
+  // The send button and at most one button beside it. A bounded width, so the pill can take it to 0 smoothly.
+  .actions {
+    flex-shrink: 0;
+    max-width: 11 * $x1;
+    max-height: $x5;
+    padding-top: 0;
+  }
+
+  // A 40px pill on one line: the placeholder, or the start of a draft ending in an ellipsis. The buttons stay mounted,
+  // hidden and without width, so the text has the pill to itself; a draft survives the shrink.
+  &.collapsed {
+    gap: 0;
+    padding: $x1 $collapsed-pill-padding-inline;
+    cursor: pointer;
+
+    > * {
+      min-height: 0;
+      max-width: 0;
+      max-height: 0;
+      padding: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .editableInput {
+      min-height: $x3;
+      max-width: none;
+      max-height: $x3;
+      line-height: $x3;
+      opacity: 1;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+// The collapsed pill's width (`onCollapsedPillWidthChange`): the placeholder on one line in the input's type, plus the
+// pill's side padding. Out of the layout and never shown.
+.collapsedPillSizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  padding: 0 $collapsed-pill-padding-inline;
+  box-sizing: border-box;
+  font-size: $input-font-size;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}

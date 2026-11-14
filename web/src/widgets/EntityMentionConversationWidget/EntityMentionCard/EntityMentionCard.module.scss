@@ -1,0 +1,44 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// Top-level card on the chat background: elevated `--agents-bg-surface`, no border; the icon tile is the nested
+// `--agents-bg-var` level. Sized by its content, at most 80% of the row.
+.card {
+  display: flex;
+  align-items: center;
+  gap: $x1;
+  min-width: 0;
+  max-width: 80%;
+  padding: $x1 $x1_5 $x1 $x1;
+  border-radius: $card-radius;
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+}
+
+.iconTile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: ($x3 + $x0_5);
+  height: ($x3 + $x0_5);
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.caption {
+  display: block;
+}
+
+.label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

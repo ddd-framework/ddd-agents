@@ -1,0 +1,48 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-labels-over-values",
+      "description": "Labels above values in a row, the filter labels of screenshot 52 (Zeitraum, Kanal).",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "direction": "row",
+          "gap": "large",
+          "children": [
+            {
+              "type": "Stack",
+              "gap": "xsmall",
+              "children": [
+                {
+                  "type": "Label",
+                  "text": "Zeitraum"
+                },
+                {
+                  "type": "Text",
+                  "text": "7 Tage"
+                }
+              ]
+            },
+            {
+              "type": "Stack",
+              "gap": "xsmall",
+              "children": [
+                {
+                  "type": "Label",
+                  "text": "Kanal"
+                },
+                {
+                  "type": "Text",
+                  "text": "Alle Kanäle"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

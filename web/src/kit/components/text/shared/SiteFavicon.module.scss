@@ -1,0 +1,14 @@
+@import "../../../../styles/spacings";
+
+// 16px square, the small inner radius of a site icon; the glyph fallback takes the same box so a row never shifts.
+.favicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: $x2;
+  height: $x2;
+  border-radius: $x0_25;
+  vertical-align: middle;
+  object-fit: contain;
+}

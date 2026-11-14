@@ -1,0 +1,9 @@
+// Package breakpoints: compile-time constants for media and container conditions, same values as the
+// app's `src/styles/_breakpoints.scss` (the table the package rules use; the app's second table in
+// `src/styles/partials/_breakpoints.scss` is read only by chat rules).
+$breakpoints: (
+  phone: 640px,
+  mobile: 640px,
+  tablet: 768px,
+  desktop: 1024px,
+) !default;

@@ -1,0 +1,89 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "diagram-widget-lifecycle",
+      "description": "ChatGPT reference 48: the widget life cycle as a Mermaid flowchart (top to bottom, one decision with Ja / Nein branches that join again).",
+      "payload": {
+        "view": {
+          "type": "Diagram",
+          "title": "Mermaid-Diagramm – Widget-Lebenszyklus",
+          "caption": "Hier wird aus einer textuellen Diagrammbeschreibung direkt eine Flowchart-Vorschau.",
+          "source": "flowchart TD\n  A[User-Anfrage] --> B[Widget-Suche]\n  B --> C{Passendes Widget?}\n  C -- Ja --> D[Widget auswählen]\n  C -- Nein --> E[UI-Bausteine kombinieren]\n  D --> F[Datenquelle abfragen]\n  E --> F\n  F --> G[Daten validieren]\n  G --> H[Darstellung erzeugen]\n  H --> I[Interaktion im Chat]"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "diagram-sequence",
+      "description": "A second diagram type (sequence) — the reference shows a flowchart only.",
+      "payload": {
+        "view": {
+          "type": "Diagram",
+          "title": "Report e-mail",
+          "source": "sequenceDiagram\n  participant Agent\n  participant Worker\n  Agent->>Worker: Queue the report\n  Worker-->>Agent: Delivered"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "diagram-invalid-source",
+      "description": "Error state: Mermaid cannot read the source — one muted line shows (observed as data), the node reports failed RENDER_FAILED with Mermaid's parse message.",
+      "payload": {
+        "view": {
+          "type": "Diagram",
+          "title": "Widget-Lebenszyklus",
+          "source": "flowchart TD\n  A[User-Anfrage] -->\n  B -- -- C"
+        }
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "diagram-empty",
+      "description": "Empty state: an empty source renders nothing and reports empty.",
+      "payload": {
+        "view": {
+          "type": "Diagram",
+          "source": ""
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "diagram-loading",
+      "description": "Loading state: the source is bound to a pending tool result — the skeleton shows.",
+      "payload": {
+        "view": {
+          "type": "Diagram",
+          "title": "Widget-Lebenszyklus",
+          "source": {
+            "$from": {
+              "toolCall": "call_diagram_1",
+              "path": "$.source",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "diagram-narrow",
+      "description": "The flowchart at the narrow width: it scales down to the box.",
+      "payload": {
+        "view": {
+          "type": "Diagram",
+          "title": "Widget-Lebenszyklus",
+          "source": "flowchart TD\n  A[User-Anfrage] --> B[Widget-Suche]\n  B --> C{Passendes Widget?}\n  C -- Ja --> D[Widget auswählen]\n  C -- Nein --> E[UI-Bausteine kombinieren]\n  D --> F[Datenquelle abfragen]\n  E --> F\n  F --> G[Daten validieren]\n  G --> H[Darstellung erzeugen]\n  H --> I[Interaktion im Chat]"
+        }
+      },
+      "expectedState": "data",
+      "width": 360
+    }
+  ]
+}

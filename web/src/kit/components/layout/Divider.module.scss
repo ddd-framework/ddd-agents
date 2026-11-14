@@ -1,0 +1,15 @@
+@import "../../../styles/spacings";
+
+// A hairline in the divider token — rows and parts are divided, never boxed.
+.horizontal {
+  width: 100%;
+  height: 0;
+  border-top: 1px solid var(--agents-divider-gl);
+}
+
+.vertical {
+  align-self: stretch;
+  width: 0;
+  min-height: $x2;
+  border-left: 1px solid var(--agents-divider-gl);
+}

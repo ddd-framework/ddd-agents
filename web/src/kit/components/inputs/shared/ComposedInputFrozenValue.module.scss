@@ -1,0 +1,20 @@
+@import "../../../../styles/spacings";
+@import "../../../../styles/surfaces";
+
+// The frozen field: the field's place, flat on the nested level, the value in the normal text colour.
+.frozenValue {
+  display: flex;
+  align-items: center;
+  min-height: $x5;
+  padding: $x1 $x1_5;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+  color: var(--agents-fg);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.multiline {
+  align-items: flex-start;
+  white-space: pre-wrap;
+}

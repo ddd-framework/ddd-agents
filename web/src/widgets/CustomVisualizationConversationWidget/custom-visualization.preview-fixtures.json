@@ -1,0 +1,227 @@
+{
+  "wireName": "CustomVisualization",
+  "fixtures": [
+    {
+      "name": "solar-system",
+      "description": "The ChatGPT custom visualization (53): the Solar System Explorer — a canvas 3D projection of six planets with speed, tilt and zoom sliders, a pause button and drag-to-rotate, all in the model's own HTML/CSS/JS inside the sandbox frame.",
+      "payload": {
+        "title": "Solar System Explorer",
+        "description": "Interaktive 3D-Projektion · Illustrative Maßstäbe",
+        "html": "<div class=\"explorer\">\n  <span class=\"count-badge\" id=\"count-badge\"></span>\n  <canvas id=\"orbits\" aria-label=\"Planet orbits\"></canvas>\n  <div class=\"controls\">\n    <label>Geschwindigkeit<input id=\"speed\" type=\"range\" min=\"0\" max=\"3\" step=\"0.1\" value=\"1\"></label>\n    <label>Neigung<input id=\"tilt\" type=\"range\" min=\"0\" max=\"80\" step=\"1\" value=\"53\"></label>\n    <label>Zoom<input id=\"zoom\" type=\"range\" min=\"0.5\" max=\"1.6\" step=\"0.05\" value=\"1\"></label>\n    <button id=\"pause\" type=\"button\">Pause</button>\n  </div>\n  <p class=\"hint\">Mit der Maus ziehen: Perspektive drehen · Regler verändern die Animation</p>\n</div>",
+        "css": ".explorer{position:relative;background:#0b1020;border-radius:12px;overflow:hidden;color:#cbd8f2}\n.count-badge{position:absolute;top:12px;right:12px;padding:4px 12px;border-radius:999px;background:rgba(203,216,242,.12);font-size:12px}\ncanvas{display:block;width:100%;aspect-ratio:16/10;cursor:grab}\ncanvas.dragging{cursor:grabbing}\n.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:end;padding:12px 16px;background:#121a30}\n.controls label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#9fb0d0}\n.controls input{width:100%;accent-color:#7ea6ff}\n.controls button{padding:8px 16px;border-radius:8px;border:0;background:#2a3d6b;color:#fff;font:inherit;cursor:pointer}\n.hint{margin:0;padding:8px 16px 12px;font-size:12px;color:#7d8bab;text-align:center;background:#121a30}\n@media (max-width:420px){.controls{grid-template-columns:1fr 1fr}.controls button{grid-column:span 2}}",
+        "script": "var bodies = window.AGENTS_VISUALIZATION.data.bodies;\nvar canvas = document.getElementById(\"orbits\");\nvar context = canvas.getContext(\"2d\");\nvar stars = [];\nfor (var starIndex = 0; starIndex < 140; starIndex++) stars.push({ x: Math.random(), y: Math.random(), size: Math.random() * 1.2 + 0.2 });\ndocument.getElementById(\"count-badge\").textContent = bodies.length + \" Planeten\";\nvar state = { time: 0, yaw: 0.35, tilt: 53 * Math.PI / 180, zoom: 1, speed: 1, running: true, last: 0 };\nvar resize = function () {\n  var ratio = window.devicePixelRatio || 1;\n  canvas.width = canvas.clientWidth * ratio;\n  canvas.height = canvas.clientHeight * ratio;\n  context.setTransform(ratio, 0, 0, ratio, 0, 0);\n};\nvar project = function (x, z) {\n  var width = canvas.clientWidth, height = canvas.clientHeight;\n  var scale = Math.min(width / 520, height / 470) * state.zoom;\n  var xr = x * Math.cos(state.yaw) - z * Math.sin(state.yaw);\n  var zr = x * Math.sin(state.yaw) + z * Math.cos(state.yaw);\n  var yr = -zr * Math.sin(state.tilt);\n  var depth = zr * Math.cos(state.tilt);\n  var perspective = 900 / (900 + depth * 0.45);\n  return { x: width / 2 + xr * scale * perspective, y: height / 2 + yr * scale * perspective, depth: depth, k: perspective * scale };\n};\nvar drawOrbit = function (radius) {\n  context.beginPath();\n  for (var step = 0; step <= 160; step++) {\n    var angle = step / 160 * Math.PI * 2;\n    var point = project(radius * Math.cos(angle), radius * Math.sin(angle));\n    if (step === 0) context.moveTo(point.x, point.y); else context.lineTo(point.x, point.y);\n  }\n  context.strokeStyle = \"rgba(124,152,203,.29)\";\n  context.lineWidth = 1;\n  context.stroke();\n};\nvar drawBody = function (body) {\n  var radius = Math.max(2, body.size * body.point.k);\n  var shade = context.createRadialGradient(body.point.x - radius * 0.4, body.point.y - radius * 0.4, 0.5, body.point.x, body.point.y, radius * 1.3);\n  shade.addColorStop(0, \"#ffffff\");\n  shade.addColorStop(0.23, body.color);\n  shade.addColorStop(1, \"#172239\");\n  context.fillStyle = shade;\n  context.beginPath();\n  context.arc(body.point.x, body.point.y, radius, 0, Math.PI * 2);\n  context.fill();\n  if (body.rings) {\n    context.beginPath();\n    context.ellipse(body.point.x, body.point.y, radius * 1.8, radius * 0.52, -0.28, 0, Math.PI * 2);\n    context.strokeStyle = \"rgba(235,210,160,.75)\";\n    context.lineWidth = 2;\n    context.stroke();\n  }\n  context.font = \"12px system-ui, sans-serif\";\n  context.textAlign = \"center\";\n  context.fillStyle = \"#cbd8f2\";\n  context.fillText(body.name, body.point.x, body.point.y + radius + 15);\n};\nvar draw = function (now) {\n  if (!state.last) state.last = now;\n  if (state.running) state.time += (now - state.last) / 1000 * state.speed;\n  state.last = now;\n  var width = canvas.clientWidth, height = canvas.clientHeight;\n  context.clearRect(0, 0, width, height);\n  stars.forEach(function (star) { context.fillStyle = \"rgba(203,216,242,.5)\"; context.fillRect(star.x * width, star.y * height, star.size, star.size); });\n  bodies.forEach(function (body) { drawOrbit(body.orbitRadius); });\n  var sun = project(0, 0);\n  var glow = context.createRadialGradient(sun.x, sun.y, 2, sun.x, sun.y, 34 * state.zoom);\n  glow.addColorStop(0, \"rgba(255,220,140,1)\");\n  glow.addColorStop(0.35, \"rgba(255,180,80,.55)\");\n  glow.addColorStop(1, \"rgba(255,150,50,0)\");\n  context.fillStyle = glow;\n  context.beginPath();\n  context.arc(sun.x, sun.y, 34 * state.zoom, 0, Math.PI * 2);\n  context.fill();\n  var placed = bodies.map(function (body) {\n    var angle = state.time * body.speed * 0.6 + body.phase;\n    return { name: body.name, size: body.size, color: body.color, rings: body.rings, point: project(body.orbitRadius * Math.cos(angle), body.orbitRadius * Math.sin(angle)) };\n  });\n  placed.sort(function (first, second) { return second.point.depth - first.point.depth; }).forEach(drawBody);\n  window.requestAnimationFrame(draw);\n};\ndocument.getElementById(\"speed\").addEventListener(\"input\", function (event) { state.speed = Number(event.target.value); });\ndocument.getElementById(\"tilt\").addEventListener(\"input\", function (event) { state.tilt = Number(event.target.value) * Math.PI / 180; });\ndocument.getElementById(\"zoom\").addEventListener(\"input\", function (event) { state.zoom = Number(event.target.value); });\nvar pauseButton = document.getElementById(\"pause\");\npauseButton.addEventListener(\"click\", function () { state.running = !state.running; pauseButton.textContent = state.running ? \"Pause\" : \"Weiter\"; });\nvar dragStartX = null;\ncanvas.addEventListener(\"pointerdown\", function (event) { dragStartX = event.clientX; canvas.classList.add(\"dragging\"); canvas.setPointerCapture(event.pointerId); });\ncanvas.addEventListener(\"pointermove\", function (event) { if (dragStartX === null) return; state.yaw += (event.clientX - dragStartX) * 0.01; dragStartX = event.clientX; });\ncanvas.addEventListener(\"pointerup\", function () { dragStartX = null; canvas.classList.remove(\"dragging\"); });\nwindow.addEventListener(\"resize\", resize);\nresize();\nwindow.requestAnimationFrame(draw);",
+        "data": {
+          "bodies": [
+            {
+              "name": "Merkur",
+              "orbitRadius": 42,
+              "size": 3.5,
+              "color": "#aba7a4",
+              "speed": 4.1,
+              "phase": 0.4
+            },
+            {
+              "name": "Venus",
+              "orbitRadius": 66,
+              "size": 5.5,
+              "color": "#e3bc85",
+              "speed": 1.7,
+              "phase": 2.6
+            },
+            {
+              "name": "Erde",
+              "orbitRadius": 94,
+              "size": 6.5,
+              "color": "#4c9dff",
+              "speed": 1,
+              "phase": 2.2
+            },
+            {
+              "name": "Mars",
+              "orbitRadius": 126,
+              "size": 4.5,
+              "color": "#ef7955",
+              "speed": 0.65,
+              "phase": 0.9
+            },
+            {
+              "name": "Jupiter",
+              "orbitRadius": 175,
+              "size": 11,
+              "color": "#d5a87a",
+              "speed": 0.3,
+              "phase": 5.9
+            },
+            {
+              "name": "Saturn",
+              "orbitRadius": 225,
+              "size": 9,
+              "color": "#d5c18e",
+              "speed": 0.17,
+              "phase": 4.4,
+              "rings": true
+            }
+          ]
+        },
+        "height": 420
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "interactions": []
+    },
+    {
+      "name": "d3-bars",
+      "description": "An allow-listed library in use: a d3 bar chart drawn by the model's script with the chat's colours (--agents-accent, --agents-fg-light).",
+      "payload": {
+        "title": "Bewertungen pro Monat",
+        "description": "Neue Google-Bewertungen, Mai bis Oktober 2026",
+        "html": "<div id=\"chart\"></div>",
+        "css": "#chart{padding:8px 4px}#chart text{fill:var(--agents-fg-light);font-size:11px}#chart .domain,#chart .tick line{stroke:var(--agents-divider)}",
+        "script": "var rows = window.AGENTS_VISUALIZATION.data.rows;\nvar width = document.getElementById(\"chart\").clientWidth, height = 220, margin = { top: 12, right: 12, bottom: 28, left: 36 };\nvar svg = d3.select(\"#chart\").append(\"svg\").attr(\"width\", width).attr(\"height\", height);\nvar x = d3.scaleBand().domain(rows.map(function (row) { return row.month; })).range([margin.left, width - margin.right]).padding(0.25);\nvar y = d3.scaleLinear().domain([0, d3.max(rows, function (row) { return row.reviews; })]).nice().range([height - margin.bottom, margin.top]);\nsvg.append(\"g\").attr(\"transform\", \"translate(0,\" + (height - margin.bottom) + \")\").call(d3.axisBottom(x));\nsvg.append(\"g\").attr(\"transform\", \"translate(\" + margin.left + \",0)\").call(d3.axisLeft(y).ticks(4));\nsvg.selectAll(\"rect\").data(rows).join(\"rect\").attr(\"x\", function (row) { return x(row.month); }).attr(\"width\", x.bandwidth()).attr(\"y\", function (row) { return y(row.reviews); }).attr(\"height\", function (row) { return y(0) - y(row.reviews); }).attr(\"rx\", 4).style(\"fill\", \"var(--agents-accent)\");\n",
+        "libraries": [
+          "d3"
+        ],
+        "data": {
+          "rows": [
+            {
+              "month": "Mai",
+              "reviews": 12
+            },
+            {
+              "month": "Jun",
+              "reviews": 18
+            },
+            {
+              "month": "Jul",
+              "reviews": 9
+            },
+            {
+              "month": "Aug",
+              "reviews": 22
+            },
+            {
+              "month": "Sep",
+              "reviews": 15
+            },
+            {
+              "month": "Okt",
+              "reviews": 27
+            }
+          ]
+        },
+        "height": 240
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "narrow",
+      "description": "The Solar System Explorer at a narrow chat width: the controls wrap into two columns inside the frame.",
+      "payload": {
+        "title": "Solar System Explorer",
+        "description": "Interaktive 3D-Projektion · Illustrative Maßstäbe",
+        "html": "<div class=\"explorer\">\n  <span class=\"count-badge\" id=\"count-badge\"></span>\n  <canvas id=\"orbits\" aria-label=\"Planet orbits\"></canvas>\n  <div class=\"controls\">\n    <label>Geschwindigkeit<input id=\"speed\" type=\"range\" min=\"0\" max=\"3\" step=\"0.1\" value=\"1\"></label>\n    <label>Neigung<input id=\"tilt\" type=\"range\" min=\"0\" max=\"80\" step=\"1\" value=\"53\"></label>\n    <label>Zoom<input id=\"zoom\" type=\"range\" min=\"0.5\" max=\"1.6\" step=\"0.05\" value=\"1\"></label>\n    <button id=\"pause\" type=\"button\">Pause</button>\n  </div>\n  <p class=\"hint\">Mit der Maus ziehen: Perspektive drehen · Regler verändern die Animation</p>\n</div>",
+        "css": ".explorer{position:relative;background:#0b1020;border-radius:12px;overflow:hidden;color:#cbd8f2}\n.count-badge{position:absolute;top:12px;right:12px;padding:4px 12px;border-radius:999px;background:rgba(203,216,242,.12);font-size:12px}\ncanvas{display:block;width:100%;aspect-ratio:16/10;cursor:grab}\ncanvas.dragging{cursor:grabbing}\n.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:end;padding:12px 16px;background:#121a30}\n.controls label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#9fb0d0}\n.controls input{width:100%;accent-color:#7ea6ff}\n.controls button{padding:8px 16px;border-radius:8px;border:0;background:#2a3d6b;color:#fff;font:inherit;cursor:pointer}\n.hint{margin:0;padding:8px 16px 12px;font-size:12px;color:#7d8bab;text-align:center;background:#121a30}\n@media (max-width:420px){.controls{grid-template-columns:1fr 1fr}.controls button{grid-column:span 2}}",
+        "script": "var bodies = window.AGENTS_VISUALIZATION.data.bodies;\nvar canvas = document.getElementById(\"orbits\");\nvar context = canvas.getContext(\"2d\");\nvar stars = [];\nfor (var starIndex = 0; starIndex < 140; starIndex++) stars.push({ x: Math.random(), y: Math.random(), size: Math.random() * 1.2 + 0.2 });\ndocument.getElementById(\"count-badge\").textContent = bodies.length + \" Planeten\";\nvar state = { time: 0, yaw: 0.35, tilt: 53 * Math.PI / 180, zoom: 1, speed: 1, running: true, last: 0 };\nvar resize = function () {\n  var ratio = window.devicePixelRatio || 1;\n  canvas.width = canvas.clientWidth * ratio;\n  canvas.height = canvas.clientHeight * ratio;\n  context.setTransform(ratio, 0, 0, ratio, 0, 0);\n};\nvar project = function (x, z) {\n  var width = canvas.clientWidth, height = canvas.clientHeight;\n  var scale = Math.min(width / 520, height / 470) * state.zoom;\n  var xr = x * Math.cos(state.yaw) - z * Math.sin(state.yaw);\n  var zr = x * Math.sin(state.yaw) + z * Math.cos(state.yaw);\n  var yr = -zr * Math.sin(state.tilt);\n  var depth = zr * Math.cos(state.tilt);\n  var perspective = 900 / (900 + depth * 0.45);\n  return { x: width / 2 + xr * scale * perspective, y: height / 2 + yr * scale * perspective, depth: depth, k: perspective * scale };\n};\nvar drawOrbit = function (radius) {\n  context.beginPath();\n  for (var step = 0; step <= 160; step++) {\n    var angle = step / 160 * Math.PI * 2;\n    var point = project(radius * Math.cos(angle), radius * Math.sin(angle));\n    if (step === 0) context.moveTo(point.x, point.y); else context.lineTo(point.x, point.y);\n  }\n  context.strokeStyle = \"rgba(124,152,203,.29)\";\n  context.lineWidth = 1;\n  context.stroke();\n};\nvar drawBody = function (body) {\n  var radius = Math.max(2, body.size * body.point.k);\n  var shade = context.createRadialGradient(body.point.x - radius * 0.4, body.point.y - radius * 0.4, 0.5, body.point.x, body.point.y, radius * 1.3);\n  shade.addColorStop(0, \"#ffffff\");\n  shade.addColorStop(0.23, body.color);\n  shade.addColorStop(1, \"#172239\");\n  context.fillStyle = shade;\n  context.beginPath();\n  context.arc(body.point.x, body.point.y, radius, 0, Math.PI * 2);\n  context.fill();\n  if (body.rings) {\n    context.beginPath();\n    context.ellipse(body.point.x, body.point.y, radius * 1.8, radius * 0.52, -0.28, 0, Math.PI * 2);\n    context.strokeStyle = \"rgba(235,210,160,.75)\";\n    context.lineWidth = 2;\n    context.stroke();\n  }\n  context.font = \"12px system-ui, sans-serif\";\n  context.textAlign = \"center\";\n  context.fillStyle = \"#cbd8f2\";\n  context.fillText(body.name, body.point.x, body.point.y + radius + 15);\n};\nvar draw = function (now) {\n  if (!state.last) state.last = now;\n  if (state.running) state.time += (now - state.last) / 1000 * state.speed;\n  state.last = now;\n  var width = canvas.clientWidth, height = canvas.clientHeight;\n  context.clearRect(0, 0, width, height);\n  stars.forEach(function (star) { context.fillStyle = \"rgba(203,216,242,.5)\"; context.fillRect(star.x * width, star.y * height, star.size, star.size); });\n  bodies.forEach(function (body) { drawOrbit(body.orbitRadius); });\n  var sun = project(0, 0);\n  var glow = context.createRadialGradient(sun.x, sun.y, 2, sun.x, sun.y, 34 * state.zoom);\n  glow.addColorStop(0, \"rgba(255,220,140,1)\");\n  glow.addColorStop(0.35, \"rgba(255,180,80,.55)\");\n  glow.addColorStop(1, \"rgba(255,150,50,0)\");\n  context.fillStyle = glow;\n  context.beginPath();\n  context.arc(sun.x, sun.y, 34 * state.zoom, 0, Math.PI * 2);\n  context.fill();\n  var placed = bodies.map(function (body) {\n    var angle = state.time * body.speed * 0.6 + body.phase;\n    return { name: body.name, size: body.size, color: body.color, rings: body.rings, point: project(body.orbitRadius * Math.cos(angle), body.orbitRadius * Math.sin(angle)) };\n  });\n  placed.sort(function (first, second) { return second.point.depth - first.point.depth; }).forEach(drawBody);\n  window.requestAnimationFrame(draw);\n};\ndocument.getElementById(\"speed\").addEventListener(\"input\", function (event) { state.speed = Number(event.target.value); });\ndocument.getElementById(\"tilt\").addEventListener(\"input\", function (event) { state.tilt = Number(event.target.value) * Math.PI / 180; });\ndocument.getElementById(\"zoom\").addEventListener(\"input\", function (event) { state.zoom = Number(event.target.value); });\nvar pauseButton = document.getElementById(\"pause\");\npauseButton.addEventListener(\"click\", function () { state.running = !state.running; pauseButton.textContent = state.running ? \"Pause\" : \"Weiter\"; });\nvar dragStartX = null;\ncanvas.addEventListener(\"pointerdown\", function (event) { dragStartX = event.clientX; canvas.classList.add(\"dragging\"); canvas.setPointerCapture(event.pointerId); });\ncanvas.addEventListener(\"pointermove\", function (event) { if (dragStartX === null) return; state.yaw += (event.clientX - dragStartX) * 0.01; dragStartX = event.clientX; });\ncanvas.addEventListener(\"pointerup\", function () { dragStartX = null; canvas.classList.remove(\"dragging\"); });\nwindow.addEventListener(\"resize\", resize);\nresize();\nwindow.requestAnimationFrame(draw);",
+        "data": {
+          "bodies": [
+            {
+              "name": "Merkur",
+              "orbitRadius": 42,
+              "size": 3.5,
+              "color": "#aba7a4",
+              "speed": 4.1,
+              "phase": 0.4
+            },
+            {
+              "name": "Venus",
+              "orbitRadius": 66,
+              "size": 5.5,
+              "color": "#e3bc85",
+              "speed": 1.7,
+              "phase": 2.6
+            },
+            {
+              "name": "Erde",
+              "orbitRadius": 94,
+              "size": 6.5,
+              "color": "#4c9dff",
+              "speed": 1,
+              "phase": 2.2
+            },
+            {
+              "name": "Mars",
+              "orbitRadius": 126,
+              "size": 4.5,
+              "color": "#ef7955",
+              "speed": 0.65,
+              "phase": 0.9
+            },
+            {
+              "name": "Jupiter",
+              "orbitRadius": 175,
+              "size": 11,
+              "color": "#d5a87a",
+              "speed": 0.3,
+              "phase": 5.9
+            },
+            {
+              "name": "Saturn",
+              "orbitRadius": 225,
+              "size": 9,
+              "color": "#d5c18e",
+              "speed": 0.17,
+              "phase": 4.4,
+              "rings": true
+            }
+          ]
+        },
+        "height": 420
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 340
+    },
+    {
+      "name": "script-error",
+      "description": "The model's script throws: what rendered stays, one muted line under it, the block reports failed RENDER_FAILED with the error line.",
+      "payload": {
+        "title": "Kaputte Visualisierung",
+        "html": "<p>Vor dem Fehler</p>",
+        "css": "p{margin:16px}",
+        "script": "undefinedFunctionCall();"
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "endless-loop",
+      "description": "The model's script never returns: the heartbeat stops, the watchdog removes the frame after 5 s and the block reports failed.",
+      "payload": {
+        "title": "Endlosschleife",
+        "html": "<p>Rechnet …</p>",
+        "css": "",
+        "script": "while (true) {}"
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "unknown-library",
+      "description": "A library outside the allow-list: the block is not run, one muted line, reported failed INVALID_PROP.",
+      "payload": {
+        "title": "Mit Chart.js",
+        "html": "<canvas id=\"c\"></canvas>",
+        "css": "",
+        "script": "new Chart(document.getElementById('c'), {});",
+        "libraries": [
+          "chart.js"
+        ]
+      },
+      "expectedState": "error",
+      "width": 528
+    }
+  ]
+}

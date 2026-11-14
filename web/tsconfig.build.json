@@ -1,0 +1,33 @@
+{
+  // The declarations of the published entries (`npm run build`, after Vite wrote the JavaScript). Only the files the
+  // entries reach are compiled; `vite/client` types `import.meta.glob`, `?raw`, `?url` and the SCSS modules.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist/types",
+    "types": ["vite/client", "google.maps"]
+  },
+  "files": [
+    "src/entries/index.ts",
+    "src/entries/renderer.ts",
+    "src/entries/kit.ts",
+    "src/entries/widgets.ts",
+    "src/entries/contract.ts",
+    "src/entries/client.ts",
+    "src/entries/client-testing.ts",
+    "src/entries/chat.ts",
+    "src/entries/preview.ts",
+    "src/entries/image-render.ts"
+  ]
+}

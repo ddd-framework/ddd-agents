@@ -1,0 +1,301 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "button-mrr-growth-simulator",
+      "description": "The MRR growth simulator: Bear/Base/Bull tabs, KPIs, the MRR line and a starting-customers slider share one state; a button copies the scenario as JSON (ChatGPT reference 16).",
+      "payload": {
+        "state": {
+          "scenario": "base",
+          "startCustomers": 800
+        },
+        "data": {
+          "months": [
+            {
+              "month": "M1",
+              "bear": 1.0,
+              "base": 1.0,
+              "bull": 1.0
+            },
+            {
+              "month": "M2",
+              "bear": 1.02,
+              "base": 1.05,
+              "bull": 1.08
+            },
+            {
+              "month": "M3",
+              "bear": 1.0404,
+              "base": 1.1025,
+              "bull": 1.1664
+            },
+            {
+              "month": "M4",
+              "bear": 1.0612,
+              "base": 1.1576,
+              "bull": 1.2597
+            },
+            {
+              "month": "M5",
+              "bear": 1.0824,
+              "base": 1.2155,
+              "bull": 1.3605
+            },
+            {
+              "month": "M6",
+              "bear": 1.1041,
+              "base": 1.2763,
+              "bull": 1.4693
+            },
+            {
+              "month": "M7",
+              "bear": 1.1262,
+              "base": 1.3401,
+              "bull": 1.5869
+            },
+            {
+              "month": "M8",
+              "bear": 1.1487,
+              "base": 1.4071,
+              "bull": 1.7138
+            },
+            {
+              "month": "M9",
+              "bear": 1.1717,
+              "base": 1.4775,
+              "bull": 1.8509
+            },
+            {
+              "month": "M10",
+              "bear": 1.1951,
+              "base": 1.5513,
+              "bull": 1.999
+            },
+            {
+              "month": "M11",
+              "bear": 1.219,
+              "base": 1.6289,
+              "bull": 2.1589
+            },
+            {
+              "month": "M12",
+              "bear": 1.2434,
+              "base": 1.7103,
+              "bull": 2.3316
+            }
+          ]
+        },
+        "computed": {
+          "growth": "scenario == \"bear\" ? 4 : scenario == \"base\" ? 8 : 12",
+          "churn": "scenario == \"bear\" ? 2 : scenario == \"base\" ? 3 : 4",
+          "netGrowth": "growth - churn",
+          "series": "map(months, m => ({ month: m.month, mrr: round(startCustomers * 79 * (scenario == \"bear\" ? m.bear : scenario == \"base\" ? m.base : m.bull)) }))",
+          "mrrMonth12": "last(series).mrr",
+          "scenarioJson": "\"{\\\"scenario\\\":\\\"\" + scenario + \"\\\",\\\"startCustomers\\\":\" + string(startCustomers) + \",\\\"mrrMonth12\\\":\" + string(mrrMonth12) + \"}\""
+        },
+        "actions": {
+          "copyScenario": {
+            "type": "copy",
+            "value": {
+              "$computed": "scenarioJson"
+            }
+          }
+        },
+        "view": {
+          "type": "Surface",
+          "title": "MRR Growth Simulator",
+          "subtitle": "12-month model · €79 ARPA · example data",
+          "children": [
+            {
+              "type": "Tabs",
+              "options": [
+                {
+                  "id": "bear",
+                  "label": "Bear"
+                },
+                {
+                  "id": "base",
+                  "label": "Base"
+                },
+                {
+                  "id": "bull",
+                  "label": "Bull"
+                }
+              ],
+              "value": {
+                "$state": "scenario"
+              },
+              "onChange": {
+                "set": "scenario"
+              }
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "MRR month 12",
+                  "value": {
+                    "$computed": "mrrMonth12"
+                  },
+                  "format": "currency",
+                  "currency": "EUR",
+                  "decimals": 0
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Net growth / month",
+                  "value": {
+                    "$computed": "netGrowth"
+                  },
+                  "format": "percent",
+                  "decimals": 0,
+                  "tone": "success",
+                  "signed": true
+                }
+              ]
+            },
+            {
+              "type": "Chart",
+              "kind": "line",
+              "data": {
+                "$computed": "series"
+              },
+              "x": "month",
+              "series": [
+                {
+                  "field": "mrr",
+                  "label": "MRR"
+                }
+              ],
+              "valueFormat": "currency",
+              "currency": "EUR"
+            },
+            {
+              "type": "Slider",
+              "label": "Starting customers",
+              "min": 100,
+              "max": 2000,
+              "step": 50,
+              "value": {
+                "$state": "startCustomers"
+              },
+              "onChange": {
+                "set": "startCustomers"
+              }
+            },
+            {
+              "type": "Divider"
+            },
+            {
+              "type": "Grid",
+              "columns": 2,
+              "gap": "small",
+              "children": [
+                {
+                  "type": "KpiTile",
+                  "label": "Growth rate",
+                  "value": {
+                    "$computed": "growth"
+                  },
+                  "format": "percent",
+                  "decimals": 0,
+                  "signed": true
+                },
+                {
+                  "type": "KpiTile",
+                  "label": "Churn rate",
+                  "value": {
+                    "$computed": "churn"
+                  },
+                  "format": "percent",
+                  "decimals": 0
+                }
+              ]
+            },
+            {
+              "type": "Button",
+              "label": "Copy scenario data as JSON",
+              "icon": "copy",
+              "fullWidth": true,
+              "onClick": {
+                "action": "copyScenario"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "bull scenario",
+          "click": {
+            "text": "Bull"
+          }
+        },
+        {
+          "name": "more starting customers",
+          "click": {
+            "selector": ".MuiSlider-thumb"
+          },
+          "press": "ArrowRight"
+        },
+        {
+          "name": "copy scenario",
+          "click": {
+            "text": "Copy scenario data as JSON"
+          }
+        }
+      ]
+    },
+    {
+      "name": "button-replay",
+      "description": "The same buttons on a replayed message: visible, inert (mode replay shows it; here the tree is the plain button row).",
+      "payload": {
+        "state": {
+          "visitors": 35000
+        },
+        "actions": {
+          "reset": {
+            "type": "resetState"
+          },
+          "copyResult": {
+            "type": "copy",
+            "value": {
+              "$state": "visitors"
+            }
+          }
+        },
+        "view": {
+          "type": "Stack",
+          "direction": "row",
+          "gap": "small",
+          "children": [
+            {
+              "type": "Button",
+              "label": "Copy JSON",
+              "icon": "copy",
+              "onClick": {
+                "action": "copyResult"
+              }
+            },
+            {
+              "type": "Button",
+              "label": "Reset",
+              "icon": "reset",
+              "variant": "secondary",
+              "onClick": {
+                "action": "reset"
+              }
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

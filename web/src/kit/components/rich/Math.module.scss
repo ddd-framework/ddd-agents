@@ -1,0 +1,43 @@
+@import "../../../styles/spacings";
+
+// A block formula is centred and scrolls sideways when it is wider than its box (KaTeX never wraps a formula); the
+// colour follows the theme because KaTeX draws in `currentColor`.
+.blockFormula {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: $x0_5 0;
+  color: var(--agents-fg);
+  text-align: center;
+
+  :global(.katex-display) {
+    margin: 0;
+  }
+}
+
+.inlineFormula {
+  color: var(--agents-fg);
+}
+
+.inlineSkeleton {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.caption {
+  overflow-wrap: anywhere;
+}
+
+.failure {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+}
+
+// The LaTeX source of a formula that could not be typeset: monospace, wrapped, never cut.
+.source {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: var(--agents-fg);
+}

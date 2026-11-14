@@ -1,0 +1,28 @@
+@import "../../../styles/spacings";
+
+// Composer tone — the same neutral pill as every other composer chip, so all composer chips read as one row.
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  min-width: 0;
+  max-width: 100%;
+  padding: $x0_25 $x0_25 $x0_25 $x1;
+  border-radius: $x2;
+  background: rgba(var(--agents-neutral-500-rgb), 0.1);
+}
+
+.icon,
+.prefix {
+  flex-shrink: 0;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove {
+  cursor: pointer;
+}

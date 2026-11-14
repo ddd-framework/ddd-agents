@@ -1,0 +1,102 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The code itself sits flat inside its tile (the tile is WidgetSurface's: elevated on the chat, flat when nested), so
+// the code area takes the nested level and scrolls sideways unless the lines wrap. Highlight colours come from the
+// palette through light-dark() and switch with the colour scheme; nothing is copied from a highlight.js theme.
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $x0_5;
+}
+
+.codeArea {
+  min-width: 0;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-var);
+  overflow: hidden;
+}
+
+// Long code shows its first 24 lines (Code.composed.tsx, CODE_COLLAPSED_LINE_COUNT; 1.6 is the line height below).
+.clipped .code {
+  max-height: calc(24 * 1.6em + #{2 * $x1_5});
+  overflow-y: hidden;
+}
+
+.code {
+  margin: 0;
+  padding: $x1_5 $x2;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  line-height: 1.6;
+  color: var(--agents-fg);
+  tab-size: 4;
+  white-space: pre;
+
+  code {
+    font: inherit;
+    background: none;
+    padding: 0;
+  }
+
+  :global(.hljs-keyword),
+  :global(.hljs-built_in),
+  :global(.hljs-selector-tag),
+  :global(.hljs-section) {
+    color: light-dark(var(--agents-accent3-900), var(--agents-accent3-300));
+  }
+
+  :global(.hljs-string),
+  :global(.hljs-regexp),
+  :global(.hljs-addition),
+  :global(.hljs-template-string) {
+    color: light-dark(var(--agents-accent4-900), var(--agents-accent4-300));
+  }
+
+  :global(.hljs-number),
+  :global(.hljs-literal),
+  :global(.hljs-symbol),
+  :global(.hljs-bullet) {
+    color: light-dark(var(--agents-accent1-500), var(--agents-accent1-300));
+  }
+
+  :global(.hljs-title),
+  :global(.hljs-title.function_),
+  :global(.hljs-title.class_),
+  :global(.hljs-name),
+  :global(.hljs-selector-id),
+  :global(.hljs-selector-class) {
+    color: var(--agents-fg-cta);
+  }
+
+  :global(.hljs-variable),
+  :global(.hljs-params),
+  :global(.hljs-attr),
+  :global(.hljs-attribute),
+  :global(.hljs-property),
+  :global(.hljs-type),
+  :global(.hljs-meta) {
+    color: light-dark(var(--agents-primary-700), var(--agents-primary-400));
+  }
+
+  :global(.hljs-comment),
+  :global(.hljs-quote) {
+    color: var(--agents-fg-lightest);
+    font-style: italic;
+  }
+
+  :global(.hljs-deletion) {
+    color: light-dark(var(--agents-accent3-900), var(--agents-accent3-300));
+  }
+}
+
+.wrapped {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.expandRow {
+  display: flex;
+  justify-content: center;
+}

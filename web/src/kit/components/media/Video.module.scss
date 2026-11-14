@@ -1,0 +1,128 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// One video of the media kit: the 16:9 frame (thumbnail or the playing embed), then title, channel ·
+// length, the source and the link to the watch page. No card of its own — a Card node around it carries the surface.
+.video {
+  display: flex;
+  flex-direction: column;
+  gap: $x1;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.videoCompact {
+  width: $x8 * 2;
+  gap: $x0_5;
+}
+
+.frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: $card-radius-compact;
+  background: var(--agents-bg-disabled);
+}
+
+.thumbnail,
+.player,
+.frameSkeleton {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.thumbnail {
+  object-fit: cover;
+}
+
+.player {
+  border: 0;
+}
+
+// The play glyph: a theme-invariant dark disc in the middle of the frame.
+.playBadge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $x6;
+  height: $x6;
+  border-radius: 50%;
+  background: rgba(var(--agents-bg-dark-rgb), 0.72);
+  color: var(--agents-fg-on-dark);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.playBadgeCompact {
+  width: $x4;
+  height: $x4;
+}
+
+.durationChip {
+  position: absolute;
+  right: $x1;
+  bottom: $x1;
+  z-index: 2;
+  padding: $x0_25 $x1;
+  border-radius: $x2;
+  background: rgba(var(--agents-bg-dark-rgb), 0.72);
+  pointer-events: none;
+}
+
+.playButton {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: -$x0_25;
+    border-radius: inherit;
+  }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.wrap {
+  overflow-wrap: anywhere;
+}
+
+.openLink {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  align-self: flex-start;
+  border-radius: $button-radius;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--agents-fg-cta);
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}

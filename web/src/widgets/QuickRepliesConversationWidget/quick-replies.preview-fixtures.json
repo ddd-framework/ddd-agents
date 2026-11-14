@@ -1,0 +1,45 @@
+{
+  "wireName": "QuickReplies",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "An owner question with three answer pills — the follow-up suggestions of the ChatGPT reference as one tap each.",
+      "payload": {
+        "question": "What should we look at next?",
+        "options": ["Compare with last month", "Show the top keywords", "Which competitor grew most?"]
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [{ "name": "pick the second answer", "click": { "text": "Show the top keywords" } }]
+    },
+    {
+      "name": "render-report-error",
+      "description": "Two options that differ only by case drop the card, reported failed INVALID_PROP.",
+      "payload": {
+        "options": [
+          "Yes",
+          "yes"
+        ]
+      },
+      "expectedState": "error",
+      "width": 528
+    },
+    {
+      "name": "kassel-dental-next-step",
+      "description": "After the review summary the assistant asks the practice owner what to look at next — three answer pills the model wrote.",
+      "dataSet": "kassel-dental-practice",
+      "payload": {
+        "question": "Womit sollen wir weitermachen?",
+        "options": [
+          "Auf die 2-Sterne-Bewertung antworten",
+          "Bewertungen mit Dentalzentrum Kassel-West vergleichen",
+          "Bewertungsanfragen an Prophylaxe-Patienten senden"
+        ]
+      },
+      "agentSpaceId": 7,
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

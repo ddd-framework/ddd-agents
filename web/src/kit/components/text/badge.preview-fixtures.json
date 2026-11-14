@@ -1,0 +1,44 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-badge-tones",
+      "description": "One Badge per tone, the status chips of screenshot 52 (Live) and the majority verdicts of 04.",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "direction": "row",
+          "gap": "small",
+          "children": [
+            {
+              "type": "Badge",
+              "text": "Mehrheit",
+              "tone": "success"
+            },
+            {
+              "type": "Badge",
+              "text": "Knapp",
+              "tone": "warning"
+            },
+            {
+              "type": "Badge",
+              "text": "Keine Mehrheit",
+              "tone": "danger"
+            },
+            {
+              "type": "Badge",
+              "text": "Live",
+              "tone": "info"
+            },
+            {
+              "type": "Badge",
+              "text": "Modelliert"
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

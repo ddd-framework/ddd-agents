@@ -1,0 +1,32 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The two surface levels of the modern widgets: an elevated card on the
+// chat (`--agents-bg-surface` + THE card shadow, no border) and a flat tile inside it or inside a canvas pane
+// (`--agents-bg-var`, no shadow). Never a third level.
+.surface {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.elevated {
+  background: var(--agents-bg-surface);
+  box-shadow: $card-shadow;
+  border-radius: $card-radius;
+  padding: $card-padding;
+}
+
+.flat {
+  background: var(--agents-bg-var);
+  border-radius: $card-radius;
+  padding: $card-padding;
+}
+
+.compact {
+  border-radius: $card-radius-compact;
+  padding: $card-padding-compact;
+  gap: $x1;
+}

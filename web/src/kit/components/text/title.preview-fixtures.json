@@ -1,0 +1,172 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "text-coalition-table",
+      "description": "Screenshot 04 rebuilt: Title, intro Text, a Table with check/cross icons in the majority column (L1 Stack, L3 Table/Icon) and a SourceRef line.",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "small",
+          "children": [
+            {
+              "type": "Title",
+              "text": "Rechnerische Koalitionsmöglichkeiten"
+            },
+            {
+              "type": "Text",
+              "text": "Auf Grundlage der GMS-Umfrage vom 19. Oktober 2026 ergibt sich bei modellierten 180 Sitzen folgende Verteilung:"
+            },
+            {
+              "type": "Table",
+              "children": [
+                {
+                  "type": "TableRow",
+                  "header": true,
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "Koalition",
+                      "format": "text"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Sitze",
+                      "format": "text",
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": "Mehrheit (91)",
+                      "format": "text"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "CSU + Freie Wähler",
+                      "format": "text"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 94,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "children": [
+                        {
+                          "type": "Icon",
+                          "name": "check",
+                          "tone": "success",
+                          "label": "Mehrheit"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "CSU + Grüne",
+                      "format": "text"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 104,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "children": [
+                        {
+                          "type": "Icon",
+                          "name": "check",
+                          "tone": "success",
+                          "label": "Mehrheit"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TableRow",
+                  "children": [
+                    {
+                      "type": "TableCell",
+                      "value": "CSU + SPD",
+                      "format": "text"
+                    },
+                    {
+                      "type": "TableCell",
+                      "value": 86,
+                      "align": "end"
+                    },
+                    {
+                      "type": "TableCell",
+                      "children": [
+                        {
+                          "type": "Icon",
+                          "name": "close",
+                          "tone": "danger",
+                          "label": "Keine Mehrheit"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "SourceRef",
+              "sources": [
+                {
+                  "name": "GMS-Umfrage, 19. Oktober 2026",
+                  "url": "https://www.wahlrecht.de/umfragen/landtage/bayern.htm"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 720
+    },
+    {
+      "name": "text-title-levels",
+      "description": "A widget title over a section title with its Caption sub-line.",
+      "payload": {
+        "view": {
+          "type": "Stack",
+          "gap": "xsmall",
+          "children": [
+            {
+              "type": "Title",
+              "text": "Rechnerische Koalitionsmöglichkeiten"
+            },
+            {
+              "type": "Caption",
+              "text": "Modelliert: 180 Sitze, Mehrheit ab 91"
+            },
+            {
+              "type": "Title",
+              "text": "CSU + Grüne",
+              "level": "section"
+            },
+            {
+              "type": "Text",
+              "text": "104 Sitze – die größte rechnerische Mehrheit."
+            }
+          ]
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

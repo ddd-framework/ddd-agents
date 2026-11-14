@@ -1,0 +1,747 @@
+{
+  "description": "Widget-block parity between the backend parser (App\\Domain\\AI\\Entities\\Conversations\\Widgets\\WidgetBlocks) and the frontend rendering pipeline (normalizeServerMessageToMarkdown -> remark + remarkGfm + remark-directive + remarkWidgetFencePlugin + conversationWidgetAstPlugin). Each case: the markdown, the blocks the backend reads (syntax, outcome, isClosed, the type as written, the origin the block's emittedBy names -- null for a block without the field, i.e. the model) and frontendRenderedWidgetNames. frontendRenderedWidgetNames means ONLY 'widget nodes mounted by registry name' (the canonical hName conversationWidgetAstPlugin resolves) -- it is NOT a claim about what the customer visibly sees: ConversationWidgetHost's feature gate can swap in an upsell, its error boundary can swallow a throwing widget, and WindowedWidget can replace an off-screen widget with a placeholder. Two paths are deliberately not represented by this column: the STREAMING bubble (ConversationMessageWidgets.tsx only strips the {preCallMessage} sentinel while a message is still arriving, with no repair and no naked-JSON referencing) and widgetNamesInMarkdown (markdown-contains-widget.ts, a separate regex-based scan the message list uses to detect a superseded widget, which never runs this remark pipeline). A case where the two legitimately disagree carries a 'divergence' text: it is LISTED, never claimed to agree. The cases name the package's own widgets (QuickReplies, MultiChoice, ToolTrace), so they render under the package's registry alone; an application keeps its own cases with its own widgets in a fixture of its own. The backend side is asserted by WidgetBlocksParityTest (PHPUnit), the frontend side by _widget-block-parity.spec.ts (vitest).",
+  "cases": [
+    {
+      "name": "standard",
+      "markdown": "Text\n```widget\n{\"type\":\"QuickReplies\",\"title\":\"a\"}\n```\nAfter",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "crlf",
+      "markdown": "Text\r\n```widget\r\n{\"type\":\"QuickReplies\"}\r\n```\r\nAfter",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "cr_only",
+      "markdown": "Text\r```widget\r{\"type\":\"QuickReplies\"}\r```\rAfter",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "space_before_widget",
+      "markdown": "```  widget\n{\"type\":\"QuickReplies\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "uppercase",
+      "markdown": "```Widget\n{\"type\":\"QuickReplies\"}\n```",
+      "backend": [],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "one_line",
+      "markdown": "```widget {\"type\":\"QuickReplies\"}```",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "info_string",
+      "markdown": "```widget title=report\n{\"type\":\"QuickReplies\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "tilde",
+      "markdown": "~~~widget\n{\"type\":\"QuickReplies\"}\n~~~",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "four_backticks",
+      "markdown": "````widget\n{\"type\":\"QuickReplies\"}\n````",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "four_closes_with_three",
+      "markdown": "````widget\n{\"type\":\"QuickReplies\"}\n```\nstill inside\n````",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "MALFORMED",
+          "isClosed": true,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "indented_3",
+      "markdown": "   ```widget\n{\"type\":\"QuickReplies\"}\n   ```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "indented_4",
+      "markdown": "    ```widget\n{\"type\":\"QuickReplies\"}\n    ```",
+      "backend": [],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": "FRONTEND DIVERGENCE (D2 fixed 2026-10-19, residual): stripPreCallMessageMarker no longer trims the message's own leading indentation, and repairMalformedWidgetFences correctly leaves the 4-space-indented pseudo-fence untouched (same guard as an indented list-item fence) — the markdown reaching remark is now byte-identical to the input. The widget still renders, through a SEPARATE, intentional mechanism: the embedded JSON line itself has no indentation, so referenceNakedWidgetJson's naked-JSON rescue (by design, for a model that drops the fence entirely) wraps it as if it were naked. The backend follows CommonMark (indented code, no block; the embedded JSON is never read as a fence). Stored rows not counted for this form."
+    },
+    {
+      "name": "widget_dash",
+      "markdown": "```widget-x\n{\"type\":\"QuickReplies\"}\n```",
+      "backend": [],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "backticks_in_json",
+      "markdown": "```widget\n{\"type\":\"QuickReplies\",\"t\":\"a ``` b\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "unclosed",
+      "markdown": "```widget\n{\"type\":\"QuickReplies\"}",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "directive_known",
+      "markdown": "```widget\n{\"type\":\"QuickRepliesDirective\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickRepliesDirective",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "directive_unknown",
+      "markdown": "```widget\n{\"type\":\"OtherDirective\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "OtherDirective",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": "Different questions: the backend reports syntax (a VALID block of the written type); the frontend lists names the registry resolves. The backend resolves the canonical name in ConversationWidgetClasses::getWidgetClassForWidgetType() (null for an unregistered type)."
+    },
+    {
+      "name": "nested_type",
+      "markdown": "```widget\n{\"data\":{\"type\":\"Z\"},\"type\":\"QuickReplies\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "bare_multiline",
+      "markdown": "widget {\"type\":\"QuickReplies\",\n\"title\":\"b\"}\nnext",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": "Structural: the frontend reads a bare widget only as a whole paragraph; the backend reads the bare form line-based (continuing over non-blank lines) — here the paragraph also holds the next line."
+    },
+    {
+      "name": "bare_single",
+      "markdown": "  widget {\"type\":\"QuickReplies\"}",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "leaf_payload",
+      "markdown": "::QuickRepliesDirective{payload='{\"title\":\"x\"}' agentSpaceId=42}",
+      "backend": [
+        {
+          "syntax": "LEAF",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickRepliesDirective",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "leaf_bare",
+      "markdown": "::QuickReplies",
+      "backend": [
+        {
+          "syntax": "LEAF",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "leaf_bad",
+      "markdown": "::QuickReplies{other=1}",
+      "backend": [
+        {
+          "syntax": "LEAF",
+          "outcome": "MALFORMED",
+          "isClosed": true,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": "Validation: the backend refuses a leaf carrying an attribute other than payload / agentSpaceId (or one twice) — MALFORMED; the frontend mounts the widget by name and passes the unknown attribute as a prop."
+    },
+    {
+      "name": "container",
+      "markdown": ":::Container\nbody\n:::\nafter",
+      "backend": [
+        {
+          "syntax": "CONTAINER",
+          "outcome": "UNSUPPORTED_SYNTAX",
+          "isClosed": true,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "invalid_json",
+      "markdown": "```widget\n{type:\"QuickReplies\",}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "MALFORMED",
+          "isClosed": true,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "two_blocks_and_code",
+      "markdown": "```json\n{\"type\":\"QuickReplies\"}\n```\n```widget\n{\"type\":\"MultiChoice\"}\n```\n```widget\n{\"type\":\"QuickReplies\",\"agentSpaceId\":\"42\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "MultiChoice",
+          "emittedBy": null
+        },
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "MultiChoice",
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "empty",
+      "markdown": "",
+      "backend": [],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "one_line_spaces",
+      "markdown": "``` widget {\"type\":\"QuickReplies\"} ```",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "one_line_four_runs",
+      "markdown": "````widget {\"type\":\"QuickReplies\"}````",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "one_line_unequal_runs",
+      "markdown": "```widget {\"type\":\"QuickReplies\"}````",
+      "backend": [],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "one_line_then_prose",
+      "markdown": "```widget {\"type\":\"QuickReplies\"}```\nmore text",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": "Structural: one-line form in a paragraph shared with prose — backend line-based reads it, the frontend renders code."
+    },
+    {
+      "name": "prose_then_one_line",
+      "markdown": "Here:\n```widget {\"type\":\"QuickReplies\"}```",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": "Structural: one-line form in a paragraph shared with prose — backend line-based reads it, the frontend renders code."
+    },
+    {
+      "name": "one_line_blank_then_prose",
+      "markdown": "```widget {\"type\":\"QuickReplies\"}```\n\nmore text",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "tilde_one_line",
+      "markdown": "~~~widget {\"type\":\"QuickReplies\"}~~~",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "MALFORMED",
+          "isClosed": false,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "brace_on_opener_closed",
+      "markdown": "```widget {\"type\":\"QuickReplies\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "MALFORMED",
+          "isClosed": true,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "glued_opener",
+      "markdown": "Pick one```widget\n{\"type\":\"QuickReplies\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "bare_mid_paragraph",
+      "markdown": "Pick one\nwidget {\"type\":\"QuickReplies\"}\nthanks",
+      "backend": [
+        {
+          "syntax": "BARE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": "Structural: bare widget inside a prose paragraph — backend line-based reads it, the frontend renders the paragraph as text."
+    },
+    {
+      "name": "list_item_fence",
+      "markdown": "- ```widget\n  {\"type\":\"QuickReplies\"}\n  ```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "backtick_info_then_widget",
+      "markdown": "```js `x`\n```widget\n{\"type\":\"QuickReplies\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "backtick_info_then_unclosed_widget",
+      "markdown": "```js `x`\n```widget\n{\"type\":\"QuickReplies\"}\n\nMore prose that should remain separate.",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "single_backtick_span",
+      "markdown": "`widget {\"type\":\"QuickReplies\"}`",
+      "backend": [],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": "Frontend leniency: the plugin reads an inline code span of one backtick as the bare form; the backend reads only an equal run of three or more."
+    },
+    {
+      "name": "unknown_type",
+      "markdown": "```widget\n{\"type\":\"NoSuchWidget\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "NoSuchWidget",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": "Different questions: the backend reports syntax (a VALID block of the written type); the frontend lists names the registry resolves. The backend resolves the canonical name in ConversationWidgetClasses::getWidgetClassForWidgetType() (null for an unregistered type)."
+    },
+    {
+      "name": "second_opener_before_closer",
+      "markdown": "```widget\n{\"type\":\"QuickReplies\"}\n```widget\n{\"type\":\"MultiChoice\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        },
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "MultiChoice",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies",
+        "MultiChoice"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "unclosed_then_prose",
+      "markdown": "```widget\n{\"type\":\"QuickReplies\"}\nThanks!",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "closer_line_with_prose",
+      "markdown": "```widget\n{\"type\":\"QuickReplies\"}\n``` Let me know.",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "QuickReplies",
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "QuickReplies"
+      ],
+      "divergence": null
+    },
+    {
+      "name": "glued_opener_without_json",
+      "markdown": "Use a ```widget fence.\nnext",
+      "backend": [],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "four_backtick_second_opener",
+      "markdown": "````widget\n{\"type\":\"QuickReplies\"}\n```widget\n{\"type\":\"MultiChoice\"}\n````",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "MALFORMED",
+          "isClosed": true,
+          "writtenWidgetType": null,
+          "emittedBy": null
+        }
+      ],
+      "frontendRenderedWidgetNames": [],
+      "divergence": null
+    },
+    {
+      "name": "emitted_by_tool",
+      "markdown": "```widget\n{\"type\":\"ToolTrace\",\"calls\":[{\"name\":\"exampleTool\"}],\"emittedBy\":\"tool:exampleTool\"}\n```",
+      "backend": [
+        {
+          "syntax": "FENCE",
+          "outcome": "VALID",
+          "isClosed": true,
+          "writtenWidgetType": "ToolTrace",
+          "emittedBy": "tool:exampleTool"
+        }
+      ],
+      "frontendRenderedWidgetNames": [
+        "ToolTrace"
+      ],
+      "divergence": null
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "code-php",
+      "description": "ChatGPT reference 49, the code block: language header, copy and wrap controls, highlighted PHP. The copy button is driven by the spec (_Code.spec.tsx): a headless browser grants no clipboard, so the click changes nothing the preview can wait for.",
+      "payload": {
+        "view": {
+          "type": "Code",
+          "code": "<?php\n\ndeclare(strict_types=1);\n\nfunction conversionRate(\n    int $conversions,\n    int $visitors\n): float {\n    return $visitors > 0\n        ? ($conversions / $visitors) * 100.0\n        : 0.0;\n}\n\necho conversionRate(750, 25000); // 3",
+          "language": "php"
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "wrap lines",
+          "click": {
+            "text": "Wrap lines"
+          }
+        }
+      ]
+    },
+    {
+      "name": "code-long",
+      "description": "Long code (40 lines) collapses to 24 lines behind 'Show all 40 lines'.",
+      "payload": {
+        "view": {
+          "type": "Code",
+          "code": "echo 'line 1';\necho 'line 2';\necho 'line 3';\necho 'line 4';\necho 'line 5';\necho 'line 6';\necho 'line 7';\necho 'line 8';\necho 'line 9';\necho 'line 10';\necho 'line 11';\necho 'line 12';\necho 'line 13';\necho 'line 14';\necho 'line 15';\necho 'line 16';\necho 'line 17';\necho 'line 18';\necho 'line 19';\necho 'line 20';\necho 'line 21';\necho 'line 22';\necho 'line 23';\necho 'line 24';\necho 'line 25';\necho 'line 26';\necho 'line 27';\necho 'line 28';\necho 'line 29';\necho 'line 30';\necho 'line 31';\necho 'line 32';\necho 'line 33';\necho 'line 34';\necho 'line 35';\necho 'line 36';\necho 'line 37';\necho 'line 38';\necho 'line 39';\necho 'line 40';",
+          "language": "php",
+          "title": "loop.php"
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "show all lines",
+          "click": {
+            "text": "Show all 40 lines"
+          }
+        }
+      ]
+    },
+    {
+      "name": "code-unknown-language",
+      "description": "A language without a grammar stays plain text under its written name.",
+      "payload": {
+        "view": {
+          "type": "Code",
+          "code": "IDENTIFICATION DIVISION.\nPROGRAM-ID. HELLO.",
+          "language": "COBOL"
+        }
+      },
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "code-empty",
+      "description": "Empty state: empty code renders nothing and reports empty.",
+      "payload": {
+        "view": {
+          "type": "Code",
+          "code": ""
+        }
+      },
+      "expectedState": "empty",
+      "width": 528
+    },
+    {
+      "name": "code-loading",
+      "description": "Loading state: the code is bound to a pending tool result — the skeleton shows.",
+      "payload": {
+        "view": {
+          "type": "Code",
+          "language": "php",
+          "code": {
+            "$from": {
+              "toolCall": "call_code_1",
+              "path": "$.code",
+              "state": "pending"
+            }
+          }
+        }
+      },
+      "expectedState": "loading",
+      "width": 528
+    },
+    {
+      "name": "code-narrow",
+      "description": "The PHP block at the narrow width: the header controls wrap, long lines scroll.",
+      "payload": {
+        "view": {
+          "type": "Code",
+          "code": "<?php\n\ndeclare(strict_types=1);\n\nfunction conversionRate(\n    int $conversions,\n    int $visitors\n): float {\n    return $visitors > 0\n        ? ($conversions / $visitors) * 100.0\n        : 0.0;\n}\n\necho conversionRate(750, 25000); // 3",
+          "language": "php"
+        }
+      },
+      "expectedState": "data",
+      "width": 360
+    }
+  ]
+}

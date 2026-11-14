@@ -1,0 +1,32 @@
+@import "../../../styles/spacings";
+
+// Same grid-rows 0fr→1fr reveal as the selection chip in ConversationMessageInput.module.scss: animates the
+// unknown content height smoothly; the inner wrapper clips while collapsing.
+.stripReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition:
+    grid-template-rows 250ms ease,
+    opacity 200ms ease;
+  opacity: 0;
+}
+
+.stripRevealOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.stripRevealInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.strip {
+  display: flex;
+  // Wide enough that a card's ✕ (sticking ~13px past its right edge) clears the next card.
+  gap: $x2_5;
+  // Top/right room for the cards' ✕ buttons, whose centers sit ON the card corners (half the
+  // button sticks out) — the scroll container would clip them otherwise.
+  padding: $x2 $x2 $x1 0;
+  overflow-x: auto;
+}

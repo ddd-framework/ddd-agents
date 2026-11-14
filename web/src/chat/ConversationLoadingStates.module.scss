@@ -1,0 +1,79 @@
+@import "../styles/spacings";
+
+$avatar-size: $x5;
+$title-width: 25 * $x1;
+$title-height: $x4;
+$subtitle-width: 37.5 * $x1;
+$subtitle-height: $x2_5;
+$suggestion-card-width: 40 * $x1;
+$suggestion-card-height: 19 * $x1;
+
+$user-bubble-width: 60%;
+$user-bubble-height: $x5;
+
+$message-author-width: 15 * $x1;
+$message-author-height: $x2;
+
+$message-body-width: 90%;
+$message-body-height: 31 * $x1;
+
+$radius-sm: $x0_5;
+$radius-md: $x1;
+$radius-lg: $x1_5;
+$radius-xl: $x2;
+
+.avatar {
+  --agents-skeleton-radius: #{$radius-sm};
+  width: $avatar-size;
+  height: $avatar-size;
+  margin-bottom: $x2;
+}
+
+.title {
+  width: $title-width;
+  height: $title-height;
+  margin-bottom: $x1;
+}
+
+.subtitle {
+  width: $subtitle-width;
+  height: $subtitle-height;
+}
+
+.suggestionCard {
+  --agents-skeleton-radius: #{$radius-xl};
+  width: $suggestion-card-width;
+  height: $suggestion-card-height;
+}
+
+.userBubble {
+  --agents-skeleton-radius: #{$radius-sm};
+  width: $user-bubble-width;
+  height: $user-bubble-height;
+  align-self: flex-end;
+}
+
+.messageHeader {
+  display: flex;
+  flex-direction: row;
+  gap: $x1;
+  align-items: center;
+  margin-bottom: $x2;
+}
+
+.messageAvatar {
+  --agents-skeleton-radius: #{$radius-lg};
+  width: $avatar-size;
+  height: $avatar-size;
+}
+
+.messageAuthor {
+  width: $message-author-width;
+  height: $message-author-height;
+}
+
+.messageBody {
+  --agents-skeleton-radius: #{$radius-md};
+  width: $message-body-width;
+  height: $message-body-height;
+}

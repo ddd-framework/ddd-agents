@@ -1,0 +1,156 @@
+@import "../../../styles/spacings";
+@import "../../../styles/surfaces";
+
+// The clock widget: one elevated surface on the chat (the
+// WidgetSurface primitive), one row per place divided by hairlines — the readout on the left, the analog dial on the
+// right. Sized against its OWN width (container query), so the chat, a canvas pane, the preview and the e-mail capture
+// all get the narrow layout below the same width; no fixed pixel sizes for the text, the dial scales with the row.
+
+.root {
+  container-type: inline-size;
+  container-name: clockWidget;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $x2;
+  padding: $x1_5 0;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  & + & {
+    border-top: $x0_125 solid var(--agents-divider-gl);
+  }
+}
+
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  min-width: 0;
+}
+
+.digitalTime {
+  display: flex;
+  align-items: baseline;
+  gap: $x0_5;
+  margin-bottom: $x0_25;
+}
+
+.wrappingText {
+  overflow-wrap: anywhere;
+}
+
+.metaLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $x0_25 $x1;
+}
+
+.dayNight {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+}
+
+.dayNightGlyph {
+  width: $x2;
+  height: $x2;
+  flex-shrink: 0;
+}
+
+.sunDisc {
+  fill: var(--agents-warning-500);
+}
+
+.sunRay {
+  stroke: var(--agents-warning-500);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.moon {
+  fill: var(--agents-fg-light);
+}
+
+// The dial: 112px beside a wide readout, 80px in a narrow widget — the hands and ticks are drawn in its viewBox.
+.dial {
+  width: $x9 + $x5;
+  height: $x9 + $x5;
+  flex-shrink: 0;
+}
+
+.dialFace {
+  fill: var(--agents-bg-var);
+}
+
+.dialTick,
+.dialQuarterTick {
+  stroke: var(--agents-fg-lightest);
+  stroke-linecap: round;
+}
+
+.dialTick {
+  stroke-width: 1.5;
+}
+
+.dialQuarterTick {
+  stroke: var(--agents-fg-light);
+  stroke-width: 2.5;
+}
+
+.hourHand,
+.minuteHand {
+  stroke: var(--agents-fg);
+  stroke-linecap: round;
+}
+
+.hourHand {
+  stroke-width: 5;
+}
+
+.minuteHand {
+  stroke-width: 3.5;
+}
+
+.secondHand {
+  stroke: var(--agents-fg-cta);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.dialHub {
+  fill: var(--agents-fg-cta);
+}
+
+@container clockWidget (max-width: 400px) {
+  .row {
+    gap: $x1_5;
+  }
+
+  .dial {
+    width: $x9 + $x1;
+    height: $x9 + $x1;
+  }
+}
+
+// A small tile (a three-column Grid cell): the dial goes under the readout, so the place name keeps its words whole.
+@container clockWidget (max-width: #{$x1 * 25}) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

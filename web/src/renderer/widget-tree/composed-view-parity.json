@@ -1,0 +1,3271 @@
+{
+    "description": "Parity of the ComposedView tree readers: the backend ComposedViewTreeReading.php and the frontend composed-view-tree.ts read every payload into the same kept tree and the same finding codes. `stubSchema` is the schema of the backend's test-only stub node types plus the core Widget node, with the package's widgets and three test-only stub widgets (StubCompact, StubRegular, StubStandalone); the expected parts are written by the backend parity test ComposedViewTreeParityTest (run with COMPOSED_VIEW_PARITY_REGENERATE=1).",
+    "stubSchema": {
+        "version": 1,
+        "generatedBy": "ComposedViewNodeSchema::buildJson() — never edit by hand",
+        "budgets": {
+            "maxSourceBytes": 65536,
+            "maxNodes": 400,
+            "maxDepth": 12,
+            "maxStateKeys": 40,
+            "maxStateStringLength": 500,
+            "maxComputedExpressions": 40,
+            "maxExpressionSourceLength": 600,
+            "maxExpressionAstNodes": 200,
+            "maxComputedDependencyDepth": 8,
+            "maxOperationsPerUpdate": 50000,
+            "maxCollectionItems": 1000,
+            "maxAllocatedItemsPerEvaluation": 5000,
+            "maxRepeatRows": 200,
+            "maxRenderedNodes": 2000,
+            "maxInlineArrayItems": 500,
+            "maxInlineCells": 3000,
+            "maxTextLength": 4000,
+            "maxActions": 20,
+            "maxInputUpdatesPerSecond": 30,
+            "maxSourceRequestsPerTreePerMinute": 20
+        },
+        "categories": [
+            "inline",
+            "block",
+            "data",
+            "media",
+            "input",
+            "layout",
+            "heavy"
+        ],
+        "sizeClasses": [
+            "compact",
+            "regular",
+            "full"
+        ],
+        "actionTypes": [
+            "copy",
+            "resetState",
+            "openEntity",
+            "openUrl"
+        ],
+        "bindingKinds": [
+            "state",
+            "computed",
+            "data",
+            "item",
+            "from",
+            "source"
+        ],
+        "findingCodes": [
+            "INVALID_NODE",
+            "INVALID_PROP",
+            "UNKNOWN_BINDING",
+            "INVALID_EXPRESSION",
+            "INVALID_STATE",
+            "INVALID_ACTION",
+            "BUDGET_EXCEEDED",
+            "INLINE_VALUE_WITHOUT_SOURCE",
+            "INVALID_INITIAL_CHOICE",
+            "UNREAD_STATE",
+            "UNKNOWN_ITEM_KEY",
+            "INVALID_SLOT_NODE_COUNT",
+            "WIDGET_LIFTED"
+        ],
+        "noteFindingCodes": [
+            "INLINE_VALUE_WITHOUT_SOURCE",
+            "INVALID_INITIAL_CHOICE",
+            "UNREAD_STATE",
+            "UNKNOWN_ITEM_KEY",
+            "INVALID_SLOT_NODE_COUNT",
+            "WIDGET_LIFTED"
+        ],
+        "nodeTypes": {
+            "StubChart": {
+                "categories": [
+                    "data"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "kind",
+                        "types": [
+                            "string"
+                        ],
+                        "isRequired": true,
+                        "isBindable": false,
+                        "allowedValues": [
+                            "line",
+                            "area",
+                            "bar",
+                            "pie",
+                            "donut",
+                            "scatter",
+                            "heatmap",
+                            "funnel",
+                            "radar"
+                        ],
+                        "description": ""
+                    }
+                ],
+                "slots": []
+            },
+            "StubChoice": {
+                "categories": [
+                    "input"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "options",
+                        "types": [
+                            "array"
+                        ],
+                        "isRequired": true,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "value",
+                        "types": [
+                            "string",
+                            "number"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "onChange",
+                        "types": [
+                            "event"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    }
+                ],
+                "slots": [],
+                "optionsProp": "options"
+            },
+            "StubFigure": {
+                "categories": [
+                    "data"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "value",
+                        "types": [
+                            "number",
+                            "string"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "rows",
+                        "types": [
+                            "array"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "source",
+                        "types": [
+                            "object",
+                            "array"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    }
+                ],
+                "slots": [],
+                "sourcing": {
+                    "needsSource": true,
+                    "namesSources": false,
+                    "rowsProps": [
+                        "rows"
+                    ],
+                    "figureProps": [
+                        "value"
+                    ]
+                }
+            },
+            "StubForm": {
+                "categories": [
+                    "layout"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [],
+                "slots": [
+                    {
+                        "name": "children",
+                        "acceptsCategories": [
+                            "inline",
+                            "block",
+                            "data",
+                            "media",
+                            "input",
+                            "layout"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 0,
+                        "maxChildren": null,
+                        "sizeClass": "regular",
+                        "description": ""
+                    }
+                ],
+                "submitsInputs": true
+            },
+            "StubGrid": {
+                "categories": [
+                    "layout"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "columns",
+                        "types": [
+                            "number"
+                        ],
+                        "isRequired": false,
+                        "isBindable": false,
+                        "allowedValues": [
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "description": ""
+                    }
+                ],
+                "slots": [
+                    {
+                        "name": "children",
+                        "acceptsCategories": [
+                            "inline",
+                            "block",
+                            "data",
+                            "media",
+                            "input",
+                            "layout",
+                            "heavy"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 0,
+                        "maxChildren": null,
+                        "sizeClass": "regular",
+                        "description": "",
+                        "sizeClassFromProp": "columns",
+                        "sizeClassesByPropValue": {
+                            "1": "full",
+                            "2": "regular",
+                            "3": "compact",
+                            "4": "compact"
+                        },
+                        "acceptsHeavyWhenCompact": true
+                    }
+                ]
+            },
+            "StubMap": {
+                "categories": [
+                    "heavy"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "points",
+                        "types": [
+                            "array"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    }
+                ],
+                "slots": []
+            },
+            "StubPressable": {
+                "categories": [
+                    "layout"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [],
+                "slots": [
+                    {
+                        "name": "children",
+                        "acceptsCategories": [
+                            "inline",
+                            "block",
+                            "data",
+                            "media",
+                            "input",
+                            "layout"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 1,
+                        "maxChildren": null,
+                        "sizeClass": "regular",
+                        "description": ""
+                    }
+                ]
+            },
+            "StubRepeat": {
+                "categories": [
+                    "data"
+                ],
+                "providesItemScope": true,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "source",
+                        "types": [
+                            "array"
+                        ],
+                        "isRequired": true,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "limit",
+                        "types": [
+                            "number"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    }
+                ],
+                "slots": [
+                    {
+                        "name": "children",
+                        "acceptsCategories": [
+                            "inline",
+                            "block",
+                            "data",
+                            "media",
+                            "input",
+                            "layout"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 0,
+                        "maxChildren": null,
+                        "sizeClass": "regular",
+                        "description": ""
+                    },
+                    {
+                        "name": "cell",
+                        "acceptsCategories": [
+                            "inline",
+                            "block",
+                            "data",
+                            "media",
+                            "input",
+                            "layout"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 0,
+                        "maxChildren": null,
+                        "sizeClass": "compact",
+                        "description": ""
+                    }
+                ],
+                "sourcing": {
+                    "needsSource": false,
+                    "namesSources": false,
+                    "rowsProps": [
+                        "source"
+                    ],
+                    "figureProps": []
+                },
+                "itemsProp": "source"
+            },
+            "StubSources": {
+                "categories": [
+                    "inline"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "sources",
+                        "types": [
+                            "array"
+                        ],
+                        "isRequired": true,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    }
+                ],
+                "slots": [],
+                "sourcing": {
+                    "needsSource": false,
+                    "namesSources": true,
+                    "rowsProps": [],
+                    "figureProps": []
+                }
+            },
+            "StubStack": {
+                "categories": [
+                    "layout"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "",
+                "props": [
+                    {
+                        "name": "direction",
+                        "types": [
+                            "string"
+                        ],
+                        "isRequired": false,
+                        "isBindable": false,
+                        "allowedValues": [
+                            "row",
+                            "column"
+                        ],
+                        "description": ""
+                    },
+                    {
+                        "name": "wrap",
+                        "types": [
+                            "boolean"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    }
+                ],
+                "slots": [
+                    {
+                        "name": "children",
+                        "acceptsCategories": [
+                            "inline",
+                            "block",
+                            "data",
+                            "media",
+                            "input",
+                            "layout",
+                            "heavy"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 0,
+                        "maxChildren": null,
+                        "sizeClass": "regular",
+                        "description": ""
+                    },
+                    {
+                        "name": "header",
+                        "acceptsCategories": [
+                            "inline"
+                        ],
+                        "acceptsNodeTypes": [],
+                        "minChildren": 0,
+                        "maxChildren": 1,
+                        "sizeClass": "regular",
+                        "description": ""
+                    }
+                ]
+            },
+            "StubText": {
+                "categories": [
+                    "inline"
+                ],
+                "providesItemScope": false,
+                "textContentProp": "text",
+                "summary": "",
+                "props": [
+                    {
+                        "name": "text",
+                        "types": [
+                            "string",
+                            "number"
+                        ],
+                        "isRequired": true,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "onClick",
+                        "types": [
+                            "event"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": null,
+                        "description": ""
+                    },
+                    {
+                        "name": "tone",
+                        "types": [
+                            "string"
+                        ],
+                        "isRequired": false,
+                        "isBindable": true,
+                        "allowedValues": [
+                            "neutral",
+                            "muted",
+                            "success",
+                            "warning",
+                            "danger",
+                            "info",
+                            "default",
+                            "positive",
+                            "negative"
+                        ],
+                        "description": ""
+                    }
+                ],
+                "slots": []
+            },
+            "Widget": {
+                "categories": [
+                    "heavy"
+                ],
+                "providesItemScope": false,
+                "textContentProp": null,
+                "summary": "an existing domain widget embedded in the tree (only widgets declared embeddable)",
+                "props": [
+                    {
+                        "name": "widget",
+                        "types": [
+                            "string"
+                        ],
+                        "isRequired": true,
+                        "isBindable": false,
+                        "allowedValues": null,
+                        "description": "the wire name of an embeddable domain widget"
+                    },
+                    {
+                        "name": "fields",
+                        "types": [
+                            "object"
+                        ],
+                        "isRequired": false,
+                        "isBindable": false,
+                        "allowedValues": null,
+                        "description": "the widget's own payload fields, as its fence would carry them next to `type`"
+                    }
+                ],
+                "slots": []
+            }
+        },
+        "embeddableWidgets": {
+            "CustomVisualization": {
+                "sizeClass": "full"
+            },
+            "StubCompact": {
+                "sizeClass": "compact"
+            },
+            "StubRegular": {
+                "sizeClass": "regular"
+            }
+        },
+        "widgetTypes": [
+            "ComposedView",
+            "ConversationSearchResults",
+            "CustomVisualization",
+            "EntityMention",
+            "MultiChoice",
+            "QuickReplies",
+            "StubCompact",
+            "StubRegular",
+            "StubStandalone",
+            "SuggestedActions",
+            "ToolTrace",
+            "WebSearchResults"
+        ],
+        "dataSources": {
+            "rankings": {
+                "summary": "stub rankings rows",
+                "clientEndpoint": "GET /api/example/agent-spaces/{agentSpaceId}/rankings",
+                "rowsPath": "$.rankings",
+                "freshnessSeconds": 300,
+                "params": [
+                    {
+                        "name": "days",
+                        "type": "number",
+                        "isRequired": false,
+                        "description": ""
+                    },
+                    {
+                        "name": "period",
+                        "type": "string",
+                        "isRequired": false,
+                        "description": ""
+                    }
+                ],
+                "columns": [
+                    {
+                        "name": "date",
+                        "type": "string",
+                        "description": ""
+                    },
+                    {
+                        "name": "position",
+                        "type": "number",
+                        "description": ""
+                    }
+                ]
+            }
+        },
+        "entityTypes": [
+            "stubEntity"
+        ]
+    },
+    "cases": [
+        {
+            "name": "valid tree with every binding kind",
+            "payload": {
+                "title": "Visits",
+                "state": {
+                    "period": "7d",
+                    "scale": 100
+                },
+                "data": {
+                    "rows": [
+                        {
+                            "x": "Mo",
+                            "v": 1
+                        }
+                    ],
+                    "live": {
+                        "$from": {
+                            "toolCall": "call_7",
+                            "path": "$.rows[*]"
+                        }
+                    }
+                },
+                "computed": {
+                    "total": "sum(rows, r => r.v) * scale"
+                },
+                "actions": {
+                    "reset": {
+                        "type": "resetState"
+                    },
+                    "site": {
+                        "type": "openUrl",
+                        "url": "https://example.org"
+                    }
+                },
+                "view": {
+                    "type": "StubStack",
+                    "id": "root",
+                    "direction": "column",
+                    "slots": {
+                        "header": [
+                            {
+                                "type": "StubText",
+                                "text": "Visits"
+                            }
+                        ]
+                    },
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$computed": "total"
+                            },
+                            "onClick": {
+                                "action": "reset"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$state": "period"
+                            },
+                            "onClick": {
+                                "set": "scale"
+                            }
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "rows"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "x"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$source": {
+                                    "name": "rankings",
+                                    "params": {
+                                        "days": 30
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "title": "Visits",
+                "state": {
+                    "period": "7d",
+                    "scale": 100
+                },
+                "data": {
+                    "rows": [
+                        {
+                            "x": "Mo",
+                            "v": 1
+                        }
+                    ],
+                    "live": {
+                        "$from": {
+                            "toolCall": "call_7",
+                            "path": "$.rows[*]"
+                        }
+                    }
+                },
+                "computed": {
+                    "total": "sum(rows, r => r.v) * scale"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "id": "root",
+                    "direction": "column",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$computed": "total"
+                            },
+                            "onClick": {
+                                "action": "reset"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$state": "period"
+                            },
+                            "onClick": {
+                                "set": "scale"
+                            }
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "rows"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "x"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$source": {
+                                    "name": "rankings",
+                                    "params": {
+                                        "days": 30
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "slots": {
+                        "header": [
+                            {
+                                "type": "StubText",
+                                "text": "Visits"
+                            }
+                        ]
+                    }
+                },
+                "actions": {
+                    "reset": {
+                        "type": "resetState"
+                    },
+                    "site": {
+                        "type": "openUrl",
+                        "url": "https://example.org"
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "unknown types, missing required props, undeclared props, backticks",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "NoSuchNode"
+                        },
+                        {
+                            "type": "StubText"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "ok",
+                            "colour": "red"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "has ``` inside"
+                        },
+                        "not an object",
+                        [
+                            "a list"
+                        ]
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_NODE",
+                "INVALID_NODE",
+                "INVALID_PROP",
+                "INVALID_NODE",
+                "INVALID_NODE",
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "ok"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "named slot limits and unknown slots",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "slots": {
+                        "header": [
+                            {
+                                "type": "StubText",
+                                "text": "a"
+                            },
+                            {
+                                "type": "StubText",
+                                "text": "b"
+                            }
+                        ],
+                        "footer": [
+                            {
+                                "type": "StubText",
+                                "text": "c"
+                            }
+                        ]
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_NODE",
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "slots": {
+                        "header": [
+                            {
+                                "type": "StubText",
+                                "text": "a"
+                            }
+                        ]
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "heavy node in a compact slot",
+            "payload": {
+                "view": {
+                    "type": "StubRepeat",
+                    "source": [
+                        1,
+                        2
+                    ],
+                    "slots": {
+                        "cell": [
+                            {
+                                "type": "StubMap"
+                            },
+                            {
+                                "type": "StubText",
+                                "text": "x"
+                            }
+                        ]
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubRepeat",
+                    "source": [
+                        1,
+                        2
+                    ],
+                    "slots": {
+                        "cell": [
+                            {
+                                "type": "StubText",
+                                "text": "x"
+                            }
+                        ]
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "bindings to undeclared names and item outside scope",
+            "payload": {
+                "state": {
+                    "period": "7d"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$state": "missing"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$computed": "nope"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$data": "nope"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$item": "x"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$from": {
+                                    "toolCall": "call_1"
+                                }
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$weird": "x"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "ok",
+                            "onClick": {
+                                "set": "no such name"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "ok",
+                            "onClick": {
+                                "action": "nope"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "UNKNOWN_BINDING",
+                "INVALID_NODE",
+                "UNKNOWN_BINDING",
+                "INVALID_NODE",
+                "UNKNOWN_BINDING",
+                "INVALID_NODE",
+                "UNKNOWN_BINDING",
+                "INVALID_NODE",
+                "UNKNOWN_BINDING",
+                "INVALID_NODE",
+                "UNKNOWN_BINDING",
+                "INVALID_NODE",
+                "UNKNOWN_BINDING",
+                "UNKNOWN_BINDING"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "period": "7d"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "ok"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "ok"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "prototype names are never state",
+            "payload": {
+                "state": {
+                    "toString": 1
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$state": "constructor"
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "UNKNOWN_BINDING",
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "toString": 1
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "state computed data and actions checks",
+            "payload": {
+                "state": {
+                    "ok": 1,
+                    "1bad": 2,
+                    "list": [
+                        1
+                    ],
+                    "long": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                "data": {
+                    "ok": [
+                        1
+                    ],
+                    "rows": {
+                        "not": "a list"
+                    },
+                    "bound": {
+                        "$state": "ok"
+                    }
+                },
+                "computed": {
+                    "doubled": "ok * 2",
+                    "ok": "1",
+                    "empty": " ",
+                    "num": 5
+                },
+                "actions": {
+                    "copyIt": {
+                        "type": "copy",
+                        "value": "x"
+                    },
+                    "turn": {
+                        "type": "issueNewTurn"
+                    },
+                    "url": {
+                        "type": "openUrl",
+                        "url": "javascript:x"
+                    },
+                    "entity": {
+                        "type": "openEntity"
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_STATE",
+                "INVALID_STATE",
+                "BUDGET_EXCEEDED",
+                "INVALID_PROP",
+                "INVALID_PROP",
+                "UNKNOWN_BINDING",
+                "INVALID_EXPRESSION",
+                "INVALID_EXPRESSION",
+                "INVALID_EXPRESSION",
+                "INVALID_ACTION",
+                "INVALID_ACTION",
+                "INVALID_ACTION"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "ok": 1
+                },
+                "computed": {
+                    "doubled": "ok * 2"
+                },
+                "actions": {
+                    "copyIt": {
+                        "type": "copy",
+                        "value": "x"
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "inline values without a source",
+            "payload": {
+                "view": {
+                    "type": "StubMap",
+                    "points": [
+                        {
+                            "value": 3.8,
+                            "source": {
+                                "cite": "call_2:webHit:0"
+                            }
+                        },
+                        {
+                            "value": 4.1,
+                            "derivedFrom": [
+                                "a",
+                                "b"
+                            ]
+                        },
+                        {
+                            "value": 9.9
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INLINE_VALUE_WITHOUT_SOURCE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubMap",
+                    "points": [
+                        {
+                            "value": 3.8,
+                            "source": {
+                                "cite": "call_2:webHit:0"
+                            }
+                        },
+                        {
+                            "value": 4.1,
+                            "derivedFrom": [
+                                "a",
+                                "b"
+                            ]
+                        },
+                        {
+                            "value": 9.9
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a widget that does not embed is lifted out of its slot, the emptied stack pruned (owner Q2)",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubStandalone",
+                            "fields": {
+                                "agentSpaceId": 1
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "WIDGET_LIFTED"
+            ],
+            "expectedKeptTree": [],
+            "expectedLiftedWidgets": [
+                {
+                    "path": "view.children[0]",
+                    "widget": "StubStandalone",
+                    "fields": {
+                        "agentSpaceId": 1
+                    }
+                }
+            ]
+        },
+        {
+            "name": "wrong top-level shapes",
+            "payload": {
+                "state": [
+                    1,
+                    2
+                ],
+                "computed": "x",
+                "actions": [
+                    {
+                        "type": "copy"
+                    }
+                ],
+                "view": "text"
+            },
+            "expectedFindingCodes": [
+                "INVALID_STATE",
+                "INVALID_EXPRESSION",
+                "INVALID_ACTION",
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": [],
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "enum and literal types",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "direction": "diagonal",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": true
+                        },
+                        {
+                            "type": "StubText",
+                            "text": 12.5
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_PROP",
+                "INVALID_PROP",
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": 12.5
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "data sources: registered, unknown, undeclared param, state-bound param",
+            "payload": {
+                "state": {
+                    "period": "30d"
+                },
+                "computed": {
+                    "x": "1"
+                },
+                "data": {
+                    "ok": {
+                        "$source": {
+                            "name": "rankings",
+                            "params": {
+                                "days": 30
+                            }
+                        }
+                    },
+                    "bound": {
+                        "$source": {
+                            "name": "rankings",
+                            "params": {
+                                "period": {
+                                    "$state": "period"
+                                }
+                            }
+                        }
+                    },
+                    "unknown": {
+                        "$source": {
+                            "name": "nope"
+                        }
+                    },
+                    "badParam": {
+                        "$source": {
+                            "name": "rankings",
+                            "params": {
+                                "limit": 5
+                            }
+                        }
+                    },
+                    "computedParam": {
+                        "$source": {
+                            "name": "rankings",
+                            "params": {
+                                "period": {
+                                    "$computed": "x"
+                                }
+                            }
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$source": {
+                            "name": "rankings"
+                        }
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "UNKNOWN_BINDING",
+                "UNKNOWN_BINDING",
+                "UNKNOWN_BINDING"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "period": "30d"
+                },
+                "data": {
+                    "ok": {
+                        "$source": {
+                            "name": "rankings",
+                            "params": {
+                                "days": 30
+                            }
+                        }
+                    },
+                    "bound": {
+                        "$source": {
+                            "name": "rankings",
+                            "params": {
+                                "period": {
+                                    "$state": "period"
+                                }
+                            }
+                        }
+                    }
+                },
+                "computed": {
+                    "x": "1"
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$source": {
+                            "name": "rankings"
+                        }
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "three backticks in the title, a state string and a $from binding",
+            "payload": {
+                "title": "a```b",
+                "state": {
+                    "ok": "fine",
+                    "bad": "x```y"
+                },
+                "data": {
+                    "rows": {
+                        "$from": {
+                            "toolCall": "call```1",
+                            "path": "$.rows"
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": "ok"
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_PROP",
+                "INVALID_STATE",
+                "INVALID_PROP"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "ok": "fine"
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": "ok"
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "the default slot written twice keeps children",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "from children"
+                        }
+                    ],
+                    "slots": {
+                        "children": [
+                            {
+                                "type": "StubText",
+                                "text": "from slots"
+                            }
+                        ]
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "from children"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a widget that does not embed at the root is lifted, the block has no view (owner Q2)",
+            "payload": {
+                "view": {
+                    "type": "Widget",
+                    "widget": "StubStandalone"
+                }
+            },
+            "expectedFindingCodes": [
+                "WIDGET_LIFTED"
+            ],
+            "expectedKeptTree": [],
+            "expectedLiftedWidgets": [
+                {
+                    "path": "view",
+                    "widget": "StubStandalone",
+                    "fields": []
+                }
+            ]
+        },
+        {
+            "name": "an empty dataset object is the empty list",
+            "payload": {
+                "data": {
+                    "rows": []
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$data": "rows"
+                    }
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "data": {
+                    "rows": []
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$data": "rows"
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "prototype names are refused for state, data, computed and actions",
+            "payload": {
+                "state": {
+                    "constructor": 1,
+                    "ok": 2
+                },
+                "data": {
+                    "prototype": [
+                        1
+                    ]
+                },
+                "computed": {
+                    "constructor": "1"
+                },
+                "actions": {
+                    "prototype": {
+                        "type": "resetState"
+                    }
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$state": "ok"
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_STATE",
+                "INVALID_PROP",
+                "INVALID_EXPRESSION",
+                "INVALID_ACTION"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "ok": 2
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$state": "ok"
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "objects keyed 0, 1, … are lists",
+            "payload": {
+                "state": [
+                    "a"
+                ],
+                "data": {
+                    "rows": [
+                        {
+                            "v": 1
+                        },
+                        {
+                            "v": 2
+                        }
+                    ]
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$data": "rows"
+                    }
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_STATE"
+            ],
+            "expectedKeptTree": {
+                "data": {
+                    "rows": [
+                        {
+                            "v": 1
+                        },
+                        {
+                            "v": 2
+                        }
+                    ]
+                },
+                "view": {
+                    "type": "StubText",
+                    "text": {
+                        "$data": "rows"
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "tones: the core words and the older aliases are kept, another word is dropped",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "a",
+                            "tone": "info"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "b",
+                            "tone": "muted"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "c",
+                            "tone": "default"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "d",
+                            "tone": "positive"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "e",
+                            "tone": "negative"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "f",
+                            "tone": "purple"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_PROP"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "a",
+                            "tone": "info"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "b",
+                            "tone": "muted"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "c",
+                            "tone": "default"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "d",
+                            "tone": "positive"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "e",
+                            "tone": "negative"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "f"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "openEntity refs: a platform-minted ref or a row-bound $item binding",
+            "payload": {
+                "data": {
+                    "places": {
+                        "$from": {
+                            "toolCall": "call_7",
+                            "path": "$.places[*]"
+                        }
+                    }
+                },
+                "actions": {
+                    "openOne": {
+                        "type": "openEntity",
+                        "ref": "call_7:stubEntity:0"
+                    },
+                    "openRow": {
+                        "type": "openEntity",
+                        "ref": {
+                            "$item": "entityRef"
+                        }
+                    },
+                    "emptyItem": {
+                        "type": "openEntity",
+                        "ref": {
+                            "$item": ""
+                        }
+                    },
+                    "stateRef": {
+                        "type": "openEntity",
+                        "ref": {
+                            "$state": "selected"
+                        }
+                    },
+                    "twoKeys": {
+                        "type": "openEntity",
+                        "ref": {
+                            "$item": "entityRef",
+                            "extra": 1
+                        }
+                    },
+                    "noRef": {
+                        "type": "openEntity"
+                    }
+                },
+                "view": {
+                    "type": "StubRepeat",
+                    "source": {
+                        "$data": "places"
+                    },
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$item": "name"
+                            },
+                            "onClick": {
+                                "action": "openRow"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_ACTION",
+                "INVALID_ACTION",
+                "INVALID_ACTION",
+                "INVALID_ACTION"
+            ],
+            "expectedKeptTree": {
+                "data": {
+                    "places": {
+                        "$from": {
+                            "toolCall": "call_7",
+                            "path": "$.places[*]"
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubRepeat",
+                    "source": {
+                        "$data": "places"
+                    },
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$item": "name"
+                            },
+                            "onClick": {
+                                "action": "openRow"
+                            }
+                        }
+                    ]
+                },
+                "actions": {
+                    "openOne": {
+                        "type": "openEntity",
+                        "ref": "call_7:stubEntity:0"
+                    },
+                    "openRow": {
+                        "type": "openEntity",
+                        "ref": {
+                            "$item": "entityRef"
+                        }
+                    }
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "inline figures need a source: on the node, on a data node around it, or a source line in the tree",
+            "payload": {
+                "data": {
+                    "written": [
+                        {
+                            "x": "A",
+                            "v": 1
+                        }
+                    ],
+                    "bound": {
+                        "$from": {
+                            "toolCall": "call_1",
+                            "path": "$.rows[*]"
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubFigure",
+                            "value": 36
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": "4,32 %"
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": "Yes"
+                        },
+                        {
+                            "type": "StubFigure",
+                            "rows": {
+                                "$data": "written"
+                            }
+                        },
+                        {
+                            "type": "StubFigure",
+                            "rows": {
+                                "$data": "bound"
+                            }
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": 12,
+                            "source": {
+                                "name": "Infratest dimap"
+                            }
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "written"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubFigure",
+                                    "value": {
+                                        "$item": "v"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "bound"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubFigure",
+                                    "value": {
+                                        "$item": "v"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INLINE_VALUE_WITHOUT_SOURCE",
+                "INLINE_VALUE_WITHOUT_SOURCE",
+                "INLINE_VALUE_WITHOUT_SOURCE",
+                "INLINE_VALUE_WITHOUT_SOURCE"
+            ],
+            "expectedKeptTree": {
+                "data": {
+                    "written": [
+                        {
+                            "x": "A",
+                            "v": 1
+                        }
+                    ],
+                    "bound": {
+                        "$from": {
+                            "toolCall": "call_1",
+                            "path": "$.rows[*]"
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubFigure",
+                            "value": 36
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": "4,32 %"
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": "Yes"
+                        },
+                        {
+                            "type": "StubFigure",
+                            "rows": {
+                                "$data": "written"
+                            }
+                        },
+                        {
+                            "type": "StubFigure",
+                            "rows": {
+                                "$data": "bound"
+                            }
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": 12,
+                            "source": {
+                                "name": "Infratest dimap"
+                            }
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "written"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubFigure",
+                                    "value": {
+                                        "$item": "v"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "bound"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubFigure",
+                                    "value": {
+                                        "$item": "v"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a source line anywhere in the tree sources every figure",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubFigure",
+                            "value": 36,
+                            "rows": [
+                                {
+                                    "x": "A",
+                                    "v": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubSources",
+                            "sources": [
+                                {
+                                    "name": "Infratest dimap"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubFigure",
+                            "value": 36,
+                            "rows": [
+                                {
+                                    "x": "A",
+                                    "v": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubSources",
+                            "sources": [
+                                {
+                                    "name": "Infratest dimap"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "chart kinds: every kind of the Chart node is kept, another word drops the chart",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChart",
+                            "kind": "donut"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "heatmap"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "funnel"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "radar"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "gauge"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_PROP",
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChart",
+                            "kind": "donut"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "heatmap"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "funnel"
+                        },
+                        {
+                            "type": "StubChart",
+                            "kind": "radar"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a source list on a data node sources its figures: one entry per page",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubFigure",
+                            "value": 36,
+                            "source": [
+                                {
+                                    "name": "Volkswagen",
+                                    "url": "https://www.volkswagen.de/id3"
+                                },
+                                {
+                                    "name": "Volkswagen",
+                                    "url": "https://www.volkswagen.de/id4"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubFigure",
+                            "rows": [
+                                {
+                                    "x": "A",
+                                    "v": 1
+                                }
+                            ],
+                            "source": [
+                                {
+                                    "name": "ADAC"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": 12,
+                            "source": "ADAC"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_PROP",
+                "INLINE_VALUE_WITHOUT_SOURCE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubFigure",
+                            "value": 36,
+                            "source": [
+                                {
+                                    "name": "Volkswagen",
+                                    "url": "https://www.volkswagen.de/id3"
+                                },
+                                {
+                                    "name": "Volkswagen",
+                                    "url": "https://www.volkswagen.de/id4"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubFigure",
+                            "rows": [
+                                {
+                                    "x": "A",
+                                    "v": 1
+                                }
+                            ],
+                            "source": [
+                                {
+                                    "name": "ADAC"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubFigure",
+                            "value": 12
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "lenient state: a set on an undeclared name declares it with null, a $state beside it reads it",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "a",
+                                "b"
+                            ],
+                            "onChange": {
+                                "set": "picked"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$state": "picked"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "state": {
+                    "picked": null
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "a",
+                                "b"
+                            ],
+                            "onChange": {
+                                "set": "picked"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$state": "picked"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a choice state that starts as none of its choices is kept with INVALID_INITIAL_CHOICE",
+            "payload": {
+                "state": {
+                    "period": "3 Monate"
+                },
+                "computed": {
+                    "shown": "period == '3m' ? 1 : 2"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                {
+                                    "id": "3m",
+                                    "label": "3 months"
+                                },
+                                {
+                                    "id": "12m",
+                                    "label": "12 months"
+                                }
+                            ],
+                            "value": {
+                                "$state": "period"
+                            },
+                            "onChange": {
+                                "set": "period"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$computed": "shown"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_INITIAL_CHOICE"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "period": "3 Monate"
+                },
+                "computed": {
+                    "shown": "period == '3m' ? 1 : 2"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                {
+                                    "id": "3m",
+                                    "label": "3 months"
+                                },
+                                {
+                                    "id": "12m",
+                                    "label": "12 months"
+                                }
+                            ],
+                            "value": {
+                                "$state": "period"
+                            },
+                            "onChange": {
+                                "set": "period"
+                            }
+                        },
+                        {
+                            "type": "StubText",
+                            "text": {
+                                "$computed": "shown"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a choice matches by id, key or label; a number state matches a number choice",
+            "payload": {
+                "state": {
+                    "a": "Bear",
+                    "b": 2
+                },
+                "computed": {
+                    "both": "concat(a, b)"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "Bear",
+                                {
+                                    "key": "base",
+                                    "label": "Base"
+                                }
+                            ],
+                            "value": {
+                                "$state": "a"
+                            },
+                            "onChange": {
+                                "set": "a"
+                            }
+                        },
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                1,
+                                2,
+                                3
+                            ],
+                            "value": {
+                                "$state": "b"
+                            },
+                            "onChange": {
+                                "set": "b"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "state": {
+                    "a": "Bear",
+                    "b": 2
+                },
+                "computed": {
+                    "both": "concat(a, b)"
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "Bear",
+                                {
+                                    "key": "base",
+                                    "label": "Base"
+                                }
+                            ],
+                            "value": {
+                                "$state": "a"
+                            },
+                            "onChange": {
+                                "set": "a"
+                            }
+                        },
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                1,
+                                2,
+                                3
+                            ],
+                            "value": {
+                                "$state": "b"
+                            },
+                            "onChange": {
+                                "set": "b"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a state only its own control reads is kept with UNREAD_STATE; a state nothing sets is no finding",
+            "payload": {
+                "state": {
+                    "tab": "a",
+                    "idle": 1
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "a",
+                                "b"
+                            ],
+                            "value": {
+                                "$state": "tab"
+                            },
+                            "onChange": {
+                                "set": "tab"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "UNREAD_STATE"
+            ],
+            "expectedKeptTree": {
+                "state": {
+                    "tab": "a",
+                    "idle": 1
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "a",
+                                "b"
+                            ],
+                            "value": {
+                                "$state": "tab"
+                            },
+                            "onChange": {
+                                "set": "tab"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a form reads the state of the inputs inside it",
+            "payload": {
+                "view": {
+                    "type": "StubForm",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "yes",
+                                "no"
+                            ],
+                            "onChange": {
+                                "set": "answer"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "state": {
+                    "answer": null
+                },
+                "view": {
+                    "type": "StubForm",
+                    "children": [
+                        {
+                            "type": "StubChoice",
+                            "options": [
+                                "yes",
+                                "no"
+                            ],
+                            "onChange": {
+                                "set": "answer"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "an $item field no resolved $from row has is kept with UNKNOWN_ITEM_KEY; a dotted field is found",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$from": {
+                                    "toolCall": "call_1",
+                                    "path": "$.rows[*]",
+                                    "state": "resolved",
+                                    "value": [
+                                        {
+                                            "name": "A",
+                                            "author": {
+                                                "name": "Ann"
+                                            }
+                                        },
+                                        {
+                                            "name": "B",
+                                            "author": {
+                                                "name": "Ben"
+                                            }
+                                        }
+                                    ],
+                                    "rowCount": 2,
+                                    "resolvedAt": "2026-10-26T09:00:00Z"
+                                }
+                            },
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "author.name"
+                                    }
+                                },
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "created"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "UNKNOWN_ITEM_KEY"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$from": {
+                                    "toolCall": "call_1",
+                                    "path": "$.rows[*]",
+                                    "state": "resolved",
+                                    "value": [
+                                        {
+                                            "name": "A",
+                                            "author": {
+                                                "name": "Ann"
+                                            }
+                                        },
+                                        {
+                                            "name": "B",
+                                            "author": {
+                                                "name": "Ben"
+                                            }
+                                        }
+                                    ],
+                                    "rowCount": 2,
+                                    "resolvedAt": "2026-10-26T09:00:00Z"
+                                }
+                            },
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "author.name"
+                                    }
+                                },
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "created"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "an $item over a pending $from or written rows is not checked",
+            "payload": {
+                "data": {
+                    "live": {
+                        "$from": {
+                            "toolCall": "call_2",
+                            "path": "$.rows[*]"
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "live"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "missing"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": [
+                                {
+                                    "x": 1
+                                }
+                            ],
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "missing"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "data": {
+                    "live": {
+                        "$from": {
+                            "toolCall": "call_2",
+                            "path": "$.rows[*]"
+                        }
+                    }
+                },
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubRepeat",
+                            "source": {
+                                "$data": "live"
+                            },
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "missing"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubRepeat",
+                            "source": [
+                                {
+                                    "x": 1
+                                }
+                            ],
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": {
+                                        "$item": "missing"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a slot under its minimum keeps its node with INVALID_SLOT_NODE_COUNT; a dropped child carries its own INVALID_NODE",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubPressable",
+                            "children": []
+                        },
+                        {
+                            "type": "StubPressable",
+                            "children": [
+                                {
+                                    "type": "Sparkle"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubPressable",
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": "ok"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_SLOT_NODE_COUNT",
+                "INVALID_NODE",
+                "INVALID_SLOT_NODE_COUNT"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubPressable"
+                        },
+                        {
+                            "type": "StubPressable"
+                        },
+                        {
+                            "type": "StubPressable",
+                            "children": [
+                                {
+                                    "type": "StubText",
+                                    "text": "ok"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a 3-column grid holds compact widgets and a map (owner Q6)",
+            "payload": {
+                "view": {
+                    "type": "StubGrid",
+                    "columns": 3,
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact",
+                            "fields": {
+                                "agentSpaceId": 1
+                            }
+                        },
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact"
+                        },
+                        {
+                            "type": "StubMap",
+                            "points": []
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubGrid",
+                    "columns": 3,
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact",
+                            "fields": {
+                                "agentSpaceId": 1
+                            }
+                        },
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact"
+                        },
+                        {
+                            "type": "StubMap",
+                            "points": []
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a 3-column grid lifts a regular widget, keeps the compact one (owner Q6, Q2)",
+            "payload": {
+                "view": {
+                    "type": "StubGrid",
+                    "columns": 3,
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact"
+                        },
+                        {
+                            "type": "Widget",
+                            "widget": "StubRegular"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "WIDGET_LIFTED"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubGrid",
+                    "columns": 3,
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": [
+                {
+                    "path": "view.children[1]",
+                    "widget": "StubRegular",
+                    "fields": []
+                }
+            ]
+        },
+        {
+            "name": "a 1-column grid gives full cells, a 2-column grid regular ones (owner Q6)",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubGrid",
+                            "columns": 1,
+                            "children": [
+                                {
+                                    "type": "Widget",
+                                    "widget": "CustomVisualization",
+                                    "fields": []
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubGrid",
+                            "columns": 2,
+                            "children": [
+                                {
+                                    "type": "Widget",
+                                    "widget": "StubRegular"
+                                },
+                                {
+                                    "type": "Widget",
+                                    "widget": "CustomVisualization",
+                                    "fields": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "WIDGET_LIFTED"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubGrid",
+                            "columns": 1,
+                            "children": [
+                                {
+                                    "type": "Widget",
+                                    "widget": "CustomVisualization",
+                                    "fields": []
+                                }
+                            ]
+                        },
+                        {
+                            "type": "StubGrid",
+                            "columns": 2,
+                            "children": [
+                                {
+                                    "type": "Widget",
+                                    "widget": "StubRegular"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": [
+                {
+                    "path": "view.children[1].children[1]",
+                    "widget": "CustomVisualization",
+                    "fields": []
+                }
+            ]
+        },
+        {
+            "name": "a grid without columns keeps the declared regular cells (owner Q6)",
+            "payload": {
+                "view": {
+                    "type": "StubGrid",
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubRegular"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubGrid",
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubRegular"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "a nested lift prunes the emptied inner stack, the outer stack keeps its text (owner Q2)",
+            "payload": {
+                "title": "Dashboard",
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "Overview"
+                        },
+                        {
+                            "type": "StubStack",
+                            "children": [
+                                {
+                                    "type": "Widget",
+                                    "widget": "StubStandalone",
+                                    "fields": {
+                                        "agentSpaceId": 5
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "WIDGET_LIFTED"
+            ],
+            "expectedKeptTree": {
+                "title": "Dashboard",
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "Overview"
+                        },
+                        {
+                            "type": "Widget",
+                            "widget": "StubCompact"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": [
+                {
+                    "path": "view.children[1].children[0]",
+                    "widget": "StubStandalone",
+                    "fields": {
+                        "agentSpaceId": 5
+                    }
+                }
+            ]
+        },
+        {
+            "name": "a lift that empties every layout leaves no view (owner Q2)",
+            "payload": {
+                "title": "Only widgets",
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubGrid",
+                            "columns": 2,
+                            "children": [
+                                {
+                                    "type": "Widget",
+                                    "widget": "StubStandaloneDirective"
+                                },
+                                {
+                                    "type": "Widget",
+                                    "widget": "QuickReplies",
+                                    "fields": {
+                                        "agentSpaceId": 5
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "WIDGET_LIFTED",
+                "WIDGET_LIFTED"
+            ],
+            "expectedKeptTree": {
+                "title": "Only widgets"
+            },
+            "expectedLiftedWidgets": [
+                {
+                    "path": "view.children[0].children[0]",
+                    "widget": "StubStandalone",
+                    "fields": []
+                },
+                {
+                    "path": "view.children[0].children[1]",
+                    "widget": "QuickReplies",
+                    "fields": {
+                        "agentSpaceId": 5
+                    }
+                }
+            ]
+        },
+        {
+            "name": "a refused widget inside a repeat is dropped, never lifted once per row (owner Q2)",
+            "payload": {
+                "view": {
+                    "type": "StubRepeat",
+                    "source": [
+                        1,
+                        2
+                    ],
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "StubStandalone"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubRepeat",
+                    "source": [
+                        1,
+                        2
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        },
+        {
+            "name": "an unknown widget name is dropped, never lifted (owner Q2)",
+            "payload": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "Widget",
+                            "widget": "NoSuchWidget"
+                        },
+                        {
+                            "type": "StubText",
+                            "text": "kept"
+                        }
+                    ]
+                }
+            },
+            "expectedFindingCodes": [
+                "INVALID_NODE"
+            ],
+            "expectedKeptTree": {
+                "view": {
+                    "type": "StubStack",
+                    "children": [
+                        {
+                            "type": "StubText",
+                            "text": "kept"
+                        }
+                    ]
+                }
+            },
+            "expectedLiftedWidgets": []
+        }
+    ],
+    "sourceBytesCases": [
+        {
+            "name": "whitespace and type do not count",
+            "payload": {
+                "type": "ComposedView",
+                "title": "Grüße / Übersicht",
+                "view": {
+                    "type": "StubText",
+                    "text": "a\u2028b"
+                }
+            },
+            "expectedBytes": 74
+        },
+        {
+            "name": "nested data",
+            "payload": {
+                "data": {
+                    "rows": [
+                        {
+                            "v": 1.5
+                        },
+                        {
+                            "v": -2
+                        }
+                    ]
+                },
+                "computed": {
+                    "t": "sum(rows, r => r.v)"
+                }
+            },
+            "expectedBytes": 77
+        },
+        {
+            "name": "objects keyed 0, 1, … measure as lists",
+            "payload": {
+                "data": {
+                    "rows": [
+                        {
+                            "v": 1
+                        },
+                        {
+                            "v": 2
+                        }
+                    ]
+                }
+            },
+            "expectedBytes": 35
+        },
+        {
+            "name": "the legacy writtenSyntax field of an old stored fence is not counted",
+            "payload": {
+                "type": "ComposedView",
+                "title": "A",
+                "view": {
+                    "type": "StubText",
+                    "text": "a"
+                },
+                "writtenSyntax": "TAG"
+            },
+            "expectedBytes": 51
+        }
+    ],
+    "surplusCloserCases": [
+        {
+            "name": "one surplus brace after a valid ComposedView tree",
+            "widgetJson": "{\"type\":\"ComposedView\",\"title\":\"Prices\",\"view\":{\"type\":\"StubText\",\"text\":\"a\"}}}",
+            "expectedOutcome": "VALID",
+            "expectedFields": {
+                "type": "ComposedView",
+                "title": "Prices",
+                "view": {
+                    "type": "StubText",
+                    "text": "a"
+                }
+            }
+        },
+        {
+            "name": "a surplus bracket and brace after a list",
+            "widgetJson": "{\"type\":\"QuickReplies\",\"items\":[\"a\",\"b\"]}]}",
+            "expectedOutcome": "VALID",
+            "expectedFields": {
+                "type": "QuickReplies",
+                "items": [
+                    "a",
+                    "b"
+                ]
+            }
+        },
+        {
+            "name": "surplus closers with whitespace between them",
+            "widgetJson": "{\"type\":\"QuickReplies\",\"item\":\"a\"} }\n }",
+            "expectedOutcome": "VALID",
+            "expectedFields": {
+                "type": "QuickReplies",
+                "item": "a"
+            }
+        },
+        {
+            "name": "three surplus closers are the most that are dropped",
+            "widgetJson": "{\"type\":\"QuickReplies\",\"item\":\"a\"}}}}",
+            "expectedOutcome": "VALID",
+            "expectedFields": {
+                "type": "QuickReplies",
+                "item": "a"
+            }
+        },
+        {
+            "name": "four surplus closers stay malformed",
+            "widgetJson": "{\"type\":\"QuickReplies\",\"item\":\"a\"}}}}}",
+            "expectedOutcome": "MALFORMED",
+            "expectedFields": null
+        },
+        {
+            "name": "a missing brace is not repaired",
+            "widgetJson": "{\"type\":\"ComposedView\",\"view\":{\"type\":\"StubText\",\"text\":\"a\"}",
+            "expectedOutcome": "MALFORMED",
+            "expectedFields": null
+        },
+        {
+            "name": "a trailing comma is not repaired",
+            "widgetJson": "{\"type\":\"QuickReplies\",\"item\":\"a\",}",
+            "expectedOutcome": "MALFORMED",
+            "expectedFields": null
+        },
+        {
+            "name": "a valid block is read as written",
+            "widgetJson": "{\"type\":\"QuickReplies\",\"item\":\"a\"}",
+            "expectedOutcome": "VALID",
+            "expectedFields": {
+                "type": "QuickReplies",
+                "item": "a"
+            }
+        }
+    ]
+}

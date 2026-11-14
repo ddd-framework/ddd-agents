@@ -1,0 +1,36 @@
+{
+  "wireName": "ComposedView",
+  "fixtures": [
+    {
+      "name": "date-picker-reference-date",
+      "description": "The reference date of the analytics studio (ChatGPT reference 52).",
+      "payload": {
+        "state": {
+          "asOf": "2026-10-25"
+        },
+        "view": {
+          "type": "DatePicker",
+          "label": "Reference date",
+          "value": {
+            "$state": "asOf"
+          },
+          "onChange": {
+            "set": "asOf"
+          },
+          "min": "2026-01-01",
+          "max": "2026-12-31"
+        }
+      },
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        {
+          "name": "open the calendar",
+          "click": {
+            "selector": "input"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+@import "../../../styles/spacings";
+
+// An inline text link: the text underlined with a dotted line that turns solid on hover, the new-tab glyph after it.
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: $x0_5;
+  max-width: 100%;
+  color: var(--agents-fg);
+  text-decoration: none;
+  border-radius: $x0_5;
+
+  &:hover .linkText {
+    text-decoration-style: solid;
+  }
+
+  &:focus-visible {
+    outline: $x0_25 solid var(--agents-fg-cta);
+    outline-offset: $x0_25;
+  }
+}
+
+.linkText {
+  color: inherit;
+  overflow-wrap: anywhere;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--agents-fg-light);
+  text-underline-offset: $x0_5;
+}
+
+.newTabIcon {
+  flex-shrink: 0;
+}
+
+.unlinked {
+  color: var(--agents-fg);
+  overflow-wrap: anywhere;
+}
