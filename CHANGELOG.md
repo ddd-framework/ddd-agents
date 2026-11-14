@@ -1,6 +1,13 @@
 # Changelog
 
+## 0.1.0-alpha.15
+
+- A spec of the frontend writes its deeply nested JSON text directly: `JSON.stringify` exhausted the call stack on
+  the CI runner and stopped the npm release of 0.1.0-alpha.14.
+
 ## 0.1.0-alpha.14
+
+Composer only: the npm release of this version stopped at the specs (see 0.1.0-alpha.15).
 
 - First pre-release of the frontend `@mgamadeus/ddd-agents` (npm, dist-tag `next`) from `web/`, released in lockstep
   with the Composer package: the agent chat, the widget renderer, the composed-view kit, the conversation client and

@@ -26,9 +26,12 @@ const deeplyNested = (depth: number): unknown => {
   return nested;
 };
 
+/** The JSON text of {@link deeplyNested}, written directly: `JSON.stringify` of such a value can exhaust the call stack of the test process (a smaller default stack on Linux CI runners). */
+const deeplyNestedJson = (depth: number): string => "[".repeat(depth) + "1" + "]".repeat(depth);
+
 describe("composed view — robustness", () => {
   it("a payload nested deeper than the backend decodes gives no view and never throws", () => {
-    const payload = JSON.stringify({ data: { rows: deeplyNested(5000) }, view: { type: "StubText", text: "x" } });
+    const payload = `{"data":{"rows":${deeplyNestedJson(5000)}},"view":{"type":"StubText","text":"x"}}`;
     const tree = parseComposedViewTree(payload, stubSchema);
     expect(tree.view).toBeNull();
     expect(tree.findings.map((finding) => finding.code)).toEqual(["BUDGET_EXCEEDED"]);
@@ -38,7 +41,7 @@ describe("composed view — robustness", () => {
   });
 
   it("the fence finder drops a deeply nested block and never throws", () => {
-    const fence = "```widget\n" + JSON.stringify({ type: "ComposedView", view: deeplyNested(5000) }) + "\n```";
+    const fence = "```widget\n" + `{"type":"ComposedView","view":${deeplyNestedJson(5000)}}` + "\n```";
     expect(() => findWidgetFencesInMarkdown(`Here:\n\n${fence}`)).not.toThrow();
     expect(findWidgetFencesInMarkdown(`Here:\n\n${fence}`)).toEqual([]);
   });
