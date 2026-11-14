@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.20
+
+- `delegate`: a `toolName` written with the namespace of the model's function list (`functions.<tool>`) names the
+  tool after it instead of being refused as not offered (`AgentDelegationToolRunTask::readToolNameFromArgumentItem()`,
+  also used for `namesBothTaskShapes` and tool-result task requests). `functions.` alone names no tool. Every name
+  without the prefix is read as before.
+
 ## 0.1.0-alpha.19
 
 - Stall classification: text of a step the loop sent with tool choice `none` (the answer step after a refused repeat,

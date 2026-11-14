@@ -6,6 +6,7 @@ namespace DDD\Domain\AI\Entities\Conversations\Agent\Tools;
 
 use DDD\Domain\AI\Entities\Conversations\Agent\Delegation\AgentDelegationAgentTask;
 use DDD\Domain\AI\Entities\Conversations\Agent\Delegation\AgentDelegationTask;
+use DDD\Domain\AI\Entities\Conversations\Agent\Delegation\AgentDelegationToolRunTask;
 use DDD\Domain\Base\Entities\ValueObject;
 
 /**
@@ -46,7 +47,7 @@ class DelegateToolArguments extends ValueObject
         }
         $delegateToolArguments->task = AgentDelegationTask::fromArgumentItem($arguments);
         $delegateToolArguments->namesBothTaskShapes = is_string($arguments['task'] ?? null) && trim($arguments['task']) !== ''
-            && is_string($arguments['toolName'] ?? null) && trim($arguments['toolName']) !== '';
+            && AgentDelegationToolRunTask::readToolNameFromArgumentItem($arguments) !== null;
         return $delegateToolArguments;
     }
 

@@ -26,19 +26,19 @@ abstract class AgentDelegationTask extends ValueObject
     public const int LABEL_MAX_LENGTH = 40;
 
     /**
-     * One item of a `delegate` call: an item with a non-empty `toolName` is a tool run — a `task` text beside it is
-     * not read, the tool's arguments say what runs; an item with a non-blank `task` and no `toolName` is an agent
+     * One item of a `delegate` call: an item that names a tool
+     * ({@see AgentDelegationToolRunTask::readToolNameFromArgumentItem()}) is a tool run — a `task` text beside it is
+     * not read, the tool's arguments say what runs; an item with a non-blank `task` that names no tool is an agent
      * task; an item with neither is no task (null — the caller counts it as refused).
      *
      * @param array<string, mixed> $argumentItem
      */
     public static function fromArgumentItem(array $argumentItem): ?self
     {
-        $toolName = $argumentItem['toolName'] ?? null;
-        $hasToolName = is_string($toolName) && trim($toolName) !== '';
-        if ($hasToolName) {
+        $toolName = AgentDelegationToolRunTask::readToolNameFromArgumentItem($argumentItem);
+        if ($toolName !== null) {
             return AgentDelegationToolRunTask::forToolCall(
-                trim($toolName),
+                $toolName,
                 AgentDelegationToolRunTask::readToolArgumentsFromArgumentItem($argumentItem)
             );
         }

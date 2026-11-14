@@ -57,4 +57,23 @@ class DelegateToolArgumentsTaskShapeTest extends UnitTestCase
         self::assertInstanceOf(AgentDelegationAgentTask::class, $blankToolNameArguments->task);
         self::assertFalse($blankToolNameArguments->namesBothTaskShapes);
     }
+
+    public function testAToolNameWrittenWithTheFunctionListNamespaceNamesTheToolAfterIt(): void
+    {
+        $toolRunArguments = DelegateToolArguments::fromToolCallArguments(['toolName' => ' functions.getWebPageAsMarkdown ', 'toolArguments' => ['url' => 'https://example.org']]);
+
+        self::assertInstanceOf(AgentDelegationToolRunTask::class, $toolRunArguments->task);
+        self::assertSame('getWebPageAsMarkdown', $toolRunArguments->task->toolName);
+        self::assertSame(['kind' => 'toolRun', 'toolName' => 'getWebPageAsMarkdown', 'toolArguments' => ['url' => 'https://example.org']], $toolRunArguments->task->buildStoredTaskArray());
+    }
+
+    public function testTheNamespaceAloneNamesNoTool(): void
+    {
+        $namespaceOnlyArguments = DelegateToolArguments::fromToolCallArguments(['toolName' => 'functions.', 'task' => 'Read the site.']);
+        self::assertInstanceOf(AgentDelegationAgentTask::class, $namespaceOnlyArguments->task);
+        self::assertFalse($namespaceOnlyArguments->namesBothTaskShapes);
+
+        self::assertFalse(DelegateToolArguments::fromToolCallArguments(['toolName' => 'functions.'])->hasTask());
+        self::assertNull(AgentDelegationToolRunTask::readToolNameFromArgumentItem(['toolName' => 17]));
+    }
 }

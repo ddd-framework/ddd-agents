@@ -24,6 +24,9 @@ use DDD\Domain\AI\Entities\Skills\AISkills;
  */
 class AgentDelegationToolRunTask extends AgentDelegationTask
 {
+    /** The namespace a model's own function list puts before a tool name; a `toolName` written with it names the tool after it. */
+    public const string FUNCTION_LIST_NAMESPACE_PREFIX = 'functions.';
+
     /** The tool the sub-agent calls. */
     public string $toolName = '';
 
@@ -78,6 +81,26 @@ class AgentDelegationToolRunTask extends AgentDelegationTask
         $agentDelegationToolRunTask = self::forToolCall($toolName ?? '', $toolArguments, $requestedSeedSkillNames);
         $agentDelegationToolRunTask->legacyBackgroundOperationName = $operationName;
         return $agentDelegationToolRunTask;
+    }
+
+    /**
+     * The tool an argument item names: its trimmed `toolName` without the namespace of the model's own function list
+     * (a model that copies the name from that list writes `functions.<toolName>`; a tool name itself carries no dot);
+     * null when the item names no tool.
+     *
+     * @param array<string, mixed> $argumentItem
+     */
+    public static function readToolNameFromArgumentItem(array $argumentItem): ?string
+    {
+        $toolName = $argumentItem['toolName'] ?? null;
+        if (!is_string($toolName)) {
+            return null;
+        }
+        $toolName = trim($toolName);
+        if (str_starts_with($toolName, self::FUNCTION_LIST_NAMESPACE_PREFIX)) {
+            $toolName = trim(substr($toolName, strlen(self::FUNCTION_LIST_NAMESPACE_PREFIX)));
+        }
+        return $toolName !== '' ? $toolName : null;
     }
 
     /**
