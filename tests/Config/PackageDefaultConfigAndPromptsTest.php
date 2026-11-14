@@ -11,6 +11,7 @@ use DDD\Domain\AI\Entities\Environment\AgentEnvironmentVariables;
 use DDD\Domain\AI\Entities\Conversations\Agent\Prompts\AgentAIPromptNames;
 use DDD\Domain\AI\Repo\Argus\Conversations\ArgusAIAgentConversation;
 use DDD\Domain\AI\Services\AIPromptsService;
+use DDD\Domain\AI\Services\Conversations\AgentToolCallForkJoinService;
 use DDD\Domain\AI\Services\Conversations\SupervisorCheckpointService;
 use DDD\Infrastructure\Libs\Config;
 use PHPUnit\Framework\TestCase;
@@ -72,7 +73,8 @@ class PackageDefaultConfigAndPromptsTest extends TestCase
         self::assertNull($agentEgress['liteLlmEndpoint']);
         self::assertSame(0, $agentEgress['transferStallAbort']['seconds']);
         $agentToolCallChildProcess = require self::PACKAGE_CONFIG_DIRECTORY . '/AI/agentToolCallChildProcess.php';
-        self::assertSame(['consoleScript' => null, 'commandName' => null], $agentToolCallChildProcess);
+        // no console script: every tool call runs inline until the application names one; the command is the module's
+        self::assertSame(['consoleScript' => null, 'commandName' => AgentToolCallForkJoinService::DEFAULT_CHILD_PROCESS_COMMAND_NAME], $agentToolCallChildProcess);
         $decisionModel = require self::PACKAGE_CONFIG_DIRECTORY . '/AI/decisionModel.php';
         self::assertSame('off', $decisionModel['mode']);
         $supervisor = require self::PACKAGE_CONFIG_DIRECTORY . '/AI/supervisor.php';

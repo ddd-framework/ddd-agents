@@ -88,5 +88,5 @@ stamp). That is enough to try the agent; it holds the request for the whole turn
   `app:workers:list` shows the list.
 - `MessengerTransportsHaveWorkerBlocksContract` (package test code, `require_once` it) checks a host's
   `messenger.yaml` and supervisor file: every transport defined, every message routed, a worker pool per transport.
-- Parallel tool calls in child processes are optional and off by default (`AI.agentToolCallChildProcess`); the host
-  command they need is described in `ddd-module-agents-tools-specialist`.
+- Parallel tool calls in child processes are optional and off by default (`AI.agentToolCallChildProcess`): the
+  package ships the child's command, the host names its console script (`ddd-module-agents-tools-specialist`).

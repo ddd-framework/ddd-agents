@@ -40,9 +40,9 @@ keeps a one-time one that ran. `AIConversationScheduleOneTimeMoment::resolveFor(
 
 ## The fire contract
 
-The package ships the steps, not the command. A console command of the host runs them on a short cron (every minute is usual), one pass at a time
-(a process lock is the usual shape; the claim alone already prevents a double fire). The command's body — rights,
-auth account, error handling — is the template of the entry skill; this is what it drives:
+The package's command `app:ai-conversation:fire-due-schedules` (`AgentFireDueSchedulesCommand`) runs these steps, one
+pass at a time (a process lock; the claim alone already prevents a double fire). It runs only from the host's cron
+line, every minute to every five minutes (the entry skill's host duties). A host that replaces it keeps the steps:
 
 1. `findDueScheduleIds()` — ACTIVE rows with `nextRunAt` due, oldest first, at most
    `AIConversationSchedulesService::DUE_SCHEDULES_BATCH_LIMIT`.
@@ -262,7 +262,8 @@ its send tools.
 
 Full class names of what a host extends or calls here: `DDD\Domain\AI\Services\Conversations\AIConversationSchedulesService`, `DDD\Domain\AI\Services\Conversations\Schedules\ScheduleBudgetPotsService`, `DDD\Domain\AI\Entities\Conversations\Schedules\AIConversationSchedule`.
 
-- The fire command and the state-sweep command — templates, cron lines and cadence in the entry skill's host duties.
+- The cron line of the package's fire command, and the state-sweep command — template, cron lines and cadence in the
+  entry skill's host duties.
 - The tools that create, list, change, pause, resume and delete schedules, with the provenance guard above.
 - Optionally: the budget pot (`ScheduleBudgetPotsService`), eligibility (`AgentAutomationEligibilityService`), the
   sweep filter, the report mail (owner reports reference).

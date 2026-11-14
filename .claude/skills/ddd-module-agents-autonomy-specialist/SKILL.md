@@ -44,8 +44,9 @@ Not here: the conversation tree, run claims and the release of a child's run (lo
    tools out of them. The supervisor skips every run that is not owner-present (`AIConversation::canBeSupervised()`).
 2. **One `delegate` call starts one sub-agent, one level deep.** Its answer is final at the spawn; the result arrives
    later as exactly one signal row per run end (`SIGNAL_SOURCE_SUB_AGENT_RUN_ENDED`). A child never delegates.
-3. **The package ships the fire and sweep steps, not the commands.** Without the host's console commands no schedule
-   fires, no deadline times out, no lost notification is re-sent and no owed report is delivered late.
+3. **The package ships the fire command, not its cron line; the sweep is a host command.** Without the host's cron
+   line for `app:ai-conversation:fire-due-schedules` no schedule fires; without the host's sweep, reaper and owed-work
+   commands no deadline times out, no lost notification is re-sent and no owed report is delivered late.
 4. **Eligibility is its own gate, never the budget.** Every default says "eligible"; a host with account states
    overrides `AgentAutomationEligibilityService`, including all three refusal methods.
 5. **A mandate gates only a tool that carries `MCPToolRequiresMandate`.** The package tags none of its tools, and it
@@ -153,7 +154,7 @@ eligible. A support override (`activateSupportOverride()` and its siblings) is p
 |---|---|
 | Let the agent or a tool start sub-agents; a sub-agent's result never arrives; "queued" sub-agents | [delegation-and-sub-agents.md](references/delegation-and-sub-agents.md) |
 | Run background operations of the host after a tool | [delegation-and-sub-agents.md](references/delegation-and-sub-agents.md) |
-| Build the fire and sweep commands; a schedule does not fire, fires twice, or never stops | [schedules-and-unattended-runs.md](references/schedules-and-unattended-runs.md) |
+| Run the fire command, build the sweep command; a schedule does not fire, fires twice, or never stops | [schedules-and-unattended-runs.md](references/schedules-and-unattended-runs.md) |
 | Write tools that create or change schedules; cap the spend of scheduled runs | [schedules-and-unattended-runs.md](references/schedules-and-unattended-runs.md) |
 | Stop automation for suspended or deleted spaces and accounts | [automation-eligibility.md](references/automation-eligibility.md) |
 | Gate a tool behind a standing permission; "requires an active MANDATE" | [mandates.md](references/mandates.md) |
@@ -174,8 +175,8 @@ eligible. A support override (`activateSupportOverride()` and its siblings) is p
 
 ## Cross-references
 
-- `ddd-module-agents-specialist` — installation, override points, transports, the host-duty table with the command
-  templates for firing schedules, sweeping schedule state, delivering owed reports and reaping dead runs.
+- `ddd-module-agents-specialist` — installation, override points, transports, the host-duty table with the package's
+  fire command and the command templates for sweeping schedule state, delivering owed reports and reaping dead runs.
 - `ddd-module-agents-loop-specialist` — the conversation tree, run claims of a child, the release, recovery.
 - `ddd-module-agents-tools-specialist` — `MCPToolRequiresMandate` among the tool attributes, the meta-tool contract,
   the structured-result keys a tool returns.

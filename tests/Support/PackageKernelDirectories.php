@@ -10,9 +10,10 @@ use RecursiveIteratorIterator;
 
 /**
  * The cache and log directories of the package kernel: below the system temp directory (never inside the repository),
- * keyed by the newest modification time of the kernel configuration and the package source. The kernel runs without
- * debug (no freshness check of the compiled container), so a changed service or config file must lead to a new
- * directory; the directories of older keys are removed. A run with the fixture application
+ * keyed by a fingerprint of the kernel configuration and the package source — the path, modification time and size of
+ * every file. The kernel runs without debug (no freshness check of the compiled container), so an added, removed or
+ * changed service or config file must lead to a new directory, also when it carries an older modification time than
+ * the newest file (a file copied with its time kept); the directories of older keys are removed. A run with the fixture application
  * ({@see PackageTestEnvironment::isRunWithFixtureApplication()}) compiles another container and keeps directories of
  * its own.
  */
@@ -22,13 +23,18 @@ class PackageKernelDirectories
     {
     }
 
-    /** Sets APP_CACHE_DIR / APP_LOG_DIR (unless the environment sets them) and removes directories of older keys. */
+    /**
+     * Sets APP_CACHE_DIR / APP_LOG_DIR (unless the environment sets them) and removes directories of older keys. A
+     * process that inherits APP_CACHE_DIR (a console the test suite starts) removes nothing: the directory in use is
+     * its parent's, whatever key the files have by now.
+     */
     public function apply(): void
     {
         $kernelVariant = PackageTestEnvironment::isRunWithFixtureApplication() ? '|fixture-application' : '';
         $directoryPrefix = sys_get_temp_dir() . '/ddd-agents-test-kernel-' . substr(md5($this->packageDirectory . $kernelVariant), 0, 12) . '-';
-        $kernelDirectory = $directoryPrefix . $this->findNewestModificationTime();
-        foreach (glob($directoryPrefix . '*', GLOB_ONLYDIR) ?: [] as $existingDirectory) {
+        $kernelDirectory = $directoryPrefix . $this->buildSourceFingerprint();
+        $cacheDirectoryIsInherited = !empty($_SERVER['APP_CACHE_DIR']);
+        foreach ($cacheDirectoryIsInherited ? [] : (glob($directoryPrefix . '*', GLOB_ONLYDIR) ?: []) as $existingDirectory) {
             if ($existingDirectory !== $kernelDirectory) {
                 $this->removeDirectory($existingDirectory);
             }
@@ -40,23 +46,34 @@ class PackageKernelDirectories
         }
     }
 
-    protected function findNewestModificationTime(): int
+    /**
+     * @return string a short hash of the path, modification time and size of every watched file: it changes when a
+     *     file is added, removed or changed, whatever its modification time
+     */
+    protected function buildSourceFingerprint(): string
     {
-        $newestModificationTime = 0;
-        $watchedDirectories = [$this->packageDirectory . '/tests/Support/kernel', $this->packageDirectory . '/src', $this->packageDirectory . '/config'];
-        if (PackageTestEnvironment::isRunWithFixtureApplication()) {
-            $watchedDirectories[] = $this->packageDirectory . '/tests/Fixtures/Application';
-        }
-        foreach ($watchedDirectories as $watchedDirectory) {
+        $fileDescriptions = [];
+        foreach ($this->getWatchedDirectories() as $watchedDirectory) {
             if (!is_dir($watchedDirectory)) {
                 continue;
             }
             $fileIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($watchedDirectory, FilesystemIterator::SKIP_DOTS));
             foreach ($fileIterator as $file) {
-                $newestModificationTime = max($newestModificationTime, (int)$file->getMTime());
+                $fileDescriptions[] = $file->getPathname() . ':' . (int)$file->getMTime() . ':' . (int)$file->getSize();
             }
         }
-        return $newestModificationTime;
+        sort($fileDescriptions);
+        return substr(md5(implode("\n", $fileDescriptions)), 0, 16);
+    }
+
+    /** @return string[] the directories whose files decide the compiled container */
+    protected function getWatchedDirectories(): array
+    {
+        $watchedDirectories = [$this->packageDirectory . '/tests/Support/kernel', $this->packageDirectory . '/src', $this->packageDirectory . '/config'];
+        if (PackageTestEnvironment::isRunWithFixtureApplication()) {
+            $watchedDirectories[] = $this->packageDirectory . '/tests/Fixtures/Application';
+        }
+        return $watchedDirectories;
     }
 
     protected function removeDirectory(string $directory): void

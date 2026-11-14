@@ -13,9 +13,14 @@ How to see what a run of the agent did and what the model saw, how to reproduce 
 the agent — on top of the services and value objects the package ships. The package ships the base of its console
 commands (`AgentConsoleCommand`: the account of a run, lifted rights, the budget option, the usage envelope, the
 progress reporter `AgentConsoleProgressReporter`, the space options), the option traits
-`ContextRetentionSettingsOptionsTrait` and `AgentEvalArmOptionsTrait`, the arms object `AgentEvalArms` and the
-recording-session contract `AgentRecordedRunSessionInterface`, but **no inspect, diagnose, chat, replay or evaluation
-command yet**: those are console commands of the host, built on the contracts below.
+`ContextRetentionSettingsOptionsTrait` and `AgentEvalArmOptionsTrait`, the arms object `AgentEvalArms`, the
+recording-session contract `AgentRecordedRunSessionInterface`, the diagnosis and measurement commands
+(`app:ai-agent:diagnose`, `app:ai-agent:validate-conversation`, `app:ai-agent:cache-diff`,
+`app:ai-agent:activity-lines`, `app:ai-agent:tool-response-stats`, `app:ai-agent:skill-token-map`,
+`app:ai-agent:context-eviction-sim`, `app:ai-conversation:search-inspect`; the full list with the maintenance
+commands is in `ddd-module-agents-specialist`) and the line editor a console chat reads its input with
+(`src/Symfony/Commands/Agents/Chat/`), but **no chat, replay or evaluation command**: those are console commands of
+the host, built on the contracts below.
 
 > Installation, transports, workers and the full host-duty table: `ddd-module-agents-specialist`. How a turn runs,
 > is claimed, released and recovered: `ddd-module-agents-loop-specialist`.
@@ -52,7 +57,8 @@ command yet**: those are console commands of the host, built on the contracts be
    a host duty of `ddd-module-agents-specialist`.
 5. **The synchronous console path never drives a conversation a worker may hold.** `generateAgentReply()` takes no
    run claim. Drive only an IDLE conversation from the console; otherwise dispatch with
-   `resumeConversationIfReady()` (`async: true`) and inspect afterwards.
+   `resumeConversationIfReady()` (`async: true`) and inspect afterwards. `app:ai-agent:diagnose --drive` is such a
+   synchronous drive and takes no claim either; `--retry` dispatches the resume to the workers instead.
 6. **An eval run is marked before its first drive.** `RunSettings::$evalRun` decides the tool block, the outbound
    guard's eval context, the report-mail skip and the statistics exclusion. A conversation stamped later has already
    run unguarded.
@@ -84,8 +90,11 @@ command yet**: those are console commands of the host, built on the contracts be
 
 ## Minimal template: the host's inspect command
 
-The duty "inspect or diagnose one conversation" (host-duty table of `ddd-module-agents-specialist`): read-only,
-rights lifted for the read, exits non-zero on an integrity violation.
+The package's commands cover the parts one at a time: `app:ai-agent:diagnose <conversationId>` (the resume
+diagnosis), `app:ai-agent:validate-conversation <conversationId>` (the integrity report, exit 1 on a violation) and
+`app:ai-agent:cache-diff <conversationId>` (the prompt-cache diff). A host that wants the diagnosis, the integrity
+report, the delegation tree and the transcript of one conversation in one read-only view writes this command: rights
+lifted for the read, exits non-zero on an integrity violation.
 
 ```php
 <?php

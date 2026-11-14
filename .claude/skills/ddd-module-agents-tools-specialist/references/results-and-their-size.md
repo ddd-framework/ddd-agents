@@ -128,4 +128,7 @@ class carries this: it is a convention of the response DTO, set from the applied
 Measure the characters of the result as the model reads it and divide by four — the same estimate the loop uses for
 the schema (`ToolDefinition::$residentSchemaTokens`). Call the tool through the executor in a host test or a console
 command of the host (testing-a-tool-in-a-host.md) with realistic arguments, once with the markdown, once with
-`outputFormat=structured`; a routine result above a few thousand tokens is a problem to fix.
+`outputFormat=structured`; a routine result above a few thousand tokens is a problem to fix. Over stored
+conversations, `app:ai-agent:tool-response-stats` ranks the tools by the size of their stored results and lists the
+largest results of one tool (`--tool`); `app:ai-agent:skill-token-map` measures the schema tokens of every skill's
+tools on the wire schema the loop sends (`--tool` for one tool).

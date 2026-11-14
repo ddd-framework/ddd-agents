@@ -16,7 +16,9 @@ use Symfony\Component\DependencyInjection\Attribute\Exclude;
 /**
  * The console namespace of the module holds commands and their helpers only: a concrete class there is a command on
  * {@see AgentConsoleCommand} with an `#[AsCommand]` name of its own under the `app:` prefix, or a plain helper that the
- * container must not build (`#[Exclude]`). Abstract classes, traits and interfaces are no services.
+ * container must not build (`#[Exclude]`). Abstract classes, traits and interfaces are no services. A hidden command
+ * declares `hidden: true`, which the attribute stores as an empty first name (`|app:…`): that empty name is the hidden
+ * marker, not a name.
  */
 class PackageConsoleCommandsTest extends UnitTestCase
 {
@@ -42,7 +44,10 @@ class PackageConsoleCommandsTest extends UnitTestCase
             if (!$reflectionClass->isSubclassOf(AgentConsoleCommand::class)) {
                 $refusedClasses[] = $className . ': a command that does not extend ' . AgentConsoleCommand::class;
             }
-            foreach (explode('|', $asCommandAttributes[0]->newInstance()->name) as $commandName) {
+            foreach (explode('|', $asCommandAttributes[0]->newInstance()->name) as $namePosition => $commandName) {
+                if ($namePosition === 0 && $commandName === '') {
+                    continue; // the hidden marker of `hidden: true`
+                }
                 if (!str_starts_with($commandName, self::COMMAND_NAME_PREFIX)) {
                     $refusedClasses[] = $className . ": the command name {$commandName} lacks the prefix " . self::COMMAND_NAME_PREFIX;
                 }

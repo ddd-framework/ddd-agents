@@ -31,9 +31,10 @@ use Throwable;
 /**
  * Runs the parallel-safe tool calls of ONE model response concurrently, each in its own short-lived console process,
  * while the turn worker keeps its claim and runs the rest of the response inline (the fork-join design). The module
- * ships no command for the child process: the application declares its console script and the command that executes one persisted
- * tool call in `config/app/AI/agentToolCallChildProcess.php` (the arguments and exit codes are listed there). An
- * application that declares none forks nothing and every call runs inline. The child claims its call row's
+ * ships the command a child runs ({@see \DDD\Symfony\Commands\Agents\AgentExecuteToolCallCommand}, named
+ * {@see DEFAULT_CHILD_PROCESS_COMMAND_NAME}); the application declares its console script, and may name another
+ * command, in `config/app/AI/agentToolCallChildProcess.php` (the arguments and exit codes are listed there). An
+ * application that declares no console script forks nothing and every call runs inline. The child claims its call row's
  * `toolCall` column with a lease, executes the call exactly as the inline path does, writes the outcome into the
  * column and exits; the turn adopts the outcome from the row when the loop reaches that call. No queue, no resume,
  * no new run state: the turn's wall clock for a batch becomes the slowest call plus one process boot (~0.1 s
@@ -59,6 +60,13 @@ class AgentToolCallForkJoinService extends Service
 
     /** The config name of the application's console command a child runs (`config/app/AI/agentToolCallChildProcess.php`). */
     public const string CHILD_PROCESS_CONFIG_NAME = 'AI.agentToolCallChildProcess';
+
+    /**
+     * The command a child runs when the application's config file names none: the module's own command
+     * ({@see \DDD\Symfony\Commands\Agents\AgentExecuteToolCallCommand}). An application's config file replaces the
+     * module's file whole, so a file that only declares the console script still gets this command.
+     */
+    public const string DEFAULT_CHILD_PROCESS_COMMAND_NAME = 'app:ai-agent:execute-tool-call';
 
     /**
      * The recorded-run comparison runs every tool call in its own process: its Argus transport is recorded and
@@ -143,14 +151,14 @@ class AgentToolCallForkJoinService extends Service
      * call). The rows are persisted PENDING by the caller before this; from here on the `toolCall` column of each row
      * belongs to its child until {@see waitForOutcome()} returned for it.
      *
-     * @throws LogicException when the application declared no child process command
+     * @throws LogicException when the application declared no console script
      */
     public function startChildren(AgentToolCallFork $agentToolCallFork, AIConversation $conversation): void
     {
         $consoleScript = $this->getChildProcessConsoleScript();
         $commandName = $this->getChildProcessCommandName();
         if ($consoleScript === null || $commandName === null) {
-            throw new LogicException('No console command for tool call child processes is declared (config/app/AI/agentToolCallChildProcess.php).');
+            throw new LogicException('No console script for tool call child processes is declared (config/app/AI/agentToolCallChildProcess.php).');
         }
         $projectDir = (string)DDDBundle::getContainer()->getParameter('kernel.project_dir');
         foreach ($agentToolCallFork->toolCalls as $toolCall) {
@@ -203,8 +211,9 @@ class AgentToolCallForkJoinService extends Service
     }
 
     /**
-     * Whether the application declared both its console script and the command a child runs. Without them no call
-     * forks ({@see selectForkableToolCalls()} returns none).
+     * Whether a child can be started: the application declared its console script (the command has a default,
+     * {@see getChildProcessCommandName()}). Without a console script no call forks ({@see selectForkableToolCalls()}
+     * returns none).
      */
     public function isChildProcessCommandDeclared(): bool
     {
@@ -218,11 +227,14 @@ class AgentToolCallForkJoinService extends Service
         return is_string($consoleScript) && trim($consoleScript, '/ ') !== '' ? trim($consoleScript, '/ ') : null;
     }
 
-    /** The name of the application's console command that executes one persisted tool call; null when none is declared. */
+    /**
+     * The name of the console command that executes one persisted tool call: the one the application's config file
+     * names, else {@see DEFAULT_CHILD_PROCESS_COMMAND_NAME}. Null only when an override of this method says so.
+     */
     public function getChildProcessCommandName(): ?string
     {
         $commandName = Config::get(self::CHILD_PROCESS_CONFIG_NAME . '.commandName');
-        return is_string($commandName) && trim($commandName) !== '' ? trim($commandName) : null;
+        return is_string($commandName) && trim($commandName) !== '' ? trim($commandName) : static::DEFAULT_CHILD_PROCESS_COMMAND_NAME;
     }
 
     /**

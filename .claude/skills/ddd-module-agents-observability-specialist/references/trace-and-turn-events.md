@@ -114,8 +114,10 @@ is classified by the same heuristic and marked `$inferred`. `AIConversationMessa
 
 Both tables carry their own batched purge, 180 days by default (`RETENTION_DAYS`):
 `AIConversationTurnEventsService::purgeOlderThanDays()` and `purgeUnreferencedSnapshots()` (a snapshot younger than
-`SNAPSHOT_GRACE_HOURS` stays), `AIConversationTraceEventsService::purgeOlderThanDays()`. A host runs them from a console
-command on a schedule. Both tables delete with their conversation (foreign key cascade).
+`SNAPSHOT_GRACE_HOURS` stays), `AIConversationTraceEventsService::purgeOlderThanDays()`. The package's commands
+`app:ai-agent:trace-events-purge` and `app:ai-agent:turn-events-purge` run them; the host registers their daily cron
+lines (the entry skill `ddd-module-agents-specialist`, host duties). Both tables delete with their conversation
+(foreign key cascade).
 
 ## For the package maintainer
 

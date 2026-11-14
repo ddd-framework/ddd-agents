@@ -7,7 +7,7 @@ Contents
 - Writing a tool that respects it
 - Parallel calls of one model response
 - Admission: when a tool may declare MCPToolParallelSafe
-- The host's child-process command (optional host duty)
+- The child-process command and the host's console script
 - What the parent does around the children (package maintainer)
 
 ## The execution ceiling
@@ -41,7 +41,7 @@ console process of the host, while the turn worker runs the rest inline and keep
 results reach the model in emission order. `AgentToolCallForkJoinService::selectForkableToolCalls()` forks a call only
 when ALL of this holds:
 
-- the host declared its child-process command (below); without it every call runs inline;
+- the host declared its console script (below); without it every call runs inline;
 - forking is not switched off for the process (`AgentToolCallForkJoinService::$forkingDisabled`, set by the recorded-run
   comparison);
 - the call has a tool name and a provider call id, is no meta tool (`AIConversationMessage::META_TOOL_NAMES`), and its
@@ -81,12 +81,14 @@ package's own `listMandates` and `getPreviousTaskRunReports` carry it.
 Check the AI cost path too: a child opens its own usage envelope (next section); a budget bypass that hangs on
 something only the parent process holds does not reach it.
 
-## The host's child-process command (optional host duty)
+## The child-process command and the host's console script
 
-The package ships no command for the child process: establishing the account a tool runs under and accounting its
-usage is the host's. A host that wants parallel calls replaces `config/app/AI/agentToolCallChildProcess.php` whole (keys are never
-merged) and names `consoleScript` (relative to the kernel project directory, e.g. bin/console) and `commandName`.
-The package default declares neither, so every call runs inline.
+The package ships the command a child runs: `app:ai-agent:execute-tool-call` (`AgentExecuteToolCallCommand`, hidden
+from the command list), the default of `commandName` (`AgentToolCallForkJoinService::DEFAULT_CHILD_PROCESS_COMMAND_NAME`).
+The package's `config/app/AI/agentToolCallChildProcess.php` declares no `consoleScript`, so every call runs inline. A
+host that wants parallel calls replaces the file whole (keys are never merged) and names `consoleScript` (relative to
+the kernel project directory, e.g. bin/console). It names `commandName` only when it replaces the package's command
+under a name of its own; a file without `commandName`, or with `commandName` null, gets the package's command.
 
 The turn worker starts:
 
@@ -95,22 +97,26 @@ php -d memory_limit=1024M <project>/<consoleScript> --no-debug <commandName> <me
     [--run-token=<token>] [--blocked-tools=<a,b>] [--every-write-blocked]
 ```
 
-The command must, in this order:
+The package's command does the following, in this order; a host command that replaces it keeps the same contract:
 
-1. Load the tool-call row `<messageId>` and its conversation fresh (exit 1 when either is missing).
-2. Authenticate as the CONVERSATION's account (never the console's admin), so the tool sees the rights the inline call
-   sees; apply `--blocked-tools` and `--every-write-blocked` to the static blocks of `MCPToolExecutorService`.
-3. Adopt the parent's claim when `--run-token` is given: `AIConversationRunClaimsService::adoptRunTokenOfParentProcess()`.
-4. Claim the row: `AIConversationMessagesService::claimToolCallExecutionLease($messageId, $lease)` (exit 3 when it fails).
-5. Run `AgentToolCallExecutionService::executeToolCall()` under a SIGALRM of `--timeout` seconds. Recommended, not
-   checked by the package: run it inside an AI usage envelope of its own that carries the conversation's budget-bypass
-   grant — without an open envelope the executor opens its fallback envelope for the authenticated account, and the
-   call runs without the conversation's lift.
-6. Write the outcome: `AIConversationMessagesService::writeToolCallOutcomeIfLeaseHeld($message, $lease)` (exit 4 when
-   refused). A failed tool is an outcome: exit 0 after the write.
-7. Exit 5 when the worker's claim on the conversation was lost.
+1. Apply `--blocked-tools` and `--every-write-blocked` to the static blocks of `MCPToolExecutorService`.
+2. Load the tool-call row `<messageId>` and its conversation fresh (exit 1 when either is missing), adopt the parent's
+   claim when `--run-token` is given (`AIConversationRunClaimsService::adoptRunTokenOfParentProcess()`), and
+   authenticate as the CONVERSATION's account (never the console's default account), so the tool sees the rights the
+   inline call sees.
+3. Claim the row: `AIConversationMessagesService::claimToolCallExecutionLease($messageId, $lease)` (exit 3 when it fails).
+4. Run `AgentToolCallExecutionService::executeToolCall()` under a SIGALRM of `--timeout` seconds, inside an AI usage
+   envelope of its own that carries the conversation's budget-bypass grant. A replacement that runs the call without
+   an open envelope gets the executor's fallback envelope for the authenticated account, and the call runs without
+   the conversation's lift. Exit 5, with no outcome written, when the worker's claim on the conversation was lost.
+5. Write the outcome: `AIConversationMessagesService::writeToolCallOutcomeIfLeaseHeld($message, $lease)` (exit 4 when
+   refused). A failed tool is an outcome, a tool refused over the AI budget too: exit 0 after the write.
 
-What breaks without it: nothing — the calls run one after another and a batch costs the sum of its durations.
+The exit codes are constants of the command: `EXIT_LEASE_NOT_CLAIMED` (3), `EXIT_OUTCOME_WRITE_REFUSED` (4),
+`EXIT_RUN_CLAIM_LOST` (5).
+
+What breaks without a console script: nothing — the calls run one after another and a batch costs the sum of their
+durations.
 
 ## What the parent does around the children (package maintainer)
 

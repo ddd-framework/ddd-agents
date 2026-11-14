@@ -80,10 +80,16 @@ class AIConversationSchedulesService extends EntitiesService
      */
     public const int STATE_SWEEP_BATCH_LIMIT = 200;
 
-    /** @var string Skip reason: the schedule's previous run conversation is still in progress. */
+    /**
+     * @var string Skip reason: the schedule's previous run conversation is still in progress. An application may
+     * redeclare it; the spawn and {@see isSkipReasonOfPreviousRunInProgress()} read it through `static::`.
+     */
     public const string OCCURRENCE_SKIP_REASON_PREVIOUS_RUN_IN_PROGRESS = 'PREVIOUS_RUN_IN_PROGRESS';
 
-    /** @var string Skip reason: the account's SCHEDULE BUDGET POT is exhausted — runs pause until the 1st. */
+    /**
+     * @var string Skip reason: the account's SCHEDULE BUDGET POT is exhausted — runs pause until the 1st. An
+     * application may redeclare it; the spawn and {@see isSkipReasonOfExhaustedBudgetPot()} read it through `static::`.
+     */
     public const string OCCURRENCE_SKIP_REASON_BUDGET_POT_EXHAUSTED = 'BUDGET_POT_EXHAUSTED';
 
     /**
@@ -955,6 +961,54 @@ class AIConversationSchedulesService extends EntitiesService
     }
 
     /**
+     * Whether `$skipReason` (an {@see AIConversationScheduleOccurrenceSpawn::$skipReason} of this service) says the
+     * schedule names no agent space that exists. Compared with this service's own constant, so an application's
+     * service that redeclares the constant answers with its own value; a caller asks this method instead of reading a
+     * constant by class name.
+     *
+     * @param string $skipReason
+     * @return bool
+     */
+    public function isSkipReasonOfMissingAgentSpace(string $skipReason): bool
+    {
+        return $skipReason === static::OCCURRENCE_SKIP_REASON_AGENT_SPACE_MISSING;
+    }
+
+    /**
+     * Whether `$skipReason` says the agent space of the schedule (or, without one, its account) is not eligible for
+     * automated work ({@see isSkipReasonOfMissingAgentSpace()} explains why a caller asks this method).
+     *
+     * @param string $skipReason
+     * @return bool
+     */
+    public function isSkipReasonOfIneligibleAgentSpace(string $skipReason): bool
+    {
+        return $skipReason === static::OCCURRENCE_SKIP_REASON_AGENT_SPACE_NOT_ELIGIBLE;
+    }
+
+    /**
+     * Whether `$skipReason` says the schedule budget pot of the account is exhausted.
+     *
+     * @param string $skipReason
+     * @return bool
+     */
+    public function isSkipReasonOfExhaustedBudgetPot(string $skipReason): bool
+    {
+        return $skipReason === static::OCCURRENCE_SKIP_REASON_BUDGET_POT_EXHAUSTED;
+    }
+
+    /**
+     * Whether `$skipReason` says the previous run conversation of the schedule is still in progress.
+     *
+     * @param string $skipReason
+     * @return bool
+     */
+    public function isSkipReasonOfPreviousRunInProgress(string $skipReason): bool
+    {
+        return $skipReason === static::OCCURRENCE_SKIP_REASON_PREVIOUS_RUN_IN_PROGRESS;
+    }
+
+    /**
      * Spawn the run conversation for a schedule whose occurrence the caller has ALREADY claimed
      * ({@see claimFireOccurrence}) — the shared fire tail of the cron command and the admin `fire-now`:
      * guardrails first (the previous run still in progress → SKIP this occurrence, streak untouched — a long run
@@ -980,7 +1034,7 @@ class AIConversationSchedulesService extends EntitiesService
         $aIConversationsService = AIConversation::getService();
         $previousRunConversation = $aIConversationsService->findNewestScheduleRunConversation((int)$schedule->id);
         if ($previousRunConversation !== null && $previousRunConversation->isRunInProgress()) {
-            return AIConversationScheduleOccurrenceSpawn::skipped(self::OCCURRENCE_SKIP_REASON_PREVIOUS_RUN_IN_PROGRESS);
+            return AIConversationScheduleOccurrenceSpawn::skipped(static::OCCURRENCE_SKIP_REASON_PREVIOUS_RUN_IN_PROGRESS);
         }
         $agentSpace = $this->findAgentSpaceOfSchedule($schedule);
         if ($this->isScheduleUnableToRunForLackOfAgentSpace($schedule, $agentSpace)) {
@@ -1032,7 +1086,7 @@ class AIConversationSchedulesService extends EntitiesService
                 } else {
                     $this->refundClaimedOccurrence($schedule, reArmNow: false);
                 }
-                return AIConversationScheduleOccurrenceSpawn::skipped(self::OCCURRENCE_SKIP_REASON_BUDGET_POT_EXHAUSTED);
+                return AIConversationScheduleOccurrenceSpawn::skipped(static::OCCURRENCE_SKIP_REASON_BUDGET_POT_EXHAUSTED);
             }
         }
         // isset-guarded summary read: accessing an UNSET `summary` would FIRE the Argus summary GENERATOR

@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.0-alpha.18
+
+- The module ships its plain console commands (`DDD\Symfony\Commands\Agents\`, 20 with the mark command) and the
+  chat line editor: schedule fire, compact-finalized, the two event purges, maintenance (snapshot strip, capability
+  rewrite, embedding repair and backfill, environment backfill), diagnosis (diagnose, validate-conversation,
+  cache-diff, activity-lines, tool-response-stats, skill-token-map, context-eviction-sim, compact, search-inspect) and
+  the hidden child-process command `app:ai-agent:execute-tool-call`. A command runs on a schedule only from the cron
+  line the host registers (`templates/crons.sh`).
+- **Behaviour change:** `agentToolCallChildProcess.commandName` defaults to the module's
+  `app:ai-agent:execute-tool-call`; `commandName: null` no longer disables forking — an application that declares a
+  `consoleScript` now forks with the module's command; unset `consoleScript` to stay inline.
+- The schedules service answers which skip an occurrence was (`isSkipReasonOf…()`), and every skip word is produced
+  through `static::`.
+- Cron rows: a host that registered the former template rows (`agent-schedules-fire`,
+  `agent-conversations-finalize-idle`, `agent-events-purge`) keeps them until it deactivates them; `crons.sh` keeps
+  `agent-schedules-fire` (an upsert switches its command) and names the split finalize and purge rows anew.
+- Developer skills: the command list, the host duties, the cron list and the child-process contract follow the
+  shipped commands; the templates for firing schedules, reducing finalized conversations and purging events are
+  removed (the package commands replace them).
+- Test kernel: the cache key is a fingerprint of path, time and size of every watched file.
+
 ## 0.1.0-alpha.17
 
 - Package prompt defaults: the owner's formal or informal form of address is one rule in `Agentic.md` and

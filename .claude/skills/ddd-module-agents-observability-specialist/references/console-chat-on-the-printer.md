@@ -5,8 +5,8 @@
 Contents: what ships and what the host writes · the printer contract · one streamed turn · the contract of the chat command · after the turn · transcripts and the TUI view model · replacing the printer · for the package maintainer · full class names
 
 A console chat is the developer's fastest loop: type, watch every tool call and result stream past, read the payload
-of a call. The package ships the rendering, not the command. The reference kernel's console runs only the
-framework's commands (container lint, router, `app:entity:show-sql`); a chat command is the host's.
+of a call. The package ships the rendering and the line editor with its slash commands
+(`src/Symfony/Commands/Agents/Chat/`), not the chat command; a chat command is the host's.
 
 ## What ships and what the host writes
 

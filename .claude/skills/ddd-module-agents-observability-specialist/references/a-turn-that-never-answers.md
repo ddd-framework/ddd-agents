@@ -11,8 +11,9 @@ the recovery commands themselves are templates of `ddd-module-agents-specialist`
 
 ## First look
 
-1. Run the host's inspect command (the template in the skill): the resume diagnosis, the integrity report, the
-   delegation tree and the transcript of one conversation, all read-only.
+1. Run `app:ai-agent:diagnose <conversationId>` (the resume diagnosis) and
+   `app:ai-agent:validate-conversation <conversationId>` (the integrity report), both read-only without options, or
+   the host's inspect command (the template in the skill), which adds the delegation tree and the transcript.
 2. Read the stored state columns of the conversation (below) and the newest rows of its tail.
 3. Read the turn events of the newest owner message (`AIConversationTurnEventsService::findForConversation()` with
    its index): a `turnEnd` event with its outcome says how the last turn ended; no event at all means no worker ever

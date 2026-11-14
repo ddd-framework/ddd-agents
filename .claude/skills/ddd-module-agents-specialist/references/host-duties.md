@@ -9,27 +9,29 @@ cron list.
 
 ## The table
 
-The package ships services and one console command so far, the finalize mark sweep
-`AgentMarkFinalizedConversationsCommand`. Every other row is a duty of the host until the package ships it.
+The package ships services and the console commands listed in the entry skill ([../SKILL.md](../SKILL.md), section
+"Console commands the package ships"). A shipped command that must run on a schedule runs only when the host
+registers its cron line. Every row that names no package command is a duty of the host.
 
 | Need | State in the package | Class | Start from |
 |---|---|---|---|
 | Declare on the host's tools what the loop reads from a tool | five method attributes exist (`MCPToolReceivesCurrentConversationId`, `MCPToolWritesAgentMemoryOnly`, `MCPToolResultIsNeverStubbedByTheBudget`, `MCPToolShowsNoActivityLine`, `MCPToolSendsMessageToOwner`); no host tool carries one by default | mandatory for a host with a tool that reads its own conversation, memory tools, research reads or tools that message the owner | tools skill `ddd-module-agents-tools-specialist`, references/tool-attributes.md |
-| Fire due schedules; sweep schedule state | services exist, no command | mandatory for unattended runs | `AgentSchedulesFireCommand`, `AgentSchedulesStateSweepCommand` templates + cron lines |
+| Fire due schedules | a package command (`AgentFireDueSchedulesCommand`, `app:ai-conversation:fire-due-schedules`); the host adds its cron line | mandatory for unattended runs | section 1 + cron line |
+| Sweep schedule state | services exist, no command | mandatory for unattended runs | `AgentSchedulesStateSweepCommand` template + cron line |
 | Deliver owed reports and resume owed turns | services exist, no command | mandatory | `AgentOwedWorkRecoveryCommand` template + cron line |
 | Reap runs whose worker died, time out sub-agent groups past their deadline, wake parents of settled groups, settle purposed conversations closed without an owner turn, re-send lost run-end notifications of parents that run no further turn (report delivery of a crashed run depends on it) | services exist, no command | mandatory | `AgentStuckRunsReapCommand` template + cron line |
-| Mark and reduce finalized conversations | the mark is a package command (`AgentMarkFinalizedConversationsCommand`, the host adds its cron line); the reduce: services exist, no command | mandatory | the package command + `AgentFinalizedConversationsReduceCommand` template (its reduce half) + cron lines |
+| Mark and reduce finalized conversations | two package commands (`AgentMarkFinalizedConversationsCommand`, `app:ai-conversation:mark-finalized`; `AgentCompactFinalizedConversationsCommand`, `app:ai-conversation:compact-finalized`); the host adds their cron lines | mandatory | section 5 + cron lines |
 | Workers: six transports, nine message classes, retry policies, a stop grace that lets a turn finish, resetters for the host's process state | constants and handlers exist, the host configures | mandatory | transport block template |
 | The usage envelope middleware for consumed messages | no package ships one | mandatory for a host that gates budgets or attributes usage | middleware template |
 | The overhead-costs middleware | no package ships one; with ddd-ai's defaults there is nothing to book | needed only together with a host cost recorder | middleware template |
 | The Redis cache group | the base system prompt cache reads and writes only the Redis group | mandatory for the cache to be shared: without it the group falls back to each process's APCu, so a bump or warm-up in the web process never reaches the turn workers and a worker reads a stale prompt for up to an hour | [installation.md](installation.md) |
 | Base system prompt cache: renew its inputs versions where the host writes what the prompt renders; build the queued prompts after the response | cache, version bumps and warm queue exist; the package calls neither the bumps nor the warm-up | bumps mandatory once the host's space or account answers feed the prompt; warm-up optional (latency) | section 7 |
-| Purge trace and turn events past their retention (180 days), then the unreferenced turn-event snapshots | service methods exist, no caller | mandatory for a host that runs for months (the three tables grow without bound) | `AgentEventsRetentionPurgeCommand` template + cron line |
+| Purge trace and turn events past their retention (180 days), then the unreferenced turn-event snapshots | two package commands (`AgentTraceEventsPurgeCommand`, `app:ai-agent:trace-events-purge`; `AgentTurnEventsPurgeCommand`, `app:ai-agent:turn-events-purge`); the host adds their cron lines | mandatory for a host that runs for months (the three tables grow without bound) | section 8 + cron lines |
 | Cancel a live run (a stop button, an external agent's cancel) | `cancelLiveRun()` exists, no route and no caller | optional | section 9 |
-| Inspect or diagnose one conversation | diagnostics services and the printer exist, no command | needed to debug | `ddd-module-agents-observability-specialist` |
-| Run one tool call in a child process | config key, default off (calls run inline) | optional | `ddd-module-agents-tools-specialist` |
-| Strip the debug payloads of old request snapshots (`removeDebugPayloadsFromRequestSnapshots()`); rewrite legacy loaded-capability rows (`compactLoadedCapabilities()`); repair embeddings | service methods exist, no caller | optional maintenance (the message table keeps the debug payloads otherwise) | the optional duties; `ddd-module-agents-observability-specialist` (snapshots), `ddd-module-agents-context-specialist` (capability rows, embeddings) |
-| Stamp the environment on old conversations (`backfillEnvironmentOnUnstampedConversations()`) | service method exists, no caller | needed once, when a host starts running several environments on one database | the optional duties |
+| Inspect or diagnose one conversation | package commands for each part (`app:ai-agent:diagnose`, `app:ai-agent:validate-conversation`, `app:ai-agent:cache-diff`); no command that prints all parts and the transcript at once | needed to debug | `ddd-module-agents-observability-specialist` (the inspect template) |
+| Run one tool call in a child process | a package command (`AgentExecuteToolCallCommand`, `app:ai-agent:execute-tool-call`, hidden); off until the host names its console script in `agentToolCallChildProcess.php` (calls run inline) | optional | `ddd-module-agents-tools-specialist` |
+| Strip the debug payloads of old request snapshots (`removeDebugPayloadsFromRequestSnapshots()`); rewrite legacy loaded-capability rows (`compactLoadedCapabilities()`); repair and complete embeddings | package commands (`app:ai-agent:request-snapshot-debug-payloads-strip`, `app:ai-agent:loaded-capabilities-compact`, `app:ai-conversation:repair-zero-embeddings`, `app:ai-conversation:backfill-message-embeddings`); the host adds a cron line for each it wants on a schedule | optional maintenance (the message table keeps the debug payloads otherwise) | the optional duties; `ddd-module-agents-observability-specialist` (snapshots), `ddd-module-agents-context-specialist` (capability rows, embeddings) |
+| Stamp the environment on old conversations (`backfillEnvironmentOnUnstampedConversations()`) | a package command (`app:ai-conversation:backfill-environment`) | needed once, when a host starts running several environments on one database | the optional duties |
 | Prefetch the situation of spaces whose schedule fires soon (`findAgentSpacesWithRunDueBetween()`) | selector exists, no caller | optional | `ddd-module-agents-autonomy-specialist` (the selector), `ddd-module-agents-context-specialist` (what the situational context is, `DDD\Domain\AI\Services\Conversations\Situations\AgentSituationalContextService`) |
 | Regenerate the Doctrine models after every Composer install and update (a host with `DATABASE_TABLE_PREFIX` or `tableNames`) | the generation command exists, no package declares a Composer script | mandatory for a host with a table prefix or own table names | [installation.md](installation.md), [tables-and-persisted-names.md](tables-and-persisted-names.md) |
 | A test that reads the widgets' contract fixtures; a command that writes the composed-view schema file | the fixtures and the schema exist, no test or command for the host | needed for a host with a frontend (wire contract) | `ddd-module-agents-widgets-specialist` |
@@ -49,7 +51,8 @@ The package ships services and one console command so far, the finalize mark swe
 
 ## The shared shape of a host command
 
-Every template under `templates/` follows the same rules; keep them when adapting one.
+Every template under `templates/` follows the same rules; keep them when adapting one. The package's commands of
+sections 1, 5 and 8 follow them on the base `AgentConsoleCommand`, except where their sections say otherwise.
 
 - **Rights off for the scan, account per row.** A cron has no authenticated account. The command lifts the entity
   rights (`DDDService::deactivateEntityRightsRestrictions()`) and restores them in a `finally`
@@ -94,16 +97,19 @@ Every template under `templates/` follows the same rules; keep them when adaptin
 
 | | |
 |---|---|
-| Template | `templates/AgentSchedulesFireCommand.php` |
-| When | every minute to every five minutes; a schedule fires at most one tick late |
+| Command | `app:ai-conversation:fire-due-schedules` (`AgentFireDueSchedulesCommand`); options `--batch` (default `DUE_SCHEDULES_BATCH_LIMIT`), `--dry-run` (lists the due schedules, claims nothing), `--ignore-budget` (never in the cron line: every run the pass spawns would carry the budget bypass) |
+| When | every minute to every five minutes, from the host's cron line; a schedule fires at most one tick late |
 | Calls | `AIConversationSchedulesService::findDueScheduleIds()`, per row `AIConversationSchedule::buildTransitionTo()` with `OPERATION_EXPIRE` (then `transitionStatus()` to `EXPIRED`), `claimFireOccurrence()`, `spawnRunConversationForClaimedSchedule()` |
 | Account | none; the spawn runs the run as the schedule's own account |
 | Envelope | none; the run is dispatched to the turn worker |
 | Returns | ids (bounded by `DUE_SCHEDULES_BATCH_LIMIT`); the claim a bool (false: another runner or a pause won); the spawn an `AIConversationScheduleOccurrenceSpawn` with the run conversation or a skip reason (`OCCURRENCE_SKIP_REASON_PREVIOUS_RUN_IN_PROGRESS`, `OCCURRENCE_SKIP_REASON_BUDGET_POT_EXHAUSTED`, `OCCURRENCE_SKIP_REASON_AGENT_SPACE_NOT_ELIGIBLE`, `OCCURRENCE_SKIP_REASON_AGENT_SPACE_MISSING`) |
 | Without it | no schedule ever runs: timed, recurring and instant background tasks wait forever |
 
-Two runners never fire one occurrence twice. The fire contract, the skip rules, the budget pot and the run's report
-duty: `ddd-module-agents-autonomy-specialist`.
+Two runners never fire one occurrence twice. The command counts every skip by asking the schedules service which one
+it was (`isSkipReasonOfMissingAgentSpace()`, `isSkipReasonOfIneligibleAgentSpace()`, `isSkipReasonOfExhaustedBudgetPot()`,
+`isSkipReasonOfPreviousRunInProgress()`), so a host service that declares its own skip words is counted right; a
+reason the service does not name is counted as "other reason". The fire contract, the skip rules, the budget pot and
+the run's report duty: `ddd-module-agents-autonomy-specialist`.
 
 ## 2. Sweep schedule state
 
@@ -161,11 +167,11 @@ claims and release: `ddd-module-agents-loop-specialist`; sub-agent groups and th
 
 | | |
 |---|---|
-| Template | `templates/AgentFinalizedConversationsReduceCommand.php` |
-| When | every five minutes; the idle window (60 minutes in the template) decides when a conversation counts as finished |
+| Commands | `app:ai-conversation:mark-finalized` (`AgentMarkFinalizedConversationsCommand`; `--idle-minutes`, default 60; `--dry-run` counts) and `app:ai-conversation:compact-finalized` (`AgentCompactFinalizedConversationsCommand`; `--batch`, default 50; `--dry-run` lists the ids; `--inline=<id>` runs the finalize chain of one conversation in the console, with `--rebuild-summary` and `--ignore-budget` as options) |
+| When | every five minutes each, from the host's cron lines; the idle window decides when a conversation counts as finished |
 | Calls | `AIConversationsService::markIdleConversationsFinalized()` (dry run: `countIdleConversationsToFinalize()`), `findFinalizedConversationIdsOwingCompletionCompaction()`, per id an `AIConversationFinalizeMessage` dispatched as the conversation's account |
-| Account | none for the mark; the conversation's own per dispatch |
-| Envelope | none in the command; the finalize message declares `ENVELOPE_AI_CONVERSATION_COMPACTION`, which the host's envelope middleware opens; the handler lifts the budget for this maintenance work only inside that envelope |
+| Account | none for the mark; the conversation's own per dispatch. A conversation whose account is not found is dispatched under the account the run started with (none in a cron), not skipped |
+| Envelope | none in the sweep; the finalize message declares `ENVELOPE_AI_CONVERSATION_COMPACTION`, which the host's envelope middleware opens; the handler lifts the budget for this maintenance work only inside that envelope. `--inline` opens that envelope itself |
 | Returns | the number marked (one unbounded UPDATE); bare ids, bounded by the batch size |
 | Without it | a finished conversation is never completion-compacted, gets no final display summary and no quality scorecard; recall and search over old conversations stay on their raw rows |
 
@@ -212,8 +218,8 @@ renews no inputs version and runs no warm-up itself; its chat traits only queue 
 
 | | |
 |---|---|
-| Template | `templates/AgentEventsRetentionPurgeCommand.php` |
-| When | daily |
+| Commands | `app:ai-agent:trace-events-purge` (`AgentTraceEventsPurgeCommand`) and `app:ai-agent:turn-events-purge` (`AgentTurnEventsPurgeCommand`: the turn events, then the unreferenced snapshots); options `--days` (default `RETENTION_DAYS`, 180), `--batch` (rows per DELETE, default 5000), `--dryRun` (prints the cutoff, deletes nothing); neither takes a process lock |
+| When | daily, from the host's cron lines |
 | Calls | `AIConversationTraceEventsService::purgeOlderThanDays()`, `AIConversationTurnEventsService::purgeOlderThanDays()` (both default to `RETENTION_DAYS`, 180), then `AIConversationTurnEventsService::purgeUnreferencedSnapshots()`, always after the turn events |
 | Account | none; raw statements, no rights |
 | Envelope | none, no model call |
@@ -235,24 +241,34 @@ The run states and the claim the cancel takes away: `ddd-module-agents-loop-spec
 
 ## The optional duties
 
-- **Child processes for parallel tool calls.** `config/app/AI/agentToolCallChildProcess.php` names a host command; its
-  contract (arguments, lease, exit codes) is in the file's docblock and in `ddd-module-agents-tools-specialist`.
+- **Child processes for parallel tool calls.** The package ships the child's command (`app:ai-agent:execute-tool-call`);
+  the host's `config/app/AI/agentToolCallChildProcess.php` names its console script. The contract (arguments, lease,
+  exit codes) is in the file's docblock and in `ddd-module-agents-tools-specialist`.
 - **Report e-mail and scorecards.** Same-path subclasses of `DDD\Domain\AI\Services\Conversations\Agent\AgentOwnerReportEmailsService` and
   `DDD\Domain\AI\Services\Conversations\Quality\AgentConversationScorecardsService`; the report mail retries for a day, then gives up and keeps its claim.
 - **Strip old request snapshots and rewrite legacy capability rows.** `AIConversationMessagesService::removeDebugPayloadsFromRequestSnapshots()`
   and `compactLoadedCapabilities()` are batched rewrites of the message table with a cursor in Redis, a time budget
-  and a pause while the database is busy; every limit is a parameter the host's command passes. Without the first,
-  the debug payloads of every model request stay in the message table.
+  and a pause while the database is busy. The package's commands `app:ai-agent:request-snapshot-debug-payloads-strip`
+  and `app:ai-agent:loaded-capabilities-compact` pass every limit as an option; as nightly cron lines they need
+  `--maxSeconds` below the ticker's 360 s (their default is 1500 s). Run the second only once every process that
+  reads these rows reads the chain format. Without the first, the debug payloads of every model request stay in the
+  message table.
+- **Repair and complete the embeddings.** `app:ai-conversation:repair-zero-embeddings` re-embeds the embeddings that
+  hold the zero vector (dry run unless `--apply`); `app:ai-conversation:backfill-message-embeddings` embeds the
+  messages that have no embedding row. Both are optional.
 - **Stamp the environment on old conversations.** A host that starts running several environments on one database
   (an override of `AgentEnvironmentNamesService`) stamps the rows written before with
-  `AIConversationsService::backfillEnvironmentOnUnstampedConversations()` (dry run: `countConversationsWithoutEnvironment()`);
+  `app:ai-conversation:backfill-environment`, once (`--dryRun` counts; the command calls
+  `AIConversationsService::backfillEnvironmentOnUnstampedConversations()` and `countConversationsWithoutEnvironment()`);
   until then production adopts every unstamped row.
 - **A settled-turn listener's own recovery.** `DDD\Domain\AI\Listeners\Conversations\AIConversationSettledOwnerTurnListener` swallows a throw; a listener
   whose work must not be lost needs a pass of its own (for example in the owed-work command).
 
 ## The cron list
 
-`templates/crons.sh` registers the six commands as rows of the framework's cron table with `app:crons:upsert`; the
-host's system scheduler runs `app:crons:execute` every minute. The ticker gives each command at most
-`Crons::TIMEOUT_PER_CRON_IN_SECONDS` (360 s), then stops it. The bounded passes stay far below that; the reaper stays
-below it only while few runs are stuck.
+`templates/crons.sh` registers the commands that run on a schedule as rows of the framework's cron table with
+`app:crons:upsert`: the package's fire, finalize mark, completion compaction and two purge commands, and the host's
+sweep, owed-work and reaper commands; the optional maintenance rows are commented out. The host's system scheduler
+runs `app:crons:execute` every minute. The ticker gives each command at most `Crons::TIMEOUT_PER_CRON_IN_SECONDS`
+(360 s), then stops it. The bounded passes stay far below that; the reaper stays below it only while few runs are
+stuck; a maintenance command with a time budget gets `--maxSeconds` below it.

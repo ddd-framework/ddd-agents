@@ -124,6 +124,7 @@ src/Domain/AI/Entities/Conversations/Agent/StateDelivery/**	context
 src/Domain/AI/Entities/Conversations/AIConversationLiveCallProbe.php	context
 src/Domain/AI/Entities/Conversations/Recall/**	context
 src/Domain/AI/Entities/Conversations/Languages/**	context
+src/Domain/AI/Entities/Conversations/Messages/EvictionSimulation/**	context
 src/Domain/AI/Entities/Conversations/Messages/Loaded*	context
 src/Domain/AI/Entities/Conversations/Messages/PersistedLoadedCapabilitiesState.php	context
 src/Domain/AI/Entities/Conversations/Messages/ContextRetentionSettings.php	context

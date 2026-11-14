@@ -20,9 +20,9 @@ the module compiler pass registers them.
 configuration; under another root namespace the host maps every class it overrides in its `services.yaml`. The lookup
 order and the folder scans it does not cover: [override-points.md](override-points.md).
 
-The package ships one console command so far (the finalize mark sweep `AgentMarkFinalizedConversationsCommand`), no
-route of its own for starting a conversation, no transport configuration and no envelope middleware. The host
-provides the rest: [host-duties.md](host-duties.md).
+The package ships the console commands listed in [../SKILL.md](../SKILL.md) (section "Console commands the package
+ships"), no route of its own for starting a conversation, no transport configuration and no envelope middleware. The
+host provides the rest and registers the cron lines of the scheduled commands: [host-duties.md](host-duties.md).
 
 ## The checklist
 
@@ -68,8 +68,9 @@ provides the rest: [host-duties.md](host-duties.md).
    at account level. Template: the minimal template of the skill and `ReferenceConversationsController`. Hooks and
    their defaults: [override-points.md](override-points.md).
 10. **Messenger.** Six transports, the routing and two middlewares: [transports-and-workers.md](transports-and-workers.md).
-11. **The host commands and the cron list.** Without them nothing fires schedules, recovers a lost turn, reaps a dead
-    worker, finalizes a conversation or purges the event tables: [host-duties.md](host-duties.md).
+11. **The cron list and the host commands.** Without the cron lines of the package's scheduled commands and the host's
+    sweep, owed-work and reaper commands nothing fires schedules, recovers a lost turn, reaps a dead worker, finalizes
+    a conversation or purges the event tables: [host-duties.md](host-duties.md), `templates/crons.sh`.
 12. **Skills and tools.** `config/app/AI/skillPackages.php` of the host replaces the package's file whole and lists
     every skill the host offers; one skill file per skill under `config/app/AI/Skills/`; one MCP package per tool
     group. [first-capability-end-to-end.md](first-capability-end-to-end.md).

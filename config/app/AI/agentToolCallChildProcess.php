@@ -2,17 +2,21 @@
 
 declare(strict_types=1);
 
+use DDD\Domain\AI\Services\Conversations\AgentToolCallForkJoinService;
+
 /**
  * The console command that executes ONE persisted tool call in a process of its own — read as
- * `Config::get('AI.agentToolCallChildProcess')` by
- * {@see \DDD\Domain\AI\Services\Conversations\AgentToolCallForkJoinService}. The module ships no command for it:
- * establishing the account a tool runs under and accounting its usage is the application's. An application that
- * wants the parallel-safe tool calls of one model response to run concurrently replaces this file whole with its own
- * `config/app/AI/agentToolCallChildProcess.php` (keys are never merged). The package default declares none, and every
- * call runs inline.
+ * `Config::get('AI.agentToolCallChildProcess')` by {@see AgentToolCallForkJoinService}. The module ships the command
+ * ({@see \DDD\Symfony\Commands\Agents\AgentExecuteToolCallCommand}, `app:ai-agent:execute-tool-call`); what the
+ * application declares is its console script. An application that wants the parallel-safe tool calls of one model
+ * response to run concurrently replaces this file whole with its own `config/app/AI/agentToolCallChildProcess.php`
+ * (keys are never merged) that names its `consoleScript`. Without a console script every call runs inline.
  *
- * `consoleScript`: the application's console script, relative to the kernel project directory (e.g. `bin/console`).
- * `commandName`: the name of the application's command.
+ * `consoleScript`: the application's console script, relative to the kernel project directory (e.g. `bin/console`);
+ *   null = no child processes.
+ * `commandName`: the command a child runs; a file that omits it (or sets null) gets the module's command
+ *   ({@see AgentToolCallForkJoinService::DEFAULT_CHILD_PROCESS_COMMAND_NAME}). Name another command only when the
+ *   application replaces the module's command under a name of its own.
  *
  * The turn worker starts `php <project directory>/<consoleScript> --no-debug <commandName> <messageId> --lease=<token>
  * --timeout=<seconds>` and adds `--run-token=<token>` (the worker's claim on the conversation; the child adopts it
@@ -28,5 +32,5 @@ declare(strict_types=1);
  */
 return [
     'consoleScript' => null,
-    'commandName' => null,
+    'commandName' => AgentToolCallForkJoinService::DEFAULT_CHILD_PROCESS_COMMAND_NAME,
 ];

@@ -186,8 +186,8 @@ purpose sets them in its `contextRetention:` map. The purpose file format belong
 
 ## Cross-references
 
-- Installation, the transports that run compaction and embeddings, host duties (marking and reducing finalized
-  conversations, repairing embeddings): the entry skill, `ddd-module-agents-specialist`.
+- Installation, the transports that run compaction and embeddings, the commands that finalize conversations and repair
+  embeddings, and their cron lines: the entry skill, `ddd-module-agents-specialist`.
 - The turn that builds and sends the call, run claims, the summary call, task plan rendering: the loop skill,
   `ddd-module-agents-loop-specialist`.
 - What a skill file declares (`nonEvictable`, sections keyed on a variant, the purpose's `contextRetention:` map and

@@ -66,12 +66,13 @@ explained in `ddd-module-agents-loop-specialist` (usage scopes and cost summarie
 
 ## The scorecard worker
 
-The chain: a host command marks idle conversations finalized (`AIConversationsService::markIdleConversationsFinalized()`)
-and dispatches an `AIConversationFinalizeMessage` per conversation (the mark and the completion compaction:
+The chain: the package's command `app:ai-conversation:mark-finalized` marks idle conversations finalized
+(`AIConversationsService::markIdleConversationsFinalized()`) and `app:ai-conversation:compact-finalized` dispatches an
+`AIConversationFinalizeMessage` per conversation (the mark and the completion compaction:
 `ddd-module-agents-context-specialist`); `AIConversationFinalizeHandler` runs the completion compaction and, in a
 `finally` — whether the compaction succeeded or not — dispatches an `AIConversationScorecardMessage` for a root
-conversation (transport `ai_conversation_scorecard`, `AgentMessengerTransports::SCORECARD`). No finalize command, no
-scorecard.
+conversation (transport `ai_conversation_scorecard`, `AgentMessengerTransports::SCORECARD`). No cron line for the two
+commands, no scorecard.
 `AIConversationScorecardHandler` restores the account, loads the conversation, skips an account whose AI data was
 erased, and calls `AgentConversationScorecardsService::writeScorecardOfFinalizedConversation($conversation,
 $forceAnalysis)`; a failure is logged, never rethrown.
