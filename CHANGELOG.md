@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.10
+
+- The tool-less step after a refused identical write is forced only when the loop already refused that call once in
+  the turn. Before, a repeat of a write that ran in the same turn paused the tools on its first refusal.
+
 ## 0.1.0-alpha.9
 
 - A `done` / `not_applicable` tick on a criterion leaf the record parks (`blockedByOwnerStatement()`) is no longer

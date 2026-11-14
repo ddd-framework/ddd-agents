@@ -338,11 +338,13 @@ class AgentToolCallDispatchService extends Service
                 $toolCall->markCompleted();
                 $toolCall->wasRefusedAsDuplicate = true;
                 // The refusal says "continue with the NEXT open item" — the tools must still be there for it. The
-                // tool-less step is forced only on the SECOND identical write of the turn (the read branch's rule —
-                // the perseveration the breaker exists for); the first refusal keeps the tools. A plan-state proxy
-                // ("nothing owner-free owed") forced the step on a model-set blocked item and on a parked judgement
-                // leaf, taking the tools away from the writes the plan still owed.
-                if ($repeatCount >= 2) {
+                // tool-less step is forced only when the loop already refused this call once in the turn (the
+                // perseveration the breaker exists for); the first refusal keeps the tools, also when the write it
+                // repeats ran in this same turn — counting that executed write as a repeat paused the tools on the
+                // first refusal, and the model, left without the tool of the next open item, told the owner it could
+                // not do the work. A plan-state proxy ("nothing owner-free owed") forced the step on a model-set
+                // blocked item and on a parked judgement leaf, taking the tools away from the writes the plan still owed.
+                if ($repeatedCallCheck->countRefusedRepeatsOfTheSameCallInTurn() >= 1) {
                     $forceToolLessAnswerStep = true;
                 }
             } elseif (($earlierUnsavedCall = $repeatedCallCheck->findEarlierUnsavedIdenticalCallInTurn()) !== null) {

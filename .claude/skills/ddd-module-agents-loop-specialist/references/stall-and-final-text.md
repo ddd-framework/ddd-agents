@@ -135,8 +135,9 @@ step is left (`armForcedOwnerReportCallIfOwed()`; `ddd-module-agents-autonomy-sp
   `wait_for_sub_agents` row (`appendPlatformWaitForSubAgentsRow()`), closes the evidence leaves, `parkedForDelegates()`.
 - Steps, cost or a repeat abort ended the turn → the terminal ERROR row plus the template run report
   (`AgentRunTerminalReport::forLoopStopWithSavedWrites()`), which names the writes that landed.
-- A refused identical write → the next step runs without tools (`AgentLoopCorrectionState::$forceToolLessAnswerStep`):
-  the model writes the answer instead of repeating the call.
+- An identical write the loop already refused once in this turn, or the third identical call → the next step runs
+  without tools (`AgentLoopCorrectionState::$forceToolLessAnswerStep`); the first refusal keeps the tools so the model
+  can go on with the next open item.
 
 ## 8. The loop's memory between steps
 
