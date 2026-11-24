@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+- npm: the 0.2 line publishes with the dist-tag `release-0.2` (npm refused `v0.2` as a semver range, so 0.2.2 reached
+  Packagist but not npm). Code identical to 0.2.2; take 0.2.3 for Composer and npm alike.
+
 ## 0.2.2
 
 Maintenance release of the 0.2 line (branch `release/0.2`; the same settings ship on the 0.3 line):
@@ -14,7 +19,7 @@ Maintenance release of the 0.2 line (branch `release/0.2`; the same settings shi
 - Host step: a host that wants the write gate sets `writeAfterUntrustedRead` to `ownerConsent` (with the decision site
   `ownerConsent` `on`) or `refuse` in its own `config/app/AI/untrustedContent.php`. A host that replaces the file keeps
   working: a missing key is `off` / `refuse`.
-- npm: published with the dist-tag `v0.2` (not `latest`).
+- npm: not published (see 0.2.3).
 
 ## 0.2.1
 

@@ -75,13 +75,13 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           case "$VERSION" in *-*) DIST_TAG=next ;; *) DIST_TAG=latest ;; esac
-          # A release of an older line (a maintenance branch) never moves latest: it gets the dist-tag v<major>.<minor>.
+          # A release of an older line (a maintenance branch) never moves latest: it gets the dist-tag release-<major>.<minor> (npm refuses a tag that is a semver range, such as v0.2).
           LATEST=$(npm view @mgamadeus/ddd-agents dist-tags.latest --registry https://registry.npmjs.org 2>/dev/null || true)
           if [ "$DIST_TAG" = latest ] && [ -n "$LATEST" ] && node -e '
             const [a, b] = process.argv.slice(1).map((v) => v.split(".").map(Number));
             for (let i = 0; i < 3; i++) { if (a[i] !== b[i]) process.exit(a[i] < b[i] ? 0 : 1); }
             process.exit(1);' "$VERSION" "$LATEST"; then
-            DIST_TAG="v$(echo "$VERSION" | cut -d. -f1,2)"
+            DIST_TAG="release-$(echo "$VERSION" | cut -d. -f1,2)"
           fi
           echo "Publishing ${VERSION} with dist-tag ${DIST_TAG} (latest is ${LATEST:-none})"
           unset NODE_AUTH_TOKEN
