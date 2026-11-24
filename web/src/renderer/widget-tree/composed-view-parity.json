@@ -594,6 +594,7 @@
             "ComposedView",
             "ConversationSearchResults",
             "CustomVisualization",
+            "DriveFiles",
             "EntityMention",
             "MultiChoice",
             "QuickReplies",

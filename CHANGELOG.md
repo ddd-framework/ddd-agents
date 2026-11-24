@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.4
+
+- The shipped ComposedView node schema (`web/src/renderer/widget-tree/composed-node-schema.json`, also in the npm
+  package under `dist/files/renderer/widget-tree/`) lists the widget `DriveFiles` again: it was declared by the module
+  but missing from the generated file, so the package renderer did not know it as a widget node of a ComposedView.
+  Regenerated from `ComposedViewNodeSchemaParts::buildModuleSchemaJson()`.
+- The parity fixture (`composed-view-parity.json`, `stubSchema.widgetTypes`) lists `DriveFiles` too. A host parity test
+  reading the fixture no longer sees a package widget as unknown.
+- Guard: a web spec fails when the fixture's stub schema misses a widget or embeddable widget of the shipped schema;
+  the PHP suite's `ComposedViewNodeSchemaExportCommandTest` holds the shipped file equal to the registered classes.
+- Host steps: none.
+
 ## 0.2.3
 
 - npm: the 0.2 line publishes with the dist-tag `release-0.2` (npm refused `v0.2` as a semver range, so 0.2.2 reached
