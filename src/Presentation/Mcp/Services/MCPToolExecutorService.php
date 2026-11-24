@@ -887,7 +887,8 @@ class MCPToolExecutorService extends Service
 
                 // THE WRITE AFTER AN UNTRUSTED READ: once the current turn read content the platform does not vouch for
                 // ({@see MCPToolContentTrust}), a WRITE or DELETE waits for the owner's consent (or is refused, per
-                // `AI.untrustedContent.writeAfterUntrustedRead`), and a fetch of a model-built URL is refused.
+                // `AI.untrustedContent.writeAfterUntrustedRead`, off by default), and a fetch of a model-built URL is refused
+                // (`AI.untrustedContent.unseenUrlAfterUntrustedRead`).
                 $untrustedReadRefusal = $this->holdCallAfterUntrustedRead($toolName, $reflection, $method, $arguments, $serverProvidedInput);
                 if ($untrustedReadRefusal !== null) {
                     $this->releaseFirstUseMandateBindingOfFailedCall();
@@ -1639,10 +1640,12 @@ class MCPToolExecutorService extends Service
      * The gate after an untrusted read of the current owner turn (agent calls only: an MCP client of the owner, an
      * evaluation harness's own calls and a call outside a conversation pass):
      * - a tool declaring {@see MCPToolFetchesModelChosenUrl} is refused for a URL whose query string or fragment appears
-     *   in no owner message and no tool result of the conversation;
-     * - a WRITE or DELETE (or a tool without a declared effect) is refused under `refuse`, else runs only with the
-     *   owner's consent to this step ({@see OwnerConsentsService}); a tool that asks for consent itself
-     *   ({@see MCPToolRequiresOwnerConfirmation}) is left to its own step. WORKSPACE and READ pass.
+     *   in no owner message and no tool result of the conversation (`unseenUrlAfterUntrustedRead: refuse`, the
+     *   default; `off` lets it run);
+     * - a WRITE or DELETE (or a tool without a declared effect) runs as any write under `off` (the default), is refused
+     *   under `refuse`, and under `ownerConsent` runs only with the owner's consent to this step
+     *   ({@see OwnerConsentsService}); a tool that asks for consent itself ({@see MCPToolRequiresOwnerConfirmation}) is
+     *   left to its own step. WORKSPACE and READ pass.
      *
      * @param array<array-key, mixed> $arguments
      * @return MCPToolResponse|null the refusal, null when the call may run
@@ -1667,7 +1670,7 @@ class MCPToolExecutorService extends Service
             return null;
         }
         $fetchAttributes = $method->getAttributes(MCPToolFetchesModelChosenUrl::class);
-        if ($fetchAttributes !== []) {
+        if ($fetchAttributes !== [] && $this->getUnseenUrlAfterUntrustedReadMode() === MCPToolContentTrust::UNSEEN_URL_AFTER_UNTRUSTED_READ_REFUSE) {
             /** @var MCPToolFetchesModelChosenUrl $fetchAttribute */
             $fetchAttribute = $fetchAttributes[0]->newInstance();
             $unseenUrl = null;
@@ -1691,7 +1694,11 @@ class MCPToolExecutorService extends Service
         if ($method->getAttributes(MCPToolRequiresOwnerConfirmation::class) !== []) {
             return null;
         }
-        if ($this->getWriteAfterUntrustedReadMode() === MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_REFUSE) {
+        $writeAfterUntrustedReadMode = $this->getWriteAfterUntrustedReadMode();
+        if ($writeAfterUntrustedReadMode === MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_OFF) {
+            return null;
+        }
+        if ($writeAfterUntrustedReadMode === MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_REFUSE) {
             return MCPToolResponse::finalRefusal(
                 "Tool '{$toolName}' was NOT executed: this turn read content written by third parties (" . implode(', ', $untrustedReadToolNames)
                 . '), and this application takes no write in such a turn. Tell the owner exactly what you would change; the owner starts it with a new message.',
@@ -1750,6 +1757,12 @@ class MCPToolExecutorService extends Service
     protected function getWriteAfterUntrustedReadMode(): string
     {
         return MCPToolContentTrust::getWriteAfterUntrustedReadMode();
+    }
+
+    /** `AI.untrustedContent.unseenUrlAfterUntrustedRead` ({@see MCPToolContentTrust::getUnseenUrlAfterUntrustedReadMode()}). */
+    protected function getUnseenUrlAfterUntrustedReadMode(): string
+    {
+        return MCPToolContentTrust::getUnseenUrlAfterUntrustedReadMode();
     }
 
     /**

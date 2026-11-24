@@ -18,6 +18,8 @@ class UntrustedReadGateToolExecutor extends MCPToolExecutorService
 
     public string $writeAfterUntrustedReadMode = MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_OWNER_CONSENT;
 
+    public string $unseenUrlAfterUntrustedReadMode = MCPToolContentTrust::UNSEEN_URL_AFTER_UNTRUSTED_READ_REFUSE;
+
     /** The reservation the consent step answers; null = the package's own service */
     public ?OwnerConsentReservation $givenOwnerConsentReservation = null;
 
@@ -39,5 +41,10 @@ class UntrustedReadGateToolExecutor extends MCPToolExecutorService
     protected function getWriteAfterUntrustedReadMode(): string
     {
         return $this->writeAfterUntrustedReadMode;
+    }
+
+    protected function getUnseenUrlAfterUntrustedReadMode(): string
+    {
+        return $this->unseenUrlAfterUntrustedReadMode;
     }
 }

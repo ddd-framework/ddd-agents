@@ -80,8 +80,9 @@ breaker, and the statistics that show whether a decision earns its place.
   where the counter does not bounce. What decides is the `turnClosing` site mode alone. Every other conversation runs
   the counter alone (the sequence itself: `ddd-module-agents-loop-specialist`).
 - **A READ tool is untrusted unless it declares `MCPToolReturnsTrustedContent`** (or is listed in
-  `untrustedContent.php`): after its call a write of the same turn needs the owner's consent, and with `ownerConsent`
-  not `on` that write is refused. Declare trust on the packages that read only the platform's own records.
+  `untrustedContent.php`). The write gate after such a read is opt-in (`writeAfterUntrustedRead`: `off` by default,
+  `ownerConsent` or `refuse`); the refusal of an unseen model-built URL has its own key (`unseenUrlAfterUntrustedRead`,
+  `refuse` by default). Declare trust on the packages that read only the platform's own records.
 - **A transient conversation is never screened** for injections: its message ids are not real rows.
 - **The breaker is shared by every runner site.** One transport failure of a runner site benches every runner site in
   every worker for `breakerSeconds`. The owner-message injection check neither trips nor closes it; the tool-result

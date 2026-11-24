@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace DDD\Domain\AI\Entities\MCPPackages;
 
 use DDD\Infrastructure\Libs\Config;
+use DDD\Infrastructure\Services\DDDService;
+use DDD\Infrastructure\Services\IssuesLogService;
+use Psr\Log\LogLevel;
 use ReflectionClass;
 use ReflectionMethod;
+use RuntimeException;
+use Throwable;
 
 /**
  * Whether a tool returns untrusted content — the rule every reader asks (the tool documentation, the tool-result
@@ -23,11 +28,23 @@ use ReflectionMethod;
  */
 class MCPToolContentTrust
 {
+    /** A write after an untrusted read runs as any write (the package default; the gate is opt-in) */
+    public const string WRITE_AFTER_UNTRUSTED_READ_OFF = 'off';
+
     /** The write after an untrusted read waits for the owner's consent (the owner-consent check) */
     public const string WRITE_AFTER_UNTRUSTED_READ_OWNER_CONSENT = 'ownerConsent';
 
     /** The write after an untrusted read is refused in that turn (the owner starts it with a new message) */
     public const string WRITE_AFTER_UNTRUSTED_READ_REFUSE = 'refuse';
+
+    /** A fetch of a model-built URL nobody showed is refused after an untrusted read (the package default) */
+    public const string UNSEEN_URL_AFTER_UNTRUSTED_READ_REFUSE = 'refuse';
+
+    /** A fetch of a model-built URL after an untrusted read runs as any fetch */
+    public const string UNSEEN_URL_AFTER_UNTRUSTED_READ_OFF = 'off';
+
+    /** Whether an unknown `writeAfterUntrustedRead` value was reported in this process */
+    protected static bool $unknownWriteAfterUntrustedReadModeReported = false;
 
     /** @var array<string, bool> tool name → untrusted, memoized per process */
     protected static array $isUntrustedByToolName = [];
@@ -122,15 +139,57 @@ class MCPToolContentTrust
     }
 
     /**
-     * What a write after an untrusted read of the same turn gets (`writeAfterUntrustedRead`). Any value other than
-     * `refuse` is the owner-consent check: no setting switches the protection off.
+     * What a write after an untrusted read of the same turn gets (`writeAfterUntrustedRead`): `off` (the default, the
+     * write runs as any write), `ownerConsent` (the owner-consent check) or `refuse`. A missing value is `off`; an
+     * unknown value is `off` too and is reported once per process in the issues log.
+     *
      * @return string WRITE_AFTER_UNTRUSTED_READ_*
      */
     public static function getWriteAfterUntrustedReadMode(): string
     {
-        return Config::get('AI.untrustedContent.writeAfterUntrustedRead') === static::WRITE_AFTER_UNTRUSTED_READ_REFUSE
-            ? static::WRITE_AFTER_UNTRUSTED_READ_REFUSE
-            : static::WRITE_AFTER_UNTRUSTED_READ_OWNER_CONSENT;
+        $configuredMode = Config::get('AI.untrustedContent.writeAfterUntrustedRead');
+        if ($configuredMode === null || $configuredMode === static::WRITE_AFTER_UNTRUSTED_READ_OFF) {
+            return static::WRITE_AFTER_UNTRUSTED_READ_OFF;
+        }
+        if (in_array($configuredMode, [static::WRITE_AFTER_UNTRUSTED_READ_OWNER_CONSENT, static::WRITE_AFTER_UNTRUSTED_READ_REFUSE], true)) {
+            return $configuredMode;
+        }
+        static::reportUnknownWriteAfterUntrustedReadModeOnce($configuredMode);
+        return static::WRITE_AFTER_UNTRUSTED_READ_OFF;
+    }
+
+    /**
+     * What a fetch of a model-built URL whose query string or fragment nobody showed gets after an untrusted read
+     * (`unseenUrlAfterUntrustedRead`, {@see MCPToolFetchesModelChosenUrl}): `refuse` (the default) or `off`. Any value
+     * other than `off` is `refuse`.
+     *
+     * @return string UNSEEN_URL_AFTER_UNTRUSTED_READ_*
+     */
+    public static function getUnseenUrlAfterUntrustedReadMode(): string
+    {
+        return Config::get('AI.untrustedContent.unseenUrlAfterUntrustedRead') === static::UNSEEN_URL_AFTER_UNTRUSTED_READ_OFF
+            ? static::UNSEEN_URL_AFTER_UNTRUSTED_READ_OFF
+            : static::UNSEEN_URL_AFTER_UNTRUSTED_READ_REFUSE;
+    }
+
+    /** Reports an unknown `writeAfterUntrustedRead` value once per process (warning); the mode is then `off`. */
+    protected static function reportUnknownWriteAfterUntrustedReadModeOnce(mixed $configuredMode): void
+    {
+        if (static::$unknownWriteAfterUntrustedReadModeReported) {
+            return;
+        }
+        static::$unknownWriteAfterUntrustedReadModeReported = true;
+        $warning = new RuntimeException(
+            'AI.untrustedContent.writeAfterUntrustedRead has the unknown value ' . json_encode($configuredMode)
+            . "; it reads as 'off'. Use 'off', 'ownerConsent' or 'refuse'."
+        );
+        try {
+            /** @var IssuesLogService $issuesLogService */
+            $issuesLogService = DDDService::instance()->getService(IssuesLogService::class);
+            $issuesLogService->logThrowable($warning, LogLevel::WARNING);
+        } catch (Throwable) {
+            error_log('MCPToolContentTrust: ' . $warning->getMessage());
+        }
     }
 
     /**

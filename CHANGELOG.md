@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.2
+
+Maintenance release of the 0.2 line (branch `release/0.2`; the same settings ship on the 0.3 line):
+
+- The write gate after an untrusted read is opt-in. `AI.untrustedContent.writeAfterUntrustedRead` takes `off` (the new
+  default: a WRITE or DELETE after an untrusted read of the turn runs as any write, also in a delegated sub-task and a
+  scheduled run), `ownerConsent` (the owner-consent check, the default of 0.1.30–0.2.1) or `refuse`. A missing value is
+  `off`; an unknown value is `off` too and is reported once per process in the issues log.
+- The refusal of a model-built URL nobody showed (`MCPToolFetchesModelChosenUrl`) has its own key,
+  `AI.untrustedContent.unseenUrlAfterUntrustedRead`: `refuse` (default, unchanged behaviour) or `off`.
+- Unchanged: a READ or WORKSPACE tool is untrusted unless it declares trust; the tool-result screen and the reading rule.
+- Host step: a host that wants the write gate sets `writeAfterUntrustedRead` to `ownerConsent` (with the decision site
+  `ownerConsent` `on`) or `refuse` in its own `config/app/AI/untrustedContent.php`. A host that replaces the file keeps
+  working: a missing key is `off` / `refuse`.
+- npm: published with the dist-tag `v0.2` (not `latest`).
+
 ## 0.2.1
 
 Messages API, found on the first live runs:

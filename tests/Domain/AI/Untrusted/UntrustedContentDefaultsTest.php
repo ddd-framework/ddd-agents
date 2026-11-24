@@ -49,9 +49,10 @@ class UntrustedContentDefaultsTest extends UnitTestCase
         }
     }
 
-    public function testNoSettingSwitchesTheWriteGateOff(): void
+    public function testTheWriteGateIsOffAndTheUnseenUrlRefusalOnByDefault(): void
     {
-        self::assertSame(MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_OWNER_CONSENT, MCPToolContentTrust::getWriteAfterUntrustedReadMode());
+        self::assertSame(MCPToolContentTrust::WRITE_AFTER_UNTRUSTED_READ_OFF, MCPToolContentTrust::getWriteAfterUntrustedReadMode());
+        self::assertSame(MCPToolContentTrust::UNSEEN_URL_AFTER_UNTRUSTED_READ_REFUSE, MCPToolContentTrust::getUnseenUrlAfterUntrustedReadMode());
     }
 
     public function testAnUnmarkedUntrustedResultCarriesTheReadingRule(): void

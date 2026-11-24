@@ -62,15 +62,17 @@ to):
 |---|---|
 | READ, WORKSPACE | runs |
 | a tool declaring `MCPToolRequiresOwnerConfirmation` | runs into its own consent step |
-| WRITE, DELETE or no declared effect, `writeAfterUntrustedRead: ownerConsent` (default) | runs only after the owner-consent check finds the owner's explicit yes to this step (`OwnerConsentRequest` kind `WRITE_AFTER_UNTRUSTED_READ`, the tool and its arguments as the target); otherwise a gate refusal (`OWNER_CONFIRMATION_REQUIRED`) naming the untrusted tools |
+| WRITE, DELETE or no declared effect, `writeAfterUntrustedRead: off` (default) | runs as any write |
+| the same under `ownerConsent` | runs only after the owner-consent check finds the owner's explicit yes to this step (`OwnerConsentRequest` kind `WRITE_AFTER_UNTRUSTED_READ`, the tool and its arguments as the target); otherwise a gate refusal (`OWNER_CONFIRMATION_REQUIRED`) naming the untrusted tools |
 | the same under `refuse` | final refusal `WRITE_AFTER_UNTRUSTED_READ`; the owner starts the step with a new message |
-| a tool declaring `MCPToolFetchesModelChosenUrl` with a URL whose query string or fragment appears in no owner message and no tool result | final refusal `UNSEEN_URL_AFTER_UNTRUSTED_READ` (a link exactly as a result showed it runs) |
+| a tool declaring `MCPToolFetchesModelChosenUrl` with a URL whose query string or fragment appears in no owner message and no tool result, `unseenUrlAfterUntrustedRead: refuse` (default) | final refusal `UNSEEN_URL_AFTER_UNTRUSTED_READ` (a link exactly as a result showed it runs); under `off` it runs |
 | no untrusted call in the turn, an MCP client of the owner, an evaluation harness's own call | runs |
 
-- The consent step fails closed: with the site `ownerConsent` not `on`, in a scheduled run without the owner, in a
+- Under `ownerConsent` the consent step fails closed: with the site `ownerConsent` not `on`, in a scheduled run without the owner, in a
   delegated sub-task the write is refused with a tool result — never a hang. A host that wants such writes declares
   the tools it reads as trusted where that is true, or lets the owner confirm.
-- No value of `writeAfterUntrustedRead` switches the gate off; an unknown value is `ownerConsent`.
+- A missing or unknown value of `writeAfterUntrustedRead` is `off` (an unknown one is reported once per process in the
+  issues log); any value of `unseenUrlAfterUntrustedRead` other than `off` is `refuse`.
 - The consent is used when the write may have happened (also a failure with an unknown outcome) and released when the
   tool refused with a caller-facing 4xx.
 - Limits: taint is per owner turn (a new owner message starts clean), per conversation (a delegation result composed
@@ -150,7 +152,8 @@ cannot stop content that genuinely looks clean. A host uses it to measure guard 
 
 - Declare `MCPToolReturnsTrustedContent` on the packages that read only its own records (or list them in
   `config/app/AI/untrustedContent.php`), and keep every tool that reads third-party text untrusted.
-- Switch `ownerConsent` `on` if its agent writes after reading untrusted content, or choose `writeAfterUntrustedRead: refuse`.
+- If it wants the write gate: set `writeAfterUntrustedRead: ownerConsent` (and switch the site `ownerConsent` `on`) or
+  `refuse`.
 - Run a worker on the transport `ai_tool_result_screening` (`ddd-module-agents-specialist`, transports).
 - When it replaces the gate rules: keep the four numbered rules, the output word BLOCKED and the final SUCCESS LINE
   ([the gate rules](#the-gate-rules)), and re-measure.
