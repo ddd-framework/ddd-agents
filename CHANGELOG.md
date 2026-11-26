@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.4
+
+- `ConversationMessageUser`: the `isGenericChat` prop was accepted but never read; it is now marked `@deprecated` and
+  no longer destructured. A customer message renders the same in every chat; existing callers keep compiling.
+
 ## 0.10.3
 
 - **Security — the owner-consent step fails closed.** Before, every call whose provenance named no stored

@@ -12,6 +12,7 @@ export type ConversationMessageUserTheme = "default" | "light" | "dark" | "prima
 export interface ConversationMessageUserProps {
   text: string;
   theme?: ConversationMessageUserTheme;
+  /** @deprecated Never read: a customer message looks the same in every chat. Kept so existing callers compile. */
   isGenericChat?: boolean;
 }
 
@@ -21,7 +22,7 @@ const isShownAboveBubble = (widget: ConversationComposerWidget): boolean =>
   "aboveBubble";
 
 export const ConversationMessageUser = (props: ConversationMessageUserProps) => {
-  const { text, isGenericChat, theme = "default" } = props;
+  const { text, theme = "default" } = props;
 
   // Pull any registered composer-widget fences out of the customer's own message text so they render as
   // read-only widgets above the prose, exactly like the assistant-side remark pipeline renders them in a reply —
