@@ -64,7 +64,9 @@ misspelt key is silently ignored.
 | `completedConversationStaysSingleton` | a finished conversation stays the space's singleton and is reopened for reading |
 | `blockedToolNames`, `blockedToolsRefusalText` | tools refused for the conversation and its whole delegation tree, named in the directive block. The purpose class adds the tools it blocks by what they declare (`AIConversationPurpose::getToolNamesBlockedByDeclaration()`, none by default) |
 | `maxStepsPerTurn` | the per-turn step cap, copied into the run settings at the start |
-| `maxTurnCostUsd` | read into `AIConversationPurpose::$maxTurnCostUsd`, but no start path copies it: a starter that wants a per-turn cost cap stamps `RunSettings::$maxTurnCostUsd` itself |
+| `maxTurnCostUsd` | the cost cap (USD) of every turn of the purpose's conversations, read live by `AIConversationTurnBudget`; an explicit `RunSettings::$maxTurnCostUsd` wins; unset = a raised turn is capped at 2.00, a plain turn not at all |
+| `stepsPerPlanItem` | steps a planned turn gets per open plan leaf, 1–20 (default 3): work whose items each take several tool calls |
+| `plannedTurnMaxStepsCeiling` | the ceiling of a planned turn's steps and of a tool's or skill's step floor, at most 120 (default 60) |
 | `contextBudgetTokens`, `contextRetention` | the working-context budget and the retention knobs (context skill) |
 | `modelInputOptions` | a map of the keys of `config/app/AI/agentModelInputOptions.php` (`offersDelegationTools`, `offersTaskPlanTools`, `offersAskOwner`, `offersFindWidgets`, `teachesWidgets`, `droppedBasePromptSections`, `dropsMemorySectionWithoutMemoryTool`, `offersReachableToolsFromTheFirstCall`): each key it names wins over the host's configuration for the purpose's conversations, a key it leaves out keeps the configured value (`AgentModelInputOptionsOverride`, context skill) |
 | `runSettings` | wire API and reasoning carry-over defaults of a new conversation (`AIConversationPurposesService::buildPurposeRunSettingsFromFrontmatter()`); with the creation choices of `contextRetention` the "agent wire profile", applied whole or not at all |

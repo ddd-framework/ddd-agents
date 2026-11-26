@@ -209,9 +209,11 @@ class AIConversationPurposesService extends Service
         $aIConversationPurpose->blockedToolNames = array_map('strval', (array)($frontmatter['blockedToolNames'] ?? []));
         $blockedToolsRefusalText = trim((string)($frontmatter['blockedToolsRefusalText'] ?? ''));
         $aIConversationPurpose->blockedToolsRefusalText = $blockedToolsRefusalText !== '' ? $blockedToolsRefusalText : null;
-        $aIConversationPurpose->maxTurnCostUsd = isset($frontmatter['maxTurnCostUsd'])
+        $aIConversationPurpose->maxTurnCostUsd = isset($frontmatter['maxTurnCostUsd']) && is_numeric($frontmatter['maxTurnCostUsd']) && (float)$frontmatter['maxTurnCostUsd'] > 0
             ? (float)$frontmatter['maxTurnCostUsd']
             : null;
+        $aIConversationPurpose->stepsPerPlanItem = static::readPositiveIntegerUpTo($frontmatter['stepsPerPlanItem'] ?? null, AIConversationPurpose::STEPS_PER_PLAN_ITEM_MAXIMUM);
+        $aIConversationPurpose->plannedTurnMaxStepsCeiling = static::readPositiveIntegerUpTo($frontmatter['plannedTurnMaxStepsCeiling'] ?? null, RunSettings::MAX_STEPS_PER_TURN_CEILING);
         // the purpose's own analysis prompt and model (null = the defaults of conversationAnalysis.php)
         $analysisPromptName = trim((string)($frontmatter['analysisPromptName'] ?? ''));
         $aIConversationPurpose->analysisPromptName = $analysisPromptName !== '' ? $analysisPromptName : null;
@@ -424,5 +426,15 @@ class AIConversationPurposesService extends Service
         }
         DDDService::instance()->getLogger()->error($invalidPurposeClassMessage);
         return null;
+    }
+
+    /** A frontmatter value as an integer from 1 to `$maximum`; anything else (missing, not an integer, out of range) is null. */
+    protected static function readPositiveIntegerUpTo(mixed $frontmatterValue, int $maximum): ?int
+    {
+        if (!is_int($frontmatterValue) && !(is_string($frontmatterValue) && ctype_digit($frontmatterValue))) {
+            return null;
+        }
+        $integerValue = (int)$frontmatterValue;
+        return $integerValue >= 1 && $integerValue <= $maximum ? $integerValue : null;
     }
 }

@@ -552,8 +552,30 @@ class AIConversationPurpose extends Entity
         return $this->buildContextRetentionSettingsForConversation()?->withoutSkillLoadingAndStateChangeDeliveryChoices();
     }
 
-    /** @var float|null Per-turn cost cap (USD) copied into RunSettings; null = default. */
+    /**
+     * @var float|null The cost cap (USD) of every turn of this purpose's conversations (frontmatter `maxTurnCostUsd`):
+     * used when the conversation's run settings name none — an explicit `runSettings.maxTurnCostUsd` wins. Null = the
+     * default: a raised turn is capped at {@see \DDD\Domain\AI\Entities\Conversations\Agent\AIConversationTurnBudget::PLANNED_TURN_DEFAULT_COST_CAP_USD}, a plain
+     * interactive turn is not capped.
+     */
     public ?float $maxTurnCostUsd = null;
+
+    /** @var int The highest `stepsPerPlanItem` a purpose may declare */
+    public const int STEPS_PER_PLAN_ITEM_MAXIMUM = 20;
+
+    /**
+     * @var int|null The steps a planned turn gets per open plan leaf (frontmatter `stepsPerPlanItem`, 1 to 20): work
+     * whose plan items each take several tool calls (read, check, write, reply, set a status, tick) raises it. Null =
+     * {@see \DDD\Domain\AI\Entities\Conversations\Agent\AIConversationTurnBudget::PLANNED_TURN_STEPS_PER_ITEM}.
+     */
+    public ?int $stepsPerPlanItem = null;
+
+    /**
+     * @var int|null The ceiling of a planned turn's steps (frontmatter `plannedTurnMaxStepsCeiling`, at most
+     * {@see RunSettings::MAX_STEPS_PER_TURN_CEILING}); it also caps a tool's or skill's step floor. Null =
+     * {@see \DDD\Domain\AI\Entities\Conversations\Agent\AIConversationTurnBudget::PLANNED_TURN_MAX_STEPS_CEILING}.
+     */
+    public ?int $plannedTurnMaxStepsCeiling = null;
 
     /**
      * @var bool The purpose's USER messages are written by the PLATFORM, not by an owner (frontmatter

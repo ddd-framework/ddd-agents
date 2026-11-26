@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DDD\Domain\AI\Entities\Conversations\Agent;
 
+use DDD\Domain\AI\Entities\Conversations\Purposes\AIConversationPurpose;
 use DDD\Domain\AI\Entities\Conversations\AIConversation;
 use DDD\Domain\AI\Entities\Conversations\Messages\RunSettings;
 use DDD\Domain\Base\Entities\ValueObject;
@@ -19,7 +20,11 @@ use DDD\Domain\Base\Entities\ValueObject;
  * with the plan's leaf count (base + per item, clamped to [MAX_STEPS, ceiling]); a plan-less turn keeps the interactive
  * default. A floor a TOOL declared for this turn raises whatever the plan yields, under the same ceiling.
  *
- * Cost: an explicit {@see RunSettings::$maxTurnCostUsd} wins; every RAISED turn without one (plan, tool floor, explicit
+ * A purpose may replace the steps per leaf and the ceiling ({@see AIConversationPurpose::$stepsPerPlanItem},
+ * {@see AIConversationPurpose::$plannedTurnMaxStepsCeiling}).
+ *
+ * Cost: an explicit {@see RunSettings::$maxTurnCostUsd} wins, then the purpose's
+ * {@see AIConversationPurpose::$maxTurnCostUsd} (every turn of it); every RAISED turn without one (plan, tool floor, explicit
  * steps) gets {@see PLANNED_TURN_DEFAULT_COST_CAP_USD} as the second brake; a plain interactive turn has no cap.
  *
  * @phpstan-consistent-constructor
@@ -56,12 +61,20 @@ class AIConversationTurnBudget extends ValueObject
     /**
      * @param int|null $loadedSkillsTurnMinimumSteps the highest `turnMinimumSteps` of the skills loaded now
      *        ({@see \DDD\Domain\AI\Entities\Skills\AISkill::$turnMinimumSteps}); a floor like a tool's, under the same ceiling
+     * @param AIConversationPurpose|null $aIConversationPurpose the conversation's purpose: its `stepsPerPlanItem`,
+     *        `plannedTurnMaxStepsCeiling` and `maxTurnCostUsd` replace the package defaults (null = the defaults)
      */
     public static function buildForConversation(
         AIConversation $conversation,
         bool $purposeWorksAutonomously,
-        ?int $loadedSkillsTurnMinimumSteps = null
+        ?int $loadedSkillsTurnMinimumSteps = null,
+        ?AIConversationPurpose $aIConversationPurpose = null,
     ): static {
+        $stepsPerPlanItem = $aIConversationPurpose?->stepsPerPlanItem ?? self::PLANNED_TURN_STEPS_PER_ITEM;
+        $plannedTurnMaxStepsCeiling = min(
+            RunSettings::MAX_STEPS_PER_TURN_CEILING,
+            $aIConversationPurpose?->plannedTurnMaxStepsCeiling ?? self::PLANNED_TURN_MAX_STEPS_CEILING
+        );
         $turnBudget = new static();
         $runSettings = isset($conversation->runSettings) ? $conversation->runSettings : null;
         $toolDeclaredFloor = self::combineStepFloors(self::getTurnMinimumStepsDeclaredForCurrentTurn($conversation), $loadedSkillsTurnMinimumSteps);
@@ -71,20 +84,22 @@ class AIConversationTurnBudget extends ValueObject
             // clamped here as well as at the DTO ingress — persisted/legacy run settings bypass DTO validation
             $turnBudget->totalMaxSteps = max(1, min(RunSettings::MAX_STEPS_PER_TURN_CEILING, $runSettings->maxStepsPerTurn));
         } else {
-            $cappedToolFloor = min(self::PLANNED_TURN_MAX_STEPS_CEILING, $toolDeclaredFloor ?? 0);
+            $cappedToolFloor = min($plannedTurnMaxStepsCeiling, $toolDeclaredFloor ?? 0);
             if (!$taskPlanTouchedInCurrentTurn && !self::workSignalTurnCarriesAnOpenPlan($conversation, $purposeWorksAutonomously)) {
                 $turnBudget->totalMaxSteps = max(self::MAX_STEPS, $cappedToolFloor);
             } else {
                 $planLeafCount = $conversation->getTaskPlan()?->items?->countLeafItems() ?? 0;
                 $turnBudget->totalMaxSteps = max(self::MAX_STEPS, $cappedToolFloor, min(
-                    self::PLANNED_TURN_MAX_STEPS_CEILING,
-                    self::PLANNED_TURN_BASE_STEPS + self::PLANNED_TURN_STEPS_PER_ITEM * $planLeafCount
+                    $plannedTurnMaxStepsCeiling,
+                    self::PLANNED_TURN_BASE_STEPS + $stepsPerPlanItem * $planLeafCount
                 ));
             }
         }
 
         if ($runSettings?->maxTurnCostUsd !== null) {
             $turnBudget->maxTurnCostUsd = $runSettings->maxTurnCostUsd;
+        } elseif ($aIConversationPurpose?->maxTurnCostUsd !== null) {
+            $turnBudget->maxTurnCostUsd = $aIConversationPurpose->maxTurnCostUsd;
         } elseif ($runSettings?->maxStepsPerTurn !== null || $taskPlanTouchedInCurrentTurn || $toolDeclaredFloor !== null) {
             $turnBudget->maxTurnCostUsd = self::PLANNED_TURN_DEFAULT_COST_CAP_USD;
         }

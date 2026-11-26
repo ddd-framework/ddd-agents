@@ -2751,7 +2751,8 @@ class AIConversationAgentService extends Service implements AgentModelCallRunner
         return AIConversationTurnBudget::buildForConversation(
             $conversation,
             $aIConversationPurposeRunsService->conversationPurposeWorksAutonomously($conversation),
-            $this->findTurnMinimumStepsOfLoadedSkills($conversation)
+            $this->findTurnMinimumStepsOfLoadedSkills($conversation),
+            $conversation->findPurpose()
         );
     }
 

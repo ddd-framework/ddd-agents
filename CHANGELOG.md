@@ -2,6 +2,16 @@
 
 ## 0.10.4
 
+- **A purpose sets its turn budget.** New purpose frontmatter keys, read live by `AIConversationTurnBudget` (via the
+  conversation's purpose, `AIConversationAgentService::buildTurnBudget()`):
+  - `stepsPerPlanItem` (1–20, default 3): the steps a planned turn gets per open plan leaf (6 + n × leaves);
+  - `plannedTurnMaxStepsCeiling` (at most 120, default 60): the ceiling of a planned turn and of a tool's or skill's
+    step floor.
+- **`maxTurnCostUsd` of a purpose now applies.** It was read from the frontmatter but used nowhere; it is now the cost
+  cap of every turn of the purpose's conversations when the run settings name none (`runSettings.maxTurnCostUsd`
+  still wins). A purpose that declared it gets that cap from now on: check the value.
+- `AIConversationTurnBudget::buildForConversation()` takes the purpose as a fourth, optional argument. Nothing changes
+  for a purpose without these keys.
 - `ConversationMessageUser`: the `isGenericChat` prop was accepted but never read; it is now marked `@deprecated` and
   no longer destructured. A customer message renders the same in every chat; existing callers keep compiling.
 
