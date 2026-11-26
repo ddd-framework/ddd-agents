@@ -1,6 +1,7 @@
 import { Text } from "../../../provider/components";
 import React, { useMemo } from "react";
 import { classNames } from "../../../provider/class-names";
+import { escapePlainTextForText } from "../../../provider/environment";
 import styles from "./ConversationMessageUser.module.scss";
 import { splitComposerWidgetFencesFromMessageText } from "../../../renderer/composer-widget-fence";
 import type { ConversationComposerWidget } from "../../../renderer/conversation-composer-widget";
@@ -27,6 +28,8 @@ export const ConversationMessageUser = (props: ConversationMessageUserProps) => 
   // Pull any registered composer-widget fences out of the customer's own message text so they render as
   // read-only widgets above the prose, exactly like the assistant-side remark pipeline renders them in a reply —
   // but WITHOUT running that pipeline over user text (never treat the customer's own prose as Markdown).
+  // The prose is the customer's own text: it reaches the text component as plain text (`escapePlainTextForText`), so
+  // an app's text component that reads a string as markup shows it as written.
   const { text: proseText, widgets } = useMemo(() => splitComposerWidgetFencesFromMessageText(text), [text]);
   const widgetsAboveBubble = useMemo(() => widgets.filter(isShownAboveBubble), [widgets]);
   const widgetsInsideBubble = useMemo(() => widgets.filter((widget) => !isShownAboveBubble(widget)), [widgets]);
@@ -52,8 +55,8 @@ export const ConversationMessageUser = (props: ConversationMessageUserProps) => 
       <ConversationMessageUserWidgets widgets={widgetsInsideBubble} />
       {/* A widget-only message (e.g. images sent without text) has no prose line to render. */}
       {proseText !== "" && (
-        <Text allowNewLines translate={false} color={textColor}>
-          {proseText}
+        <Text testId="conversation-message-user-text" allowNewLines translate={false} color={textColor}>
+          {escapePlainTextForText(proseText)}
         </Text>
       )}
     </div>
