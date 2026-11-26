@@ -182,7 +182,9 @@ full-plan resend the rules forbid. `ToolCall::readTaskPlanCallOutcome()` gives t
 ## 8. Budgets and chunks
 
 A plan raises the turn's budget (`AIConversationTurnBudget`, see [architecture-of-a-turn](architecture-of-a-turn.md) §7): a turn whose plan was
-touched in this turn gets base steps plus steps per leaf, clamped, and the default cost cap as a second brake; explicit
+touched in this turn gets base steps plus steps per leaf (the purpose's `stepsPerPlanItem`, default 3), with no step
+ceiling unless the purpose sets `plannedTurnMaxStepsCeiling`: the cost cap (the purpose's `maxTurnCostUsd`, else 2.00)
+is the brake; explicit
 `RunSettings::$maxStepsPerTurn` and `$maxTurnCostUsd` always win. The budget is re-derived at every step, so a plan
 created at step 1 raises its own turn and a shrinking plan lowers it. Steps consumed are counted from the persisted
 usage-stamped rows.

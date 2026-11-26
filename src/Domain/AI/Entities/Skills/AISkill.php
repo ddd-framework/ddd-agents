@@ -426,7 +426,7 @@ class AISkill extends Entity
     /**
      * The step floor of an owner turn while this skill is loaded (frontmatter `turnMinimumSteps`, a positive whole
      * number; null = none): a skill whose work runs long (build a document, render it, check it, hand it over) raises
-     * the turn's step budget to at least this. Capped by {@see \DDD\Domain\AI\Entities\Conversations\Agent\AIConversationTurnBudget::PLANNED_TURN_MAX_STEPS_CEILING};
+     * the turn's step budget to at least this. Capped by {@see \DDD\Domain\AI\Entities\Conversations\Agent\AIConversationTurnBudget::PLANNED_TURN_MAX_STEPS_CEILING} (or the purpose's ceiling);
      * a raised turn carries the planned turn's default cost cap unless the run settings name one. Explicit
      * `runSettings.maxStepsPerTurn` wins over every floor.
      */

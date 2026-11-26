@@ -50,10 +50,18 @@ class TurnBudgetOfThePurposeTest extends TestCase
 
         self::assertSame(90, AIConversationTurnBudget::buildForConversation($this->buildPlannedConversation(20), false, null, $aIConversationPurpose)->totalMaxSteps);
         self::assertSame(90, AIConversationTurnBudget::buildForConversation($this->buildPlannedConversation(0), false, 500, $aIConversationPurpose)->totalMaxSteps);
+    }
+
+    public function testWithoutAPurposeCeilingAPlanHasNoStepCeilingButTheCostCap(): void
+    {
+        $turnBudget = AIConversationTurnBudget::buildForConversation($this->buildPlannedConversation(40), false, null, null);
+
+        self::assertSame(AIConversationTurnBudget::PLANNED_TURN_BASE_STEPS + 3 * 40, $turnBudget->totalMaxSteps, '126: no ceiling');
+        self::assertSame(AIConversationTurnBudget::PLANNED_TURN_DEFAULT_COST_CAP_USD, $turnBudget->maxTurnCostUsd);
         self::assertSame(
             AIConversationTurnBudget::PLANNED_TURN_MAX_STEPS_CEILING,
-            AIConversationTurnBudget::buildForConversation($this->buildPlannedConversation(20), false, null, null)->totalMaxSteps,
-            'without a purpose the package ceiling holds'
+            AIConversationTurnBudget::buildForConversation($this->buildPlannedConversation(0), false, 500, null)->totalMaxSteps,
+            'a declared floor stays capped'
         );
     }
 

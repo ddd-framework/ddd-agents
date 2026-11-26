@@ -571,8 +571,9 @@ class AIConversationPurpose extends Entity
     public ?int $stepsPerPlanItem = null;
 
     /**
-     * @var int|null The ceiling of a planned turn's steps (frontmatter `plannedTurnMaxStepsCeiling`, at most
-     * {@see RunSettings::MAX_STEPS_PER_TURN_CEILING}); it also caps a tool's or skill's step floor. Null =
+     * @var int|null An optional ceiling of a planned turn's steps (frontmatter `plannedTurnMaxStepsCeiling`, at most
+     * {@see RunSettings::MAX_STEPS_PER_TURN_CEILING}); it also caps a tool's or skill's step floor. Null = a planned
+     * turn's steps are unbounded (the cost cap is the brake) and a declared floor is capped at
      * {@see \DDD\Domain\AI\Entities\Conversations\Agent\AIConversationTurnBudget::PLANNED_TURN_MAX_STEPS_CEILING}.
      */
     public ?int $plannedTurnMaxStepsCeiling = null;

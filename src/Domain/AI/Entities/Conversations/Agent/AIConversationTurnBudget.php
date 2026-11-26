@@ -17,11 +17,12 @@ use DDD\Domain\Base\Entities\ValueObject;
  * Steps (plan-adaptive): an explicit {@see RunSettings::$maxStepsPerTurn} (admin task, eval
  * fixture, delegation inherit) always wins; without one, a turn whose task plan was touched THIS turn — or a work-signal
  * turn of an autonomous purpose whose plan still has open items (the re-seeded plan is deliberately unstamped) — scales
- * with the plan's leaf count (base + per item, clamped to [MAX_STEPS, ceiling]); a plan-less turn keeps the interactive
- * default. A floor a TOOL declared for this turn raises whatever the plan yields, under the same ceiling.
+ * with the plan's leaf count (base + per item, at least MAX_STEPS, NO step ceiling: the turn's cost cap is the brake);
+ * a plan-less turn keeps the interactive default. A floor a TOOL or a loaded skill declared for this turn raises
+ * whatever the plan yields, capped at {@see PLANNED_TURN_MAX_STEPS_CEILING}.
  *
- * A purpose may replace the steps per leaf and the ceiling ({@see AIConversationPurpose::$stepsPerPlanItem},
- * {@see AIConversationPurpose::$plannedTurnMaxStepsCeiling}).
+ * A purpose may replace the steps per leaf ({@see AIConversationPurpose::$stepsPerPlanItem}) and set a ceiling of its
+ * own ({@see AIConversationPurpose::$plannedTurnMaxStepsCeiling}: it caps the plan's steps and a declared floor).
  *
  * Cost: an explicit {@see RunSettings::$maxTurnCostUsd} wins, then the purpose's
  * {@see AIConversationPurpose::$maxTurnCostUsd} (every turn of it); every RAISED turn without one (plan, tool floor, explicit
@@ -40,7 +41,10 @@ class AIConversationTurnBudget extends ValueObject
     /** Steps per plan LEAF item — empirically one work call + its set_task_status tick + an occasional retry/second read. */
     public const int PLANNED_TURN_STEPS_PER_ITEM = 3;
 
-    /** Hard ceiling — a plan has no item limit, so a bloated plan must not buy unbounded steps; the cost cap is the second brake. */
+    /**
+     * The cap of a step floor a tool or a loaded skill declares. A planned turn's own steps have no ceiling unless its
+     * purpose sets one: the turn's cost cap ({@see PLANNED_TURN_DEFAULT_COST_CAP_USD} or the purpose's) is the brake.
+     */
     public const int PLANNED_TURN_MAX_STEPS_CEILING = 60;
 
     /**
@@ -71,10 +75,11 @@ class AIConversationTurnBudget extends ValueObject
         ?AIConversationPurpose $aIConversationPurpose = null,
     ): static {
         $stepsPerPlanItem = $aIConversationPurpose?->stepsPerPlanItem ?? self::PLANNED_TURN_STEPS_PER_ITEM;
-        $plannedTurnMaxStepsCeiling = min(
-            RunSettings::MAX_STEPS_PER_TURN_CEILING,
-            $aIConversationPurpose?->plannedTurnMaxStepsCeiling ?? self::PLANNED_TURN_MAX_STEPS_CEILING
-        );
+        // a ceiling only the purpose sets; the plan's steps are otherwise unbounded
+        $purposeStepsCeiling = $aIConversationPurpose?->plannedTurnMaxStepsCeiling !== null
+            ? min(RunSettings::MAX_STEPS_PER_TURN_CEILING, $aIConversationPurpose->plannedTurnMaxStepsCeiling)
+            : null;
+        $declaredFloorCeiling = $purposeStepsCeiling ?? self::PLANNED_TURN_MAX_STEPS_CEILING;
         $turnBudget = new static();
         $runSettings = isset($conversation->runSettings) ? $conversation->runSettings : null;
         $toolDeclaredFloor = self::combineStepFloors(self::getTurnMinimumStepsDeclaredForCurrentTurn($conversation), $loadedSkillsTurnMinimumSteps);
@@ -84,15 +89,16 @@ class AIConversationTurnBudget extends ValueObject
             // clamped here as well as at the DTO ingress — persisted/legacy run settings bypass DTO validation
             $turnBudget->totalMaxSteps = max(1, min(RunSettings::MAX_STEPS_PER_TURN_CEILING, $runSettings->maxStepsPerTurn));
         } else {
-            $cappedToolFloor = min($plannedTurnMaxStepsCeiling, $toolDeclaredFloor ?? 0);
+            $cappedToolFloor = min($declaredFloorCeiling, $toolDeclaredFloor ?? 0);
             if (!$taskPlanTouchedInCurrentTurn && !self::workSignalTurnCarriesAnOpenPlan($conversation, $purposeWorksAutonomously)) {
                 $turnBudget->totalMaxSteps = max(self::MAX_STEPS, $cappedToolFloor);
             } else {
                 $planLeafCount = $conversation->getTaskPlan()?->items?->countLeafItems() ?? 0;
-                $turnBudget->totalMaxSteps = max(self::MAX_STEPS, $cappedToolFloor, min(
-                    $plannedTurnMaxStepsCeiling,
-                    self::PLANNED_TURN_BASE_STEPS + $stepsPerPlanItem * $planLeafCount
-                ));
+                $plannedSteps = self::PLANNED_TURN_BASE_STEPS + $stepsPerPlanItem * $planLeafCount;
+                if ($purposeStepsCeiling !== null) {
+                    $plannedSteps = min($purposeStepsCeiling, $plannedSteps);
+                }
+                $turnBudget->totalMaxSteps = max(self::MAX_STEPS, $cappedToolFloor, $plannedSteps);
             }
         }
 

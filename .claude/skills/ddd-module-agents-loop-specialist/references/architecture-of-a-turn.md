@@ -167,11 +167,12 @@ then marks waiting sub-agent run-end notifications read.
 
 - Steps: an explicit `RunSettings::$maxStepsPerTurn` wins (clamped to `MAX_STEPS_PER_TURN_CEILING`); else a turn whose
   task plan was touched in this turn (or a work-signal turn of an autonomous purpose with an open plan) gets
-  `PLANNED_TURN_BASE_STEPS` + `PLANNED_TURN_STEPS_PER_ITEM` × leaf count, clamped to [`MAX_STEPS`,
-  `PLANNED_TURN_MAX_STEPS_CEILING`]; else `MAX_STEPS`. The purpose's `stepsPerPlanItem` and
-  `plannedTurnMaxStepsCeiling` replace the per-leaf steps and the ceiling (at most `MAX_STEPS_PER_TURN_CEILING`). A tool-declared floor (`AgentWorkingState::$turnMinimumSteps`)
+  `PLANNED_TURN_BASE_STEPS` + `PLANNED_TURN_STEPS_PER_ITEM` × leaf count, at least `MAX_STEPS` and with NO step
+  ceiling (the cost cap is the brake); else `MAX_STEPS`. The purpose's `stepsPerPlanItem` replaces the per-leaf steps;
+  its optional `plannedTurnMaxStepsCeiling` (at most `MAX_STEPS_PER_TURN_CEILING`) caps the plan's steps. A tool-declared floor (`AgentWorkingState::$turnMinimumSteps`)
   and the floor of the skills loaded now (`turnMinimumSteps` in a skill file, the highest one counts;
-  `AIConversationAgentService::findTurnMinimumStepsOfLoadedSkills()`) raise it under the same ceiling.
+  `AIConversationAgentService::findTurnMinimumStepsOfLoadedSkills()`) raise it, capped at
+  `PLANNED_TURN_MAX_STEPS_CEILING` (or the purpose's ceiling).
 - Cost: an explicit `maxTurnCostUsd` wins, then the purpose's `maxTurnCostUsd` (every turn of it). Otherwise `PLANNED_TURN_DEFAULT_COST_CAP_USD` applies when
   `maxStepsPerTurn` is set, the plan was touched in this turn or a tool or a loaded skill declared a step floor. Any other turn — an
   autonomous work-signal turn on an untouched plan included — has no cost cap.

@@ -66,7 +66,7 @@ misspelt key is silently ignored.
 | `maxStepsPerTurn` | the per-turn step cap, copied into the run settings at the start |
 | `maxTurnCostUsd` | the cost cap (USD) of every turn of the purpose's conversations, read live by `AIConversationTurnBudget`; an explicit `RunSettings::$maxTurnCostUsd` wins; unset = a raised turn is capped at 2.00, a plain turn not at all |
 | `stepsPerPlanItem` | steps a planned turn gets per open plan leaf, 1–20 (default 3): work whose items each take several tool calls |
-| `plannedTurnMaxStepsCeiling` | the ceiling of a planned turn's steps and of a tool's or skill's step floor, at most 120 (default 60) |
+| `plannedTurnMaxStepsCeiling` | an optional ceiling of a planned turn's steps (unset: none, the cost cap is the brake) and of a tool's or skill's step floor (unset: 60), at most 120 |
 | `contextBudgetTokens`, `contextRetention` | the working-context budget and the retention knobs (context skill) |
 | `modelInputOptions` | a map of the keys of `config/app/AI/agentModelInputOptions.php` (`offersDelegationTools`, `offersTaskPlanTools`, `offersAskOwner`, `offersFindWidgets`, `teachesWidgets`, `droppedBasePromptSections`, `dropsMemorySectionWithoutMemoryTool`, `offersReachableToolsFromTheFirstCall`): each key it names wins over the host's configuration for the purpose's conversations, a key it leaves out keeps the configured value (`AgentModelInputOptionsOverride`, context skill) |
 | `runSettings` | wire API and reasoning carry-over defaults of a new conversation (`AIConversationPurposesService::buildPurposeRunSettingsFromFrontmatter()`); with the creation choices of `contextRetention` the "agent wire profile", applied whole or not at all |

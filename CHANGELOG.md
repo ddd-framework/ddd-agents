@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.5
+
+- **A turn with a task plan has no step ceiling.** It gets 6 + `stepsPerPlanItem` (default 3) × leaf items, at least 12,
+  with no upper bound; the turn's cost cap is the brake (the purpose's `maxTurnCostUsd`, else 2.00 for a raised turn;
+  `runSettings` still win). Before, 60 capped it. A plan-less turn keeps 12. `plannedTurnMaxStepsCeiling` is now an
+  optional ceiling a purpose sets; a step floor a tool or a loaded skill declares stays capped at 60 (or that ceiling).
+  Check that every purpose with long plans has the cost cap it wants.
+
 ## 0.10.4
 
 - **A purpose sets its turn budget.** New purpose frontmatter keys, read live by `AIConversationTurnBudget` (via the
