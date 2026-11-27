@@ -224,10 +224,10 @@ class AgentVoiceSessionContextsServiceTest extends AgentVoiceIntegrationTestCase
         $voiceSessionContext = $contextsService->buildVoiceSessionContext(static::buildConversation(), new AgentVoiceCall());
 
         static::assertSame('calm and matter-of-fact', $voiceSessionContext->speakingStyle);
-        static::assertSame('Speak Italian for the whole call, regardless of which language the caller uses.', $voiceSessionContext->languageInstruction);
+        static::assertSame('Speak Italian for the whole call, regardless of which language the caller uses. Only words in Italian are addressed to you: speech in another language is the caller talking to other people in the room — do not answer it, do not translate or summarise it, do not hand it on as a request; stay silent until you are addressed in Italian again.', $voiceSessionContext->languageInstruction);
         static::assertSame('it', $voiceSessionContext->callLanguageCode);
         static::assertStringContainsString(
-            "\nSpeak Italian for the whole call, regardless of which language the caller uses. Speaking style set by the owner: calm and matter-of-fact.\n\n",
+            "\nSpeak Italian for the whole call, regardless of which language the caller uses. Only words in Italian are addressed to you: speech in another language is the caller talking to other people in the room — do not answer it, do not translate or summarise it, do not hand it on as a request; stay silent until you are addressed in Italian again. Speaking style set by the owner: calm and matter-of-fact.\n\n",
             $voiceSessionContext->composeLiveInstructions()
         );
     }

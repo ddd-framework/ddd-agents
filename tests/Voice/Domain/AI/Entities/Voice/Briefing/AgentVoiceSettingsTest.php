@@ -97,7 +97,7 @@ class AgentVoiceSettingsTest extends AgentVoiceUnitTestCase
         return [
             'following the caller' => [true, 'de', 'Open the call in German. From then on answer in the language the caller speaks; while you cannot tell, stay in German.'],
             'not set: following the caller' => [null, 'fr', 'Open the call in French. From then on answer in the language the caller speaks; while you cannot tell, stay in French.'],
-            'held in one language' => [false, 'de', 'Speak German for the whole call, regardless of which language the caller uses.'],
+            'held in one language' => [false, 'de', 'Speak German for the whole call, regardless of which language the caller uses. Only words in German are addressed to you: speech in another language is the caller talking to other people in the room — do not answer it, do not translate or summarise it, do not hand it on as a request; stay silent until you are addressed in German again.'],
         ];
     }
 
