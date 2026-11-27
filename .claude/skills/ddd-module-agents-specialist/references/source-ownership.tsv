@@ -2,6 +2,12 @@
 # First match wins. '**/' = zero or more path segments, '**' at the end = anything, '*' = anything but '/'.
 # The groups are ordered so that every named exception stands above the folder pattern it pierces: the skills whose
 # classes sit inside mixed folders come first, the loop (the default of the mixed loop folders) comes last.
+# tools (ddd-module-agents-tools-specialist): AgentConnections, the external accounts (mail, calendar, contacts, drive, chat) behind the Agent.Connections.* tools; its Connections folders pierce every folder rule below
+src/Domain/AI/**/Connections/**	tools
+src/Presentation/**/Connections/**	tools
+src/Symfony/Commands/Agents/AgentConnections*	tools
+config/app/AI/agentConnections.php	tools
+config/app/AI/Skills/Agent/Connections/**	tools
 # voice (ddd-module-agents-voice-specialist): the voice channel; its Voice folders pierce the trace-event, installation, API, MCP, skill and config rules below, the enum of the call's signal sources pierces the widgets' signal source folder
 src/Domain/AI/**/Voice/**	voice
 src/Presentation/**/Voice/**	voice

@@ -75,7 +75,7 @@ class AIConversationEvalPurgeServiceRunTest extends UnitTestCase
         self::assertSame(2, $report->conversationsInPurgedTrees);
         self::assertSame([7001 => 1], $report->treesPurgedByAccountId);
         self::assertSame([], $service->executedChunks, 'a dry run writes nothing');
-        // 9 module steps match the 2 conversations, 4 match the 3 messages
+        // 12 module steps match the 2 conversations, 4 match the 3 messages
         self::assertSame(30, $report->getRowsTotal());
         self::assertSame(2, $report->rowsByStep[DBAIConversationModel::getTableName()]);
         self::assertSame(AIConversationEvalPurgeReport::STOPPED_NO_TREE_LEFT, $report->stoppedBecause);

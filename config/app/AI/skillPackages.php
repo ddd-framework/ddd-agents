@@ -14,6 +14,13 @@ use DDD\Presentation\Mcp\Client\Agents\AgentUIActionsMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\AgentUIMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\AgentUIWindowMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\WebSearchMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsMailMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsCalendarMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsContactsMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsDocumentsMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsFilesMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsChatMCPPackage;
 use DDD\Presentation\Mcp\Client\Voice\AgentVoiceCallsMCPPackage;
 use DDD\Presentation\Mcp\Admin\System\SystemCronsMCPPackage;
 use DDD\Presentation\Mcp\Admin\System\SystemHealthMCPPackage;
@@ -42,6 +49,14 @@ return [
     AISkill::AGENT_IMAGES => [AgentImagesMCPPackage::class],
     // offered only while the web research is switched on (AI.webSearch) and its capability has an endpoint
     AISkill::AGENT_WEB_SEARCH => [WebSearchMCPPackage::class],
+    // AgentConnections (switched off unless AI.agentConnections.enabled; each package hides itself otherwise)
+    AISkill::AGENT_CONNECTIONS_OVERVIEW => [AgentConnectionsMCPPackage::class],
+    AISkill::AGENT_CONNECTIONS_MAIL => [AgentConnectionsMailMCPPackage::class],
+    AISkill::AGENT_CONNECTIONS_CALENDAR => [AgentConnectionsCalendarMCPPackage::class],
+    AISkill::AGENT_CONNECTIONS_CONTACTS => [AgentConnectionsContactsMCPPackage::class],
+    AISkill::AGENT_CONNECTIONS_FILES => [AgentConnectionsFilesMCPPackage::class],
+    AISkill::AGENT_CONNECTIONS_DOCUMENTS => [AgentConnectionsDocumentsMCPPackage::class],
+    AISkill::AGENT_CONNECTIONS_CHAT => [AgentConnectionsChatMCPPackage::class],
     // the user's client: requests over the realtime channel (AI.agentRealtimeChannel); the window-mode package only
     // while AI.agentUI.windowModeRequests is on (AgentUIWindowMCPPackage::isAvailable())
     AISkill::AGENT_UI => [AgentUIMCPPackage::class, AgentUIWindowMCPPackage::class, AgentUIActionsMCPPackage::class],

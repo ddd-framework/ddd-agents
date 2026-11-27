@@ -17,22 +17,24 @@ use Ratchet\Client\Connector;
  * directory: every class sits below one of the namespaces it owns, and no other package has a file there. Owned
  * namespaces ({@see self::OWNED_NAMESPACES}, declared to Core by {@see getOwnedNamespaces()} and checked by Core's
  * `ModuleNamespacesTestCase` and the package's contract test):
- * - `DDD\Domain\AI\Entities\AgentSpaces\`, `…\Entities\ClientTools\`, `…\Entities\Conversations\`, `…\Entities\Discovery\`, `…\Entities\Documents\`,
+ * - `DDD\Domain\AI\Entities\AgentSpaces\`, `…\Entities\ClientTools\`, `…\Entities\Connections\`, `…\Entities\Conversations\`, `…\Entities\Discovery\`, `…\Entities\Documents\`,
  *   `…\Entities\Drives\`, `…\Entities\Environment\`,
  *   `…\Entities\Evals\`, `…\Entities\Installation\`, `…\Entities\MCPPackages\`, `…\Entities\Mandates\`, `…\Entities\Models\CustomerSelection\`,
  *   `…\Entities\RecordedRuns\`, `…\Entities\Skills\`, `…\Entities\SystemHealth\`, `…\Entities\Texts\Embeddings\`, `…\Entities\Voice\`,
  *   `…\Entities\WebSearch\`;
- * - `DDD\Domain\AI\Exceptions\Conversations\`, `…\Exceptions\Evals\`, `…\Exceptions\Texts\Embeddings\`, `…\Exceptions\Voice\`;
+ * - `DDD\Domain\AI\Exceptions\Connections\`, `…\Exceptions\Conversations\`, `…\Exceptions\Evals\`, `…\Exceptions\Texts\Embeddings\`, `…\Exceptions\Voice\`;
  * - `DDD\Domain\AI\Interfaces\`, `DDD\Domain\AI\MessageHandlers\`;
- * - `DDD\Domain\AI\Libs\RecordedRuns\`, `DDD\Domain\AI\Listeners\Conversations\`,
+ * - `DDD\Domain\AI\Libs\RecordedRuns\`, `DDD\Domain\AI\Libs\Connections\`, `DDD\Domain\AI\Listeners\Conversations\`,
+ *   `DDD\Domain\AI\Listeners\Connections\`, `DDD\Domain\AI\Traits\Connections\`,
  *   `DDD\Domain\AI\Messenger\Conversations\`, `DDD\Domain\AI\Traits\Conversations\`;
  * - `DDD\Domain\AI\Repo\Argus\Conversations\`, `…\Repo\Argus\Guard\`, `…\Repo\Argus\Mandates\`, `…\Repo\Argus\WebSearch\`,
- *   `…\Repo\DB\AgentSpaces\`, `…\Repo\DB\Conversations\`, `…\Repo\DB\Evals\`, `…\Repo\DB\Mandates\`, `…\Repo\DB\Voice\`;
- * - `DDD\Domain\AI\Services\AgentSpaces\`, `…\Services\ClientTools\`, `…\Services\Conversations\`, `…\Services\Decisions\`, `…\Services\Documents\`,
+ *   `…\Repo\DB\AgentSpaces\`, `…\Repo\DB\Connections\`, `…\Repo\DB\Conversations\`, `…\Repo\DB\Evals\`, `…\Repo\DB\Mandates\`, `…\Repo\DB\Voice\`;
+ * - `DDD\Domain\AI\Services\AgentSpaces\`, `…\Services\ClientTools\`, `…\Services\Connections\`, `…\Services\Conversations\`, `…\Services\Decisions\`, `…\Services\Documents\`,
  *   `…\Services\Drives\`, `…\Services\Eval\`, `…\Services\Installation\`, `…\Services\Mandates\`,
  *   `…\Services\Skills\`, `…\Services\SystemHealth\`, `…\Services\SystemPrompts\`, `…\Services\Texts\Embeddings\`, `…\Services\Voice\`,
  *   `…\Services\WebSearch\`;
- * - `DDD\Modules\Agents\`, `DDD\Presentation\Api\Admin\Voice\` (the admin list of calls), `DDD\Presentation\Api\Agents\`,
+ * - `DDD\Modules\Agents\`, `DDD\Presentation\Api\Admin\Connections\` and `DDD\Presentation\Api\Public\Connections\`
+ *   (the connection endpoints), `DDD\Presentation\Api\Admin\Voice\` (the admin list of calls), `DDD\Presentation\Api\Agents\`,
  *   `DDD\Presentation\Mcp\` (the MCP / JSON-RPC wire DTOs, the tool executor, the console printer and the JSON-RPC
  *   base controller);
  * - `DDD\Symfony\Commands\Agents\` (the console commands of the module, their shared base, the option traits and the
@@ -63,6 +65,7 @@ class AgentsModule extends DDDModule
     public const array OWNED_NAMESPACES = [
         'DDD\\Domain\\AI\\Entities\\AgentSpaces\\',
         'DDD\\Domain\\AI\\Entities\\ClientTools\\',
+        'DDD\\Domain\\AI\\Entities\\Connections\\',
         'DDD\\Domain\\AI\\Entities\\Conversations\\',
         'DDD\\Domain\\AI\\Entities\\Discovery\\',
         'DDD\\Domain\\AI\\Entities\\Documents\\',
@@ -79,12 +82,15 @@ class AgentsModule extends DDDModule
         'DDD\\Domain\\AI\\Entities\\Texts\\Embeddings\\',
         'DDD\\Domain\\AI\\Entities\\Voice\\',
         'DDD\\Domain\\AI\\Entities\\WebSearch\\',
+        'DDD\\Domain\\AI\\Exceptions\\Connections\\',
         'DDD\\Domain\\AI\\Exceptions\\Conversations\\',
         'DDD\\Domain\\AI\\Exceptions\\Evals\\',
         'DDD\\Domain\\AI\\Exceptions\\Texts\\Embeddings\\',
         'DDD\\Domain\\AI\\Exceptions\\Voice\\',
         'DDD\\Domain\\AI\\Interfaces\\',
+        'DDD\\Domain\\AI\\Libs\\Connections\\',
         'DDD\\Domain\\AI\\Libs\\RecordedRuns\\',
+        'DDD\\Domain\\AI\\Listeners\\Connections\\',
         'DDD\\Domain\\AI\\Listeners\\Conversations\\',
         'DDD\\Domain\\AI\\MessageHandlers\\',
         'DDD\\Domain\\AI\\Messenger\\Conversations\\',
@@ -93,12 +99,14 @@ class AgentsModule extends DDDModule
         'DDD\\Domain\\AI\\Repo\\Argus\\Mandates\\',
         'DDD\\Domain\\AI\\Repo\\Argus\\WebSearch\\',
         'DDD\\Domain\\AI\\Repo\\DB\\AgentSpaces\\',
+        'DDD\\Domain\\AI\\Repo\\DB\\Connections\\',
         'DDD\\Domain\\AI\\Repo\\DB\\Conversations\\',
         'DDD\\Domain\\AI\\Repo\\DB\\Evals\\',
         'DDD\\Domain\\AI\\Repo\\DB\\Mandates\\',
         'DDD\\Domain\\AI\\Repo\\DB\\Voice\\',
         'DDD\\Domain\\AI\\Services\\AgentSpaces\\',
         'DDD\\Domain\\AI\\Services\\ClientTools\\',
+        'DDD\\Domain\\AI\\Services\\Connections\\',
         'DDD\\Domain\\AI\\Services\\Conversations\\',
         'DDD\\Domain\\AI\\Services\\Decisions\\',
         'DDD\\Domain\\AI\\Services\\Documents\\',
@@ -112,9 +120,12 @@ class AgentsModule extends DDDModule
         'DDD\\Domain\\AI\\Services\\Texts\\Embeddings\\',
         'DDD\\Domain\\AI\\Services\\Voice\\',
         'DDD\\Domain\\AI\\Services\\WebSearch\\',
+        'DDD\\Domain\\AI\\Traits\\Connections\\',
         'DDD\\Domain\\AI\\Traits\\Conversations\\',
         'DDD\\Modules\\Agents\\',
+        'DDD\\Presentation\\Api\\Admin\\Connections\\',
         'DDD\\Presentation\\Api\\Admin\\Voice\\',
+        'DDD\\Presentation\\Api\\Public\\Connections\\',
         'DDD\\Presentation\\Api\\Agents\\',
         'DDD\\Presentation\\Mcp\\',
         'DDD\\Symfony\\Commands\\Agents\\',
@@ -136,6 +147,21 @@ class AgentsModule extends DDDModule
      * provider with (`ratchet/pawl`, which runs on `react/event-loop`; both are suggested, not required)
      */
     public const string VOICE_SESSION_WORKER_LIBRARY_CLASS = Connector::class;
+
+    /**
+     * @var string The Slack Socket Mode runner (AgentConnections, local and dev inbound): it holds a WebSocket, so it
+     * needs the same optional library as the voice session worker (`ratchet/pawl`, composer `suggest`)
+     */
+    public const string SOCKET_MODE_NAMESPACE = 'DDD\\Domain\\AI\\Services\\Connections\\Adapters\\Slack\\SocketMode\\';
+
+    /** @var class-string The class the Socket Mode runner needs */
+    public const string SOCKET_MODE_LIBRARY_CLASS = Connector::class;
+
+    /** @var string The Google adapter of AgentConnections: it needs the optional `google/apiclient` (composer `suggest`) */
+    public const string GOOGLE_ADAPTER_NAMESPACE = 'DDD\\Domain\\AI\\Services\\Connections\\Adapters\\Google\\';
+
+    /** @var string The class of `google/apiclient` the Google adapter needs (a string: the library is optional) */
+    public const string GOOGLE_LIBRARY_CLASS = 'Google\\Client';
 
     /** @return string[] {@see self::OWNED_NAMESPACES}: Core checks that no other package ships a class below them */
     public static function getOwnedNamespaces(): array
@@ -181,6 +207,9 @@ class AgentsModule extends DDDModule
             // the voice channel: call life, admission, start and ring, the call store port, the briefing, the provider
             // adapters and the session worker (the routes, the tools, the handlers and the reaper fetch them)
             'DDD\\Domain\\AI\\Services\\Voice\\',
+            // AgentConnections: connections, adapters, the gate, approvals, inbound (the tools, routes, handlers and the
+            // settled-turn listener fetch them)
+            'DDD\\Domain\\AI\\Services\\Connections\\',
             'DDD\\Presentation\\Mcp\\Services\\',
         ];
     }
@@ -195,7 +224,8 @@ class AgentsModule extends DDDModule
      */
     public static function getNamespacesRequiringClasses(): array
     {
-        return array_fill_keys(static::VOICE_SESSION_WORKER_NAMESPACES, static::VOICE_SESSION_WORKER_LIBRARY_CLASS);
+        return array_fill_keys(static::VOICE_SESSION_WORKER_NAMESPACES, static::VOICE_SESSION_WORKER_LIBRARY_CLASS)
+            + [static::SOCKET_MODE_NAMESPACE => static::SOCKET_MODE_LIBRARY_CLASS, static::GOOGLE_ADAPTER_NAMESPACE => static::GOOGLE_LIBRARY_CLASS];
     }
 
     /**

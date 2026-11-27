@@ -32,6 +32,9 @@ class AIConversationEvalPurgeServiceRecordingDouble extends AIConversationEvalPu
     /** @var int[] */
     public array $pauses = [];
 
+    /** Whether AgentConnections is switched on (its three tables are then purge steps) */
+    public bool $agentConnectionsEnabled = false;
+
     public float $clockSeconds = 1000.0;
 
     public float $secondsPerWrite = 0.01;
@@ -163,5 +166,10 @@ class AIConversationEvalPurgeServiceRecordingDouble extends AIConversationEvalPu
     protected function getSqlDialect(): SqlDialect
     {
         return DialectResolver::forDriver($this->databaseDriver);
+    }
+
+    protected function areAgentConnectionTablesInUse(): bool
+    {
+        return $this->agentConnectionsEnabled;
     }
 }

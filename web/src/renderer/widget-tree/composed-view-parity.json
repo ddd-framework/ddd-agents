@@ -593,10 +593,12 @@
         "widgetTypes": [
             "AttachedFiles",
             "ComposedView",
+            "ContinueInPersonalSpace",
             "ConversationSearchResults",
             "CustomVisualization",
             "DriveFiles",
             "EntityMention",
+            "ExtendConnectionPermission",
             "ImageGallery",
             "MultiChoice",
             "QuickReplies",

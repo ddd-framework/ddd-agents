@@ -78,6 +78,15 @@ class AISkill extends Entity
     // its own copy of this skill file (the package's file names no skill of a package it does not require).
     public const string AGENT_WEB_SEARCH = 'Agent.Web.Search';
 
+    /** @var string AgentConnections: what is connected, names, levels */
+    public const string AGENT_CONNECTIONS_OVERVIEW = 'Agent.Connections.Overview';
+    public const string AGENT_CONNECTIONS_MAIL = 'Agent.Connections.Mail';
+    public const string AGENT_CONNECTIONS_CALENDAR = 'Agent.Connections.Calendar';
+    public const string AGENT_CONNECTIONS_CONTACTS = 'Agent.Connections.Contacts';
+    public const string AGENT_CONNECTIONS_FILES = 'Agent.Connections.Files';
+    public const string AGENT_CONNECTIONS_DOCUMENTS = 'Agent.Connections.Documents';
+    public const string AGENT_CONNECTIONS_CHAT = 'Agent.Connections.Chat';
+
     // The user's UI: the agent reads the screen the user is on, lists and opens screens, highlights an element; the
     // client executes the requests (client tool request channel).
     public const string AGENT_UI = 'Agent.UI';

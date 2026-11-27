@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DDD\Presentation\Mcp\Client\Connections\Dtos;
+
+use DDD\Presentation\Base\Dtos\RequestDto;
+use DDD\Presentation\Base\OpenApi\Attributes\Parameter;
+
+class AgentConnectionChatThreadRequestDto extends RequestDto
+{
+    /** @var string|null The connection by its name or id (listConnections); omitted = the only or default one */
+    #[Parameter(in: Parameter::BODY, required: false)]
+    public ?string $connection = null;
+    #[Parameter(in: Parameter::BODY, required: true)]
+    public string $channelId = '';
+    #[Parameter(in: Parameter::BODY, required: true)]
+    public string $threadId = '';
+}

@@ -27,11 +27,13 @@ class OwnerDevice extends ValueObject
     public const string KIND_PHONE_CALL = 'PHONE_CALL';
     public const string KIND_EXTERNAL_AGENT = 'EXTERNAL_AGENT';
     public const string KIND_ADMIN_CONSOLE = 'ADMIN_CONSOLE';
+    /** @var string A turn that arrived through an AgentConnection (a Slack thread, a mail): the surface shows text only, no widgets */
+    public const string KIND_CHAT_CONNECTION = 'CHAT_CONNECTION';
     public const string KIND_UNKNOWN = 'UNKNOWN';
 
     public const array KINDS = [
         self::KIND_MOBILE_APP, self::KIND_WEB_BROWSER, self::KIND_MOBILE_WEB_BROWSER,
-        self::KIND_PHONE_CALL, self::KIND_EXTERNAL_AGENT, self::KIND_ADMIN_CONSOLE, self::KIND_UNKNOWN,
+        self::KIND_PHONE_CALL, self::KIND_EXTERNAL_AGENT, self::KIND_ADMIN_CONSOLE, self::KIND_CHAT_CONNECTION, self::KIND_UNKNOWN,
     ];
 
     /** The header's lowercase kind tokens → the kind constants (the constant names are accepted too). */

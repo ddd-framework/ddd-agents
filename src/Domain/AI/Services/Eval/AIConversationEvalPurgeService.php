@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace DDD\Domain\AI\Services\Eval;
 
+use DDD\Domain\AI\Entities\Connections\AgentConnectionsConfiguration;
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionThreadModel;
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionApprovalRequestModel;
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionActionModel;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
 use DDD\Domain\AI\Entities\Evals\ConversationPurge\AIConversationEvalPurgeKeys;
 use DDD\Domain\AI\Entities\Evals\ConversationPurge\AIConversationEvalPurgeReport;
@@ -215,6 +219,7 @@ class AIConversationEvalPurgeService extends Service
             ...$this->getAgentMemoryStoreService()->getColumnsNotPurgedByEvalPurge(),
             ...$this->getAgentGoalStoreService()->getColumnsNotPurgedByEvalPurge(),
             ...$this->getVoiceCallColumnsNotPurged(),
+            ...$this->getAgentConnectionColumnsNotPurged(),
             "{$conversationTableName}.rootConversationId" => 'inside the tree: the tree expansion follows it',
             "{$conversationTableName}.supervisedConversationId" => 'inside the tree: the tree expansion follows it',
             "{$conversationTableName}.delegatedFromMessageId" => 'inside the tree: the child conversation goes with it',
@@ -250,6 +255,48 @@ class AIConversationEvalPurgeService extends Service
             "{$voiceCallTableName}.aiConversationId" => $reason,
             "{$voiceCallTableName}.startedByAgentInConversationId" => $reason,
         ];
+    }
+
+    /** The column through which the AgentConnections tables point at a conversation ({@see getAgentConnectionTableNames()}) */
+    public const string AGENT_CONNECTIONS_CONVERSATION_COLUMN = 'aiConversationId';
+
+    /**
+     * The conversation pointers of the AgentConnections tables while AgentConnections is switched off
+     * ({@see areAgentConnectionTablesInUse()}): nothing writes their rows then and the tables need not exist, so a
+     * statement on them would fail. While it is on they are purge steps ({@see buildModulePurgeSteps()}).
+     *
+     * @return string[] `table.column` → why it is not a step
+     */
+    protected function getAgentConnectionColumnsNotPurged(): array
+    {
+        if ($this->areAgentConnectionTablesInUse()) {
+            return [];
+        }
+        $columnsNotPurged = [];
+        foreach ($this->getAgentConnectionTableNames() as $tableName) {
+            $columnsNotPurged[$tableName . '.' . static::AGENT_CONNECTIONS_CONVERSATION_COLUMN] = 'AgentConnections is switched off (AI.agentConnections.enabled): no row is written and the table need not exist';
+        }
+        return $columnsNotPurged;
+    }
+
+    /**
+     * The AgentConnections tables that point at a conversation: the audit, the approval requests, the chat threads
+     *
+     * @return string[]
+     */
+    protected function getAgentConnectionTableNames(): array
+    {
+        return [
+            (string)DBAgentConnectionActionModel::getTableName(),
+            (string)DBAgentConnectionApprovalRequestModel::getTableName(),
+            (string)DBAgentConnectionThreadModel::getTableName(),
+        ];
+    }
+
+    /** Whether AgentConnections is switched on, so its tables exist ({@see AgentConnectionsConfiguration::isEnabled()}) */
+    protected function areAgentConnectionTablesInUse(): bool
+    {
+        return AgentConnectionsConfiguration::current()->isEnabled();
     }
 
     /**
@@ -308,6 +355,12 @@ class AIConversationEvalPurgeService extends Service
         // per-conversation records
         $this->addPurgeStep($moduleSteps, AIConversationEvalPurgeStep::deleteRows((string)DBAIConversationTurnEventModel::getTableName(), 'aiConversationId', $conversation));
         $this->addPurgeStep($moduleSteps, AIConversationEvalPurgeStep::deleteRows((string)DBAIConversationTraceEventModel::getTableName(), 'aiConversationId', $conversation));
+        if ($this->areAgentConnectionTablesInUse()) {
+            // AgentConnections: the audit, approval requests and chat threads of an eval conversation (FAKE connections only)
+            foreach ($this->getAgentConnectionTableNames() as $tableName) {
+                $this->addPurgeStep($moduleSteps, AIConversationEvalPurgeStep::deleteRows($tableName, static::AGENT_CONNECTIONS_CONVERSATION_COLUMN, $conversation));
+            }
+        }
         $this->addPurgeStep($moduleSteps, AIConversationEvalPurgeStep::deleteRows((string)DBAIConversationToolCallBatchModel::getTableName(), 'conversationId', $conversation));
         $this->addPurgeStep($moduleSteps, AIConversationEvalPurgeStep::deleteRows((string)DBAIConversationDelegationBatchModel::getTableName(), 'parentConversationId', $conversation));
         $this->addPurgeStep($moduleSteps, AIConversationEvalPurgeStep::deleteRows((string)DBAIConversationTaskPushNotificationConfigModel::getTableName(), 'aiConversationId', $conversation));

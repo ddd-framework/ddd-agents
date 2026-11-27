@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 return [
     ['file' => 'src/Domain/AI/Services/Conversations/AgentToolCallForkJoinService.php', 'sink' => 'process', 'reason' => 'our own console script for a forked tool call, argument array; the call arguments travel in a file of our own'],
+    ['file' => 'src/Domain/AI/Services/Connections/Adapters/Slack/SlackAgentConnectionAdapter.php', 'sink' => 'http-client', 'reason' => 'the Slack Web API on the fixed host https://slack.com/api/ (API_BASE_URL) with fixed method names; no URL from outside'],
     ['file' => 'src/Domain/AI/Services/Eval/Probes/AgentReasoningReplayProbeTransportService.php', 'sink' => 'http-client', 'reason' => 'the reasoning-replay probe posts its own composed bodies to the three fixed OpenRouter endpoints (an allow-list in the method); no URL from outside'],
     ['file' => 'src/Domain/AI/Services/Skills/AISkillsService.php', 'sink' => 'yaml-parse', 'reason' => 'frontmatter of the skill files shipped with the code, no object flags'],
     ['file' => 'src/Domain/AI/Services/Voice/Live/OpenAILiveVoiceProviderAdapter.php', 'sink' => 'http-client', 'reason' => 'the two REST calls of a voice session (create, hang up) go to the provider host of the committed config (AI.agentVoice.provider.<name>.apiHost) on fixed paths, the session id URL-encoded; no URL from outside'],

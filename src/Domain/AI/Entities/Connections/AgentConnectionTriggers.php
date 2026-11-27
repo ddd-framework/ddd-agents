@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DDD\Domain\AI\Entities\Connections;
+
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionTriggers;
+use DDD\Domain\AI\Services\Connections\AgentConnectionTriggersService;
+use DDD\Domain\Base\Entities\ChangeHistory\ChangeHistoryTrait;
+use DDD\Domain\Base\Entities\EntitySet;
+use DDD\Domain\Base\Entities\LazyLoad\LazyLoadRepo;
+use DDD\Domain\Base\Entities\QueryOptions\QueryOptions;
+use DDD\Domain\Base\Entities\QueryOptions\QueryOptionsTrait;
+
+/**
+ * A list of {@see AgentConnectionTrigger}.
+ *
+ * @property AgentConnectionTrigger[] $elements
+ * @method AgentConnectionTrigger getByUniqueKey(string $uniqueKey)
+ * @method AgentConnectionTrigger[] getElements()
+ * @method AgentConnectionTrigger|null first()
+ * @method static AgentConnectionTriggersService getService()
+ * @phpstan-consistent-constructor
+ */
+#[QueryOptions]
+#[LazyLoadRepo(LazyLoadRepo::DB, DBAgentConnectionTriggers::class, forceDBEntityModelCreation: true)]
+class AgentConnectionTriggers extends EntitySet
+{
+    use ChangeHistoryTrait, QueryOptionsTrait;
+
+    /** Pins the service to its folder (the flat convention of getService() would miss `Services\Connections\…`) */
+    public const string SERVICE_NAME = AgentConnectionTriggersService::class;
+}

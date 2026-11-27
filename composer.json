@@ -47,7 +47,8 @@
     },
     "suggest": {
         "php-tui/php-tui": "Draws the full-screen agent chat (app:agent:chat-tui); without it the command ends with a line naming the library",
-        "ratchet/pawl": "The WebSocket client of the voice session worker, which stays with a call from its answer to its end; without it the voice channel reads as unavailable and app:agent:check-installation names a switched-on AI.agentVoice.enabled",
-        "react/event-loop": "The event loop the voice session worker runs its WebSocket connection and its timers on; needed together with ratchet/pawl by an application that switches the voice channel on"
+        "ratchet/pawl": "The WebSocket client of the voice session worker, which stays with a call from its answer to its end; without it the voice channel reads as unavailable and app:agent:check-installation names a switched-on AI.agentVoice.enabled. Also the Slack Socket Mode client of AgentConnections (app:agent:connections:slack-socket-mode, local and dev)",
+        "react/event-loop": "The event loop the voice session worker runs its WebSocket connection and its timers on; needed together with ratchet/pawl by an application that switches the voice channel on",
+        "google/apiclient": "AgentConnections: the Google adapter (Gmail, Calendar, Contacts, Drive)"
     }
 }

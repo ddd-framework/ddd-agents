@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace DDD\Tests\Agents\Domain\AI\Services\Skills;
 
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsChatMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsDocumentsMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsFilesMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsContactsMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsCalendarMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsMailMCPPackage;
+use DDD\Presentation\Mcp\Client\Connections\AgentConnectionsMCPPackage;
 use DDD\Domain\AI\Entities\Skills\AISkill;
 use DDD\Domain\AI\Services\Skills\MCPPackageIdsService;
 use DDD\Presentation\Mcp\Client\Agents\AgentMandatesMCPPackage;
@@ -76,6 +83,13 @@ class MCPPackageIdsServiceTest extends TestCase
                 AISkill::AGENT_GOALS => [AgentGoalsMCPPackage::class, AgentGoalBlueprintMCPPackage::class],
                 AISkill::AGENT_IMAGES => [AgentImagesMCPPackage::class],
                 AISkill::AGENT_WEB_SEARCH => [WebSearchMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_OVERVIEW => [AgentConnectionsMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_MAIL => [AgentConnectionsMailMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_CALENDAR => [AgentConnectionsCalendarMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_CONTACTS => [AgentConnectionsContactsMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_FILES => [AgentConnectionsFilesMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_DOCUMENTS => [AgentConnectionsDocumentsMCPPackage::class],
+                AISkill::AGENT_CONNECTIONS_CHAT => [AgentConnectionsChatMCPPackage::class],
                 AISkill::AGENT_UI => [AgentUIMCPPackage::class, AgentUIWindowMCPPackage::class, AgentUIActionsMCPPackage::class],
                 AISkill::AGENT_VOICE => [AgentVoiceCallsMCPPackage::class],
                 AISkill::SYSTEM_HEALTH => [SystemHealthMCPPackage::class],

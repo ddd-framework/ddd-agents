@@ -526,6 +526,12 @@ class AIConversationMessage extends Entity
     public const string SIGNAL_SOURCE_FRONTEND_CHANNEL_CONNECTION = 'FRONTEND_CHANNEL_CONNECTION';
 
     /**
+     * @var string A person answered an approval request of an AgentConnection step (approved and run, rejected,
+     * failed) — from the admin list or a chat button; the agent learns the outcome of the step it waited for.
+     */
+    public const string SIGNAL_SOURCE_CONNECTION_APPROVAL = 'CONNECTION_APPROVAL';
+
+    /**
      * @var string The owner NAVIGATED — opened or left a flow the chat cannot be read behind (an external sign-in
      * flow opened from the `ChannelConnections` widget). The frontend posts it PROGRAMMATICALLY
      * from a store transition, so it is deliberately NOT {@see self::SIGNAL_SOURCE_FRONTEND_WIDGET_CLICK}: a

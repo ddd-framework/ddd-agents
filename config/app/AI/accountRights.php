@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use DDD\Domain\AI\Entities\Connections\AgentConnectionsAccountRights;
 use DDD\Domain\AI\Entities\Conversations\Entitlements\AgentAccountRights;
 use DDD\Domain\AI\Entities\Conversations\Entitlements\AgentRoleMappedAccountRights;
 use DDD\Domain\Common\Entities\Roles\Role;
@@ -31,4 +32,9 @@ return [
     AgentAccountRights::USE_WEB => [AgentRoleMappedAccountRights::EVERY_ACCOUNT],
     AgentAccountRights::USE_UI => [AgentRoleMappedAccountRights::EVERY_ACCOUNT],
     'useDrive' => [AgentRoleMappedAccountRights::EVERY_ACCOUNT],
+    // AgentConnections (switched off by default): the tools for every account, its own connections for every account,
+    // the agent's own identities for the superadmin
+    AgentConnectionsAccountRights::USE_AGENT_CONNECTIONS => [AgentRoleMappedAccountRights::EVERY_ACCOUNT],
+    AgentConnectionsAccountRights::MANAGE_OWN_AGENT_CONNECTIONS => [AgentRoleMappedAccountRights::EVERY_ACCOUNT],
+    AgentConnectionsAccountRights::MANAGE_SYSTEM_AGENT_CONNECTIONS => [Role::SUPERADMIN],
 ];

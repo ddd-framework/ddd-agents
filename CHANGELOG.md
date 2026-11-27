@@ -12,6 +12,38 @@
   `openConnectionPermissions({connectionId, capability, level})` (type `AgentsConnectionPermissionTarget`), which opens
   the app's connection settings with that permission preselected. Without the hook, or without a connection, capability
   and level in the block, the widget renders nothing.
+- **New: AgentConnections.** The agent works through an account's or a space's external accounts (Google mail,
+  calendar, contacts, drive and native documents; IMAP/SMTP mail; Slack) under per-capability levels (READ … SEND_BY_RULE)
+  with a gate in front of every provider call: the level, the stage guard (outside production only allow-listed
+  recipients), send limits, the audit (`AgentConnectionActions`, external addresses hashed) and a person's yes for
+  every outward step that needs one (in the conversation through the owner-consent step, unattended as an
+  `AgentConnectionApprovalRequest` answered on the admin screen or in a chat thread; one answer wins).
+  - Tables (all new; nothing changes on an existing table): `AgentConnections`, `AgentConnectionCredentialSets`
+    (encrypted secrets), `AgentConnectionPermissions`, `AgentConnectionReleases`, `AgentConnectionActions`,
+    `AgentConnectionActionTargets`, `AgentConnectionApprovalRequests`, `AgentConnectionAccountLinks`,
+    `AgentConnectionAddresses`, `AgentConnectionThreads`, `AgentConnectionTriggers`, `AgentConnectionInboundEvents`,
+    `AgentConnectionDriveRoots`. Every read path is behind `AI.agentConnections.enabled` (off by default).
+  - Sharing: a connection is the owner's ("only me") or released to an agent space with a ceiling per capability
+    (`AgentConnectionCapabilityCeilings`) and boundaries (`AgentConnectionScopeBoundaries`: folders, labels,
+    calendars, contact labels and sources), both typed sets stored as JSON. In a conversation only a release to the
+    conversation's own space counts (`AgentConnectionReach`); the management screens see every member space.
+  - Google consent is incremental: the connect asks for the read scopes of the chosen capabilities plus identity; a
+    higher level asks for its additional scopes first (`startOAuthReconsent`, `include_granted_scopes`) and takes
+    effect only after the provider granted them (`AgentConnectionConsentRequiredException`, HTTP 409
+    `consent_required`). A tool that needs a missing scope refuses and shows the owner the new widget
+    `ExtendConnectionPermission`.
+  - A connection the audience of a shared conversation may not see is refused there and offers the widget
+    `ContinueInPersonalSpace` (`{request, reason}`); the reason comes from the host hook
+    `AgentConnectionsService::getOwnerFacingText()`.
+  - Outward steps carry typed arguments (`AgentConnectionStepArguments`); the approved content hash is taken over
+    their stored form. The per-recipient limit counts exact targets (`AgentConnectionActionTargets`).
+  - A merge of contacts deletes its donor: it needs the delete level and always a yes, also under a rule.
+  - Mail triggers start a run only for a new mail of the poll window, inside the trigger account's label boundary,
+    from a sender the mailbox's own server authenticated (trusted authserv-id, DMARC with an aligned header.from).
+  - Skills `Agent.Connections.Overview`, `.Mail`, `.Calendar`, `.Contacts`, `.Files`, `.Documents`, `.Chat`; admin
+    endpoints `AdminAgentConnectionsTrait`; OAuth callback per provider; Slack Events API and Socket Mode.
+  - Config `AI.agentConnections` (`config/app/AI/agentConnections.php`): adapters, stages, limits, internal domains,
+    `unresolvedSecretReferencePrefixes`.
 
 ## 0.10.7
 

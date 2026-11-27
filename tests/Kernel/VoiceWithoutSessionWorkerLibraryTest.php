@@ -54,6 +54,8 @@ class VoiceWithoutSessionWorkerLibraryTest extends UnitTestCase
             [
                 'DDD\\Domain\\AI\\MessageHandlers\\Voice\\SessionWorker\\' => Connector::class,
                 'DDD\\Domain\\AI\\Services\\Voice\\SessionWorker\\' => Connector::class,
+                'DDD\\Domain\\AI\\Services\\Connections\\Adapters\\Slack\\SocketMode\\' => Connector::class,
+                'DDD\\Domain\\AI\\Services\\Connections\\Adapters\\Google\\' => 'Google\\Client',
             ],
             AgentsModule::getNamespacesRequiringClasses()
         );
@@ -98,6 +100,7 @@ class VoiceWithoutSessionWorkerLibraryTest extends UnitTestCase
         self::assertSame(['Modules/Agents/AgentsModule.php'], $filesNamingTheLibrary, 'a file that imports the library sits below a gated namespace');
         sort($gatedFilesNamingTheLibrary);
         self::assertSame([
+            'Domain/AI/Services/Connections/Adapters/Slack/SocketMode/SlackSocketModeRunner.php',
             'Domain/AI/Services/Voice/SessionWorker/AgentLiveVoiceSessionsService.php',
             'Domain/AI/Services/Voice/SessionWorker/Samples/LiveVoiceSampleSession.php',
             'Domain/AI/Services/Voice/SessionWorker/Samples/LiveVoiceSampleSynthesizer.php',

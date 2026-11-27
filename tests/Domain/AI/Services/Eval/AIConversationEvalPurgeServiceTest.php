@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace DDD\Tests\Agents\Domain\AI\Services\Eval;
 
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionThreadModel;
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionApprovalRequestModel;
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionActionModel;
 use DDD\Domain\AI\Entities\Evals\ConversationPurge\AIConversationEvalPurgeKeys;
 use DDD\Domain\AI\Entities\Evals\ConversationPurge\AIConversationEvalPurgeReport;
 use DDD\Domain\AI\Entities\Evals\ConversationPurge\AIConversationEvalPurgeSettings;
@@ -278,6 +281,29 @@ class AIConversationEvalPurgeServiceTest extends UnitTestCase
         }
         self::assertCount(count($labels), array_unique($labels), 'every step label is unique');
         self::assertCount(count($labels), array_unique($steps->getStepKeys()), 'every step key is unique');
+    }
+
+    public function testTheAgentConnectionsTablesArePurgedOnlyWhileTheFeatureIsOn(): void
+    {
+        $service = new AIConversationEvalPurgeServiceRecordingDouble();
+        $connectionColumns = [
+            DBAgentConnectionActionModel::getTableName() . '.aiConversationId',
+            DBAgentConnectionApprovalRequestModel::getTableName() . '.aiConversationId',
+            DBAgentConnectionThreadModel::getTableName() . '.aiConversationId',
+        ];
+        $labelsWhileOff = $service->buildPurgeSteps()->getStepKeys();
+        foreach ($connectionColumns as $connectionColumn) {
+            self::assertNotContains('delete:' . $connectionColumn, $labelsWhileOff, 'no statement names a table that need not exist');
+            self::assertArrayHasKey($connectionColumn, $service->getColumnsNotPurged());
+        }
+
+        $service->agentConnectionsEnabled = true;
+        $labelsWhileOn = $service->buildPurgeSteps()->getStepKeys();
+        self::assertCount(count($labelsWhileOff) + 3, $labelsWhileOn);
+        foreach ($connectionColumns as $connectionColumn) {
+            self::assertContains('delete:' . $connectionColumn, $labelsWhileOn);
+            self::assertArrayNotHasKey($connectionColumn, $service->getColumnsNotPurged());
+        }
     }
 
     public function testTheApplicationsStepsGoFirstByDefault(): void

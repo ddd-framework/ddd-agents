@@ -207,6 +207,7 @@ A host or purpose takes groups of them off the offer to save tokens (`offersDele
 | Ask the owner a closed question; read the pick in a tool; add a catalogue question | [asking the owner a closed question](references/asking-the-owner-a-closed-question.md) |
 | Change a package tool's right, description, summary, parameter text or owner-facing subject by name; name the space argument as the application does | [tool overlays and the space argument](references/tool-overlays-and-the-space-argument.md) |
 | Wire Agent.UI (the user's screen: awareness note, client channel, tools, screen catalog port) or the System tools (health sections port, issues, workers, crons) | [Agent.UI and System](references/agent-ui-and-system-tools.md) |
+| Switch on AgentConnections (external mailboxes, calendars, contacts, drives, chat): config, adapters, levels, releases, approvals, host hooks, routes, Slack inbound | [AgentConnections](references/agent-connections.md) |
 | Switch on the package's web research (search, page read); its endpoints, payer, fee booking, country; a web tool is not offered | [web research](references/web-research.md) |
 | Grant a flow more steps; start sub-agents from a result; write a widget or a line into the chat | [loop-control fields and tool-written messages](references/loop-control-fields-and-tool-written-messages.md) |
 | Assert the schema, call the tool in a test, call it over HTTP, read a failure | [testing a tool in a host](references/testing-a-tool-in-a-host.md) |

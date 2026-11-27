@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DDD\Presentation\Api\Admin\Connections\Dtos;
+
+use DDD\Presentation\Base\Dtos\RequestDto;
+use DDD\Presentation\Base\OpenApi\Attributes\Parameter;
+
+class AdminAgentConnectionSlackPostRequestDto extends RequestDto
+{
+    #[Parameter(in: Parameter::BODY, required: false)]
+    public ?string $displayName = null;
+}
