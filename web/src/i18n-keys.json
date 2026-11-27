@@ -428,6 +428,15 @@
       ]
     },
     {
+      "key": "Bcc",
+      "defaultText": "Bcc",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
+      ]
+    },
+    {
       "key": "Booked seconds",
       "defaultText": "Booked seconds",
       "placeholders": [],
@@ -470,6 +479,15 @@
       ],
       "usedIn": [
         "src/voice/admin/agent-voice-admin-format.ts"
+      ]
+    },
+    {
+      "key": "Cc",
+      "defaultText": "Cc",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
       ]
     },
     {
@@ -888,6 +906,15 @@
       "contexts": [],
       "usedIn": [
         "src/widgets/DriveFilesConversationWidget/DriveFilesConversationWidget.tsx"
+      ]
+    },
+    {
+      "key": "From",
+      "defaultText": "From",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
       ]
     },
     {
@@ -1702,7 +1729,8 @@
       "placeholders": [],
       "contexts": [],
       "usedIn": [
-        "src/kit/components/form/Form.composed.tsx"
+        "src/kit/components/form/Form.composed.tsx",
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
       ]
     },
     {
@@ -1715,12 +1743,22 @@
       ]
     },
     {
+      "key": "Sending…",
+      "defaultText": "Sending…",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
+      ]
+    },
+    {
       "key": "Sent",
       "defaultText": "Sent",
       "placeholders": [],
       "contexts": [],
       "usedIn": [
-        "src/kit/components/form/Form.composed.tsx"
+        "src/kit/components/form/Form.composed.tsx",
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
       ]
     },
     {
@@ -1778,7 +1816,8 @@
       "placeholders": [],
       "contexts": [],
       "usedIn": [
-        "src/kit/components/text/Text.composed.tsx"
+        "src/kit/components/text/Text.composed.tsx",
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
       ]
     },
     {
@@ -1787,7 +1826,8 @@
       "placeholders": [],
       "contexts": [],
       "usedIn": [
-        "src/kit/components/text/Text.composed.tsx"
+        "src/kit/components/text/Text.composed.tsx",
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx"
       ]
     },
     {
@@ -1942,6 +1982,7 @@
       "placeholders": [],
       "contexts": [],
       "usedIn": [
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx",
         "src/widgets/WritingDraftConversationWidget/WritingDraftWidget/WritingDraftWidget.tsx"
       ]
     },
@@ -2555,6 +2596,7 @@
       "placeholders": [],
       "contexts": [],
       "usedIn": [
+        "src/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.tsx",
         "src/widgets/WritingDraftConversationWidget/WritingDraftWidget/WritingDraftWidget.tsx"
       ]
     },

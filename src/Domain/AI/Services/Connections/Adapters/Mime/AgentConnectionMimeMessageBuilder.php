@@ -6,6 +6,7 @@ namespace DDD\Domain\AI\Services\Connections\Adapters\Mime;
 
 use DDD\Domain\AI\Entities\Connections\Adapters\AgentConnectionMailDraft;
 use DDD\Infrastructure\Base\DateTime\DateTime;
+use DDD\Infrastructure\Libs\Datafilter;
 use Parsedown;
 use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
@@ -52,7 +53,7 @@ class AgentConnectionMimeMessageBuilder
         return implode("\r\n", $headers) . "\r\n\r\n" . implode("\r\n", $parts) . "\r\n--$boundary--\r\n";
     }
 
-    /** The body's markdown as a small HTML document (safe mode, line breaks kept, tables with borders) */
+    /** The body's markdown as a small HTML document (safe mode, line breaks kept, tables with borders, sanitised) */
     public static function buildHtmlBody(string $bodyText): string
     {
         $parsedown = new Parsedown();
@@ -64,7 +65,9 @@ class AgentConnectionMimeMessageBuilder
             ['<table style="border-collapse:collapse">', '<th style="border:1px solid #ccc;padding:4px 8px;text-align:left">', '<td style="border:1px solid #ccc;padding:4px 8px">'],
             $bodyHtml
         );
-        return '<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.4">' . $bodyHtml . '</body></html>';
+        // the body is model text: sanitised once, as the last step (nothing edits it afterwards)
+        $safeBodyHtml = Datafilter::sanitizeHtml($bodyHtml);
+        return '<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.4">' . $safeBodyHtml . '</body></html>';
     }
 
     public static function cleanHeaderValue(string $value): string

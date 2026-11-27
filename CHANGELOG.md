@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.11.5
+
+- **Connections: an explicit send order is the yes, at most one confirmation.**
+  - `SEND_BY_RULE` also covers, in an attended run outside a chat thread and in a conversation only its owner reads,
+    recipients the owner wrote in their own messages of the conversation (`findAddressesNamedByOwner`); internal
+    recipients as before; removals still ask. In a conversation others read an address in a message names no recipient
+    for the rule (`AgentConnectionsService::isConversationSharedWithOthers()`; the host's default answer is "read by
+    others").
+  - A mail send that waits for the owner's yes shows the exact mail once as the tool-written `MailDraftPreview` widget
+    (DRAFT, one send button) and tells the model to write one short line — no copy of the mail, no `askOwner`. After a
+    shown preview a refused consent tells the model never to ask again. A sent mail is shown as a SENT preview.
+  - The tool-written DRAFT preview of exactly this content (`contentHash` = the step's hash, on a TOOL_MESSAGE row with
+    `emittedBy: tool:…`) is the consent step's shown-content evidence (`findShownMailPreviewIndex`); the consent
+    dialogue reads it as a WIDGET line (`composeShownMailPreviewText`). A block the model typed into its text never counts.
+  - The owner-consent criteria name short send orders with typos ("senden", "snde", "schick", "raus"), the preview's
+    button, and a bare "ok"/"ja"/"passt" right after the question as a yes.
+  - Mails go out as `multipart/alternative`: the body as written plus its markdown rendered to HTML (Parsedown, safe
+    mode, then `Datafilter::sanitizeHtml()`).
+  - Skills `Agent.Connections.Mail` and `Agent.Connections.Overview`: call `sendMail` at once, one confirmation at most.
+  - Decision fixtures: `"shownAs": "mailPreview"` cases; the connection-send fixture covers the preview and typos.
+  - Web: the package renderer `MailDraftPreview` (DRAFT with one send button, SENT chip). A host that registered its own
+    renderer with `replacesPackageWidget: true` can drop it.
+- Fix: two by-reference notices in `OwnerConsentsService::addShownContentLine()`.
+
 ## 0.11.4
 
 - **New: the skill `Agent.Conversations` (package `agent.conversations`, READ, parallel safe).** `searchConversations`

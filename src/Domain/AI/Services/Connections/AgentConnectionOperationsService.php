@@ -364,6 +364,7 @@ class AgentConnectionOperationsService
         }
         if ($agentConnectionOperation->recipients === [] || $agentConnectionOperation->capability === AgentConnectionPermission::CAPABILITY_CHAT
             || $this->isRunUnattended($agentConnectionOperation) || static::isChatConnectionTurn($agentConnectionOperation)
+            || $this->isReadByOthers($agentConnectionOperation)
         ) {
             return false;
         }
@@ -409,6 +410,21 @@ class AgentConnectionOperationsService
             }
         }
         return array_values(array_unique($ownerNamedAddresses));
+    }
+
+    /**
+     * Whether others read the conversation of the call: there an address in a message is not necessarily the owner's
+     * (another member may have written it), so it names no recipient for the rule.
+     */
+    protected function isReadByOthers(AgentConnectionOperation $agentConnectionOperation): bool
+    {
+        $conversationId = $agentConnectionOperation->callProvenance?->conversation?->id ?? null;
+        if ($conversationId === null) {
+            return true;
+        }
+        /** @var AgentConnectionsService $agentConnectionsService */
+        $agentConnectionsService = DDDService::instance()->getService(AgentConnectionsService::class);
+        return $agentConnectionsService->isConversationSharedWithOthers((int)$conversationId, $agentConnectionOperation->agentConnection);
     }
 
     /** A turn whose owner message came in through a chat connection (a chat thread shows no buttons) */
