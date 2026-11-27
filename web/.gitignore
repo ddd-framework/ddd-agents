@@ -1,3 +1,5 @@
 dist/
 *.tgz
 node_modules/
+# compiled output of a stray tsc run; the sources are TypeScript
+/src/**/*.js
