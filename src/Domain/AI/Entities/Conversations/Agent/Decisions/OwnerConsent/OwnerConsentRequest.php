@@ -53,6 +53,13 @@ class OwnerConsentRequest extends ValueObject
     public string $targetKey = '';
 
     /**
+     * @var int|null The agent's own text row that showed the step's exact content (checked by the tool), or null. The
+     *     consent dialogue then carries that row as the explanation, so an owner message that orders sending what was
+     *     shown is a yes in one pass; an unrelated message stays no. Evidence only: the decision model still decides.
+     */
+    public ?int $shownContentMessageIndex = null;
+
+    /**
      * The request for one step from free lines — the replay command's entry (the probe corpus). The tools build theirs
      * from what they loaded through their package's own factory (a method of the application's tool package,
      * outside the AI core).

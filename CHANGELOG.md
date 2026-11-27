@@ -44,6 +44,14 @@
     endpoints `AdminAgentConnectionsTrait`; OAuth callback per provider; Slack Events API and Socket Mode.
   - Config `AI.agentConnections` (`config/app/AI/agentConnections.php`): adapters, stages, limits, internal domains,
     `unresolvedSecretReferencePrefixes`.
+- **Owner consent: evidence of shown content.** `OwnerConsentRequest::$shownContentMessageIndex` names the agent's own
+  text row (never a widget or tool row) that showed a step's whole content (for a mail send: every recipient, the
+  subject and the body, unchanged) before the owner's message; the AgentConnections gate fills it.
+  `OwnerConsentsService` then reads that row into the dialogue (widget blocks the agent wrote into its text as their
+  text fields), takes the evidence as the answer to "was the step explained", and leaves "did the owner agree" to the
+  decision model at its normal threshold: a clear "send it" after the shown mail needs no second question, an unrelated
+  message still refuses. Without the evidence nothing changes. The consequence line of a send is "It reaches
+  <recipients>." `listConnections` carries `stageRecipientNote` outside production.
 
 ## 0.10.7
 

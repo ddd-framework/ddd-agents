@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DDD\Presentation\Mcp\Client\Connections;
 
+use DDD\Domain\AI\Entities\Connections\AgentConnectionsConfiguration;
 use DDD\Domain\AI\Services\Connections\AgentConnectionReach;
 use DDD\Domain\AI\Entities\Connections\AgentConnectionsAccountRights;
 use DDD\Domain\AI\Entities\MCPPackages\MCPRequiresAccountRights;
@@ -51,6 +52,13 @@ class AgentConnectionsMCPPackage extends AgentConnectionsBaseMCPPackage
         $responseDto = new AgentConnectionsListMcpResponseDto();
         foreach ($this->findUsableConnections($callProvenance)->getElements() as $agentConnection) {
             $responseDto->connections[] = static::summarize($agentConnection, $agentConnectionsService, $accountId, AgentConnectionReach::ofCall($callProvenance));
+        }
+        $agentConnectionsConfiguration = AgentConnectionsConfiguration::current();
+        if (!$agentConnectionsConfiguration->isProductionStage()) {
+            $allowedRecipients = $agentConnectionsConfiguration->getNonProductionAllowedRecipients();
+            $responseDto->stageRecipientNote = 'Stage ' . $agentConnectionsConfiguration->getCurrentStage() . ': only '
+                . ($allowedRecipients === [] ? 'nobody' : implode(', ', $allowedRecipients))
+                . ' receive what is sent through a real connection; any other recipient is refused there even with the level. A FAKE connection (provider FAKE) takes any address. Drafts are never limited: show the mail anyway, name the refused recipients in the same message and leave them out.';
         }
         return $responseDto;
     }

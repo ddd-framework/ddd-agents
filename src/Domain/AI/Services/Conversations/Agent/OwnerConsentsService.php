@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DDD\Domain\AI\Services\Conversations\Agent;
 
+use ArrayObject;
 use DDD\Domain\AI\Entities\Conversations\AIConversation;
 use DDD\Domain\AI\Entities\Conversations\Agent\AgentToolCallProvenance;
 use DDD\Domain\AI\Entities\Conversations\Agent\Decisions\AgentDecisionModelSettings;
@@ -633,6 +634,12 @@ class OwnerConsentsService extends Service
             return OwnerConsentDecisionResult::create(OwnerConsentVerdict::failed(OwnerConsentVerdict::FAILURE_NO_OWNER_ROW));
         }
         $dialogue = $this->buildOwnerConsentDialogue($messages, $afterOwnerMessageIndex, $conversation->getAgentWorkingState());
+        if ($this->addShownContentLine($dialogue, $messages, $request)) {
+            // the step's exact content stood in the agent's own text before the owner's message (checked by the tool
+            // against the rows): that answers "was the step explained"; whether the owner agreed stays the model's call
+            $request->minimumStepExplainedProbability = 0.0;
+            $request->minimumProbability = $request->minimumOwnerAgreedProbability;
+        }
         if (!$dialogue->hasOwnerLine()) {
             return OwnerConsentDecisionResult::create(OwnerConsentVerdict::failed(OwnerConsentVerdict::FAILURE_NO_OWNER_ROW), $dialogue);
         }
@@ -655,6 +662,69 @@ class OwnerConsentsService extends Service
         } catch (Throwable $checkError) {
             $this->logCheckFailedInOurCode($checkError);
             return OwnerConsentDecisionResult::create(OwnerConsentVerdict::failed(OwnerConsentVerdict::FAILURE_ERROR), $dialogue);
+        }
+    }
+
+    /**
+     * Adds the agent's own text row that showed the step's content ({@see OwnerConsentRequest::$shownContentMessageIndex})
+     * as an assistant line read as the owner saw it, when it is an assistant text before the newest owner line. Only the
+     * agent's own text counts as shown, never a widget or tool row. True when the dialogue carries it.
+     */
+    public function addShownContentLine(OwnerConsentDialogue $dialogue, AIConversationMessages $messages, OwnerConsentRequest $request): bool
+    {
+        $shownContentMessageIndex = $request->shownContentMessageIndex;
+        $newestOwnerMessageIndex = $dialogue->getNewestOwnerMessageIndex();
+        if ($shownContentMessageIndex === null || $newestOwnerMessageIndex === null || $shownContentMessageIndex >= $newestOwnerMessageIndex) {
+            return false;
+        }
+        foreach ($messages->getRowsSortedByIndex() as $row) {
+            if (($row->indexInConversation ?? null) !== $shownContentMessageIndex || !$row->isAssistantText()) {
+                continue;
+            }
+            $shownText = static::composeReadableAssistantText(AIConversationMessage::stripPreCallMessageMarker(trim((string)$row->message)));
+            foreach ($dialogue->getElements() as $dialogueLine) {
+                if ($dialogueLine->messageIndex === $shownContentMessageIndex) {
+                    // already the text before an owner line: the same row, read as the owner saw it
+                    $dialogueLine->text = $shownText;
+                    return true;
+                }
+            }
+            $dialogue->add(OwnerConsentDialogueLine::create(OwnerConsentDialogueLine::SPEAKER_ASSISTANT, $shownContentMessageIndex, $shownText));
+            $dialogue->sort(static fn (OwnerConsentDialogueLine $first, OwnerConsentDialogueLine $second): int => $first->messageIndex <=> $second->messageIndex);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * The agent's text as the owner saw it: a widget block the agent wrote into its own text (a preview) is replaced by
+     * its text fields (markdown, text, title), so the decision model reads the shown content, not escaped JSON. Pure.
+     */
+    public static function composeReadableAssistantText(string $assistantText): string
+    {
+        return (string)preg_replace_callback('/```widget\s*(\{.*?\})\s*```/s', [static::class, 'composeReadableWidgetBlock'], $assistantText);
+    }
+
+    /** @param array<int, string> $widgetMatch */
+    public static function composeReadableWidgetBlock(array $widgetMatch): string
+    {
+        $widgetFields = json_decode($widgetMatch[1], true);
+        if (!is_array($widgetFields)) {
+            return $widgetMatch[0];
+        }
+        $readableParts = [];
+        $collectedTexts = new ArrayObject();
+        array_walk_recursive($widgetFields, [static::class, 'collectReadableField'], $collectedTexts);
+        foreach ($collectedTexts as $collectedText) {
+            $readableParts[] = $collectedText;
+        }
+        return $readableParts === [] ? $widgetMatch[0] : implode("\n", $readableParts);
+    }
+
+    public static function collectReadableField(mixed $fieldValue, int|string $fieldName, ArrayObject $collectedTexts): void
+    {
+        if (is_string($fieldValue) && in_array($fieldName, ['title', 'markdown', 'text', 'question'], true) && trim($fieldValue) !== '') {
+            $collectedTexts->append($fieldValue);
         }
     }
 

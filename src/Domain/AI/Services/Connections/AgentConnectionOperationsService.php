@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DDD\Domain\AI\Services\Connections;
 
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
 use DDD\Domain\AI\Entities\Conversations\Widgets\ShownConversationWidget;
 use DDD\Domain\AI\Entities\Conversations\Messages\OwnerDevice;
 use DDD\Domain\AI\Entities\Conversations\Widgets\ShownConversationWidgets;
@@ -125,9 +126,14 @@ class AgentConnectionOperationsService
             $agentConnectionOperation->toolName,
             strtolower($agentConnectionOperation->operation) . ' through ' . $agentConnectionOperation->agentConnection->getLabel(),
             $agentConnectionOperation->approvalSummary,
-            $agentConnectionOperation->approvalContent,
+            // what follows from the step: a send reaches its recipients (the content itself is the target the owner saw)
+            $agentConnectionOperation->recipients !== []
+                ? 'It reaches ' . implode(', ', $agentConnectionOperation->recipients) . '.'
+                : $agentConnectionOperation->approvalContent,
             $agentConnectionOperation->getContentHash()
         );
+        // evidence for the consent step: the agent's own text that showed exactly this content (never a widget or tool row)
+        $ownerConsentRequest->shownContentMessageIndex = $this->findShownContentMessageIndex($agentConnectionOperation);
         try {
             $ownerConsentReservation = $ownerConsentsService->requireOwnerConsentForStep($agentConnectionOperation->callProvenance, $ownerConsentRequest);
         } catch (Throwable $consentMissing) {
@@ -467,6 +473,58 @@ class AgentConnectionOperationsService
             $internalChannelIds[] = (string)$agentConnectionAddress->externalAddress;
         }
         return $internalChannelIds;
+    }
+
+    /**
+     * The index of the agent's own text row (never a widget or tool row: their text may come from outside) that showed
+     * this step's whole content — every recipient, the subject and the body, as they are now — before the owner
+     * message of this turn. Evidence for the consent step, never a consent of its own. Null when no such row exists or
+     * for a step without such content. Only a mail send so far.
+     */
+    public function findShownContentMessageIndex(AgentConnectionOperation $agentConnectionOperation): ?int
+    {
+        $callProvenance = $agentConnectionOperation->callProvenance;
+        $mailDraft = $agentConnectionOperation->stepArguments->mailDraft;
+        $ownerMessageIndex = $callProvenance?->sourceUserMessage?->indexInConversation ?? null;
+        if ($callProvenance === null || $mailDraft === null || $ownerMessageIndex === null || trim($mailDraft->bodyText) === '') {
+            return null;
+        }
+        $conversation = $callProvenance->conversation;
+        $messages = $callProvenance->conversationMessages ?? ($conversation instanceof AIConversation && isset($conversation->messages) ? $conversation->messages : null);
+        if (!$messages instanceof AIConversationMessages) {
+            return null;
+        }
+        $requiredParts = [static::normalizeShownText($mailDraft->bodyText)];
+        if (trim($mailDraft->subject) !== '') {
+            $requiredParts[] = static::normalizeShownText($mailDraft->subject);
+        }
+        foreach ($mailDraft->getAllRecipients() as $recipient) {
+            $requiredParts[] = static::normalizeShownText((string)$recipient);
+        }
+        $shownContentMessageIndex = null;
+        foreach ($messages->getRowsSortedByIndex() as $row) {
+            $rowIndex = $row->indexInConversation ?? null;
+            if ($rowIndex === null || $rowIndex >= (int)$ownerMessageIndex || !$row->isAssistantText()) {
+                continue;
+            }
+            $shownText = static::normalizeShownText((string)($row->message ?? ''));
+            $carriesAll = $shownText !== '';
+            foreach ($requiredParts as $requiredPart) {
+                $carriesAll = $carriesAll && str_contains($shownText, $requiredPart);
+            }
+            if ($carriesAll) {
+                $shownContentMessageIndex = (int)$rowIndex;
+            }
+        }
+        return $shownContentMessageIndex;
+    }
+
+    /** Text as the owner saw it, for a content comparison: lower case, no markdown marks, single spaces */
+    public static function normalizeShownText(string $text): string
+    {
+        $text = preg_replace('/[*_`>#\\\\]+/u', '', $text) ?? $text;
+        $text = preg_replace('/\\s+/u', ' ', $text) ?? $text;
+        return trim(mb_strtolower($text));
     }
 
     /**
