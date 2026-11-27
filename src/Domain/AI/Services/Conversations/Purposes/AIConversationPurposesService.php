@@ -200,6 +200,7 @@ class AIConversationPurposesService extends Service
             : (string)$kickoffSignalText;
         $aIConversationPurpose->requiredFeatureFlags = array_values(array_map('strval', (array)($frontmatter['requiredFeatureFlags'] ?? [])));
         $aIConversationPurpose->worksAutonomouslyAfterKickoff = (bool)($frontmatter['worksAutonomouslyAfterKickoff'] ?? false);
+        $aIConversationPurpose->seededTaskPlanAcceptsNewItems = ($frontmatter['seededTaskPlanAcceptsNewItems'] ?? false) === true;
         $aIConversationPurpose->usesSynthesizedOwnerText = (bool)($frontmatter['usesSynthesizedOwnerText'] ?? false);
         $aIConversationPurpose->loadsEarlierSessionsItself = (bool)($frontmatter['loadsEarlierSessionsItself'] ?? false);
         $aIConversationPurpose->readsLocalSituation = (bool)($frontmatter['readsLocalSituation'] ?? true);

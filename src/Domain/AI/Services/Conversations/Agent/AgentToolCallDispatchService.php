@@ -1034,7 +1034,12 @@ class AgentToolCallDispatchService extends Service
         if (!$this->purposeRunsService()->conversationPurposeSeedsItsTaskPlan($conversation)) {
             return AgentSeededPlanPurposeFacts::withoutSeededPlan($allowThreads);
         }
-        return AgentSeededPlanPurposeFacts::withSeededPlan($conversation->getTaskPlan() !== null, $conversation->isNextPlanItemInThePurposesClosingAct(), $allowThreads);
+        return AgentSeededPlanPurposeFacts::withSeededPlan(
+            $conversation->getTaskPlan() !== null,
+            $conversation->isNextPlanItemInThePurposesClosingAct(),
+            $allowThreads,
+            $conversation->findPurpose()?->acceptsNewItemsOnSeededTaskPlan() ?? false
+        );
     }
 
     /**

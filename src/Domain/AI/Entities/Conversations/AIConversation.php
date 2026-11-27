@@ -1382,8 +1382,12 @@ class AIConversation extends Entity
         $agentOfferedToolsInputs->offersDelegationTools = $agentModelInputOptions->offersDelegationTools;
         $agentOfferedToolsInputs->offersTaskPlanTools = $agentModelInputOptions->offersTaskPlanTools;
         $agentOfferedToolsInputs->offersAskOwner = $agentModelInputOptions->offersAskOwner;
-        // The plan this conversation's purpose seeded is worked, never rewritten — no update_task_plan
-        $agentOfferedToolsInputs->offersUpdateTaskPlan = $this->getTaskPlan() === null || !($this->findPurpose()?->seedsTaskPlan() ?? false);
+        // The plan this conversation's purpose seeded is worked, never rewritten — no update_task_plan, unless the
+        // purpose lets the agent add items to it (the seeded items stay fixed)
+        $conversationPurpose = $this->findPurpose();
+        $agentOfferedToolsInputs->offersUpdateTaskPlan = $this->getTaskPlan() === null
+            || !($conversationPurpose?->seedsTaskPlan() ?? false)
+            || $conversationPurpose->acceptsNewItemsOnSeededTaskPlan();
         $agentOfferedToolsInputs->finishedTaskPlanCount = $this->getAgentWorkingState()?->countFinishedTaskPlans() ?? 0;
         $agentOfferedToolsInputs->isGuidedByPlanDynamics = $agentOfferedToolsInputs->finishedTaskPlanCount > 0 && $this->isGuidedByPlanDynamics();
         $agentOfferedToolsInputs->reportChannel = $this->reportChannel ?? null;

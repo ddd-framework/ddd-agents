@@ -74,11 +74,14 @@ class UpdateTaskPlanTool extends ValueObject implements AgentSeededPlanRefusingM
     /**
      * A purpose-seeded plan that exists is never rewritten ({@see answerSeededPlanRewriteRefusal()}); the call is stored
      * COMPLETED, yet it changed nothing, so the answer records the outcome `refused`. Without a plan the
-     * call is applied (the plan is created).
+     * call is applied (the plan is created). A purpose that accepts new items on its seeded plan takes the call: the
+     * update check keeps every seeded item's text, place and order and refuses dropping one.
      */
     public static function findSeededPlanRefusal(AgentSeededPlanPurposeFacts $agentSeededPlanPurposeFacts): ?AgentMetaToolCallAnswer
     {
-        if ($agentSeededPlanPurposeFacts->purposeSeedsItsTaskPlan && $agentSeededPlanPurposeFacts->hasTaskPlan) {
+        if ($agentSeededPlanPurposeFacts->purposeSeedsItsTaskPlan && $agentSeededPlanPurposeFacts->hasTaskPlan
+            && !$agentSeededPlanPurposeFacts->seededPlanAcceptsNewItems
+        ) {
             return self::answerSeededPlanRewriteRefusal()->withTaskPlanCallOutcome(ToolCall::TASK_PLAN_CALL_OUTCOME_REFUSED);
         }
         return null;

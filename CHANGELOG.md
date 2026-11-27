@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.6
+
+- **A seeded plan can grow.** New purpose frontmatter key `seededTaskPlanAcceptsNewItems` (default false). With `true`,
+  a conversation of the purpose is offered `update_task_plan` on its seeded plan and may add top-level items and
+  subtasks (one per ticket of a support run) and tick them; the seeded items keep their text, place and order and are
+  never dropped (the existing update check). The planned turn's budget counts the added leaves
+  (`6 + stepsPerPlanItem × leaves`). Without the key nothing changes: a seeded plan is still refused a rewrite.
+
 ## 0.10.5
 
 - **A turn with a task plan has no step ceiling.** It gets 6 + `stepsPerPlanItem` (default 3) × leaf items, at least 12,

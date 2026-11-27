@@ -25,6 +25,9 @@ class AgentSeededPlanPurposeFacts extends ValueObject
     /** The plan's next item belongs to the purpose's closing act; false when the purpose seeds no plan. */
     public bool $nextPlanItemIsInClosingAct = false;
 
+    /** The purpose lets the agent add items to its seeded plan ({@see \DDD\Domain\AI\Entities\Conversations\Purposes\AIConversationPurpose::$seededTaskPlanAcceptsNewItems}). */
+    public bool $seededPlanAcceptsNewItems = false;
+
     /** The conversation may start delegation children (a delegation child may not). */
     public bool $conversationMayDelegate = false;
 
@@ -37,12 +40,13 @@ class AgentSeededPlanPurposeFacts extends ValueObject
     }
 
     /** A conversation whose purpose seeds its task plan. */
-    public static function withSeededPlan(bool $hasTaskPlan, bool $nextPlanItemIsInClosingAct, bool $conversationMayDelegate): self
+    public static function withSeededPlan(bool $hasTaskPlan, bool $nextPlanItemIsInClosingAct, bool $conversationMayDelegate, bool $seededPlanAcceptsNewItems = false): self
     {
         $agentSeededPlanPurposeFacts = self::withoutSeededPlan($conversationMayDelegate);
         $agentSeededPlanPurposeFacts->purposeSeedsItsTaskPlan = true;
         $agentSeededPlanPurposeFacts->hasTaskPlan = $hasTaskPlan;
         $agentSeededPlanPurposeFacts->nextPlanItemIsInClosingAct = $nextPlanItemIsInClosingAct;
+        $agentSeededPlanPurposeFacts->seededPlanAcceptsNewItems = $seededPlanAcceptsNewItems;
         return $agentSeededPlanPurposeFacts;
     }
 }

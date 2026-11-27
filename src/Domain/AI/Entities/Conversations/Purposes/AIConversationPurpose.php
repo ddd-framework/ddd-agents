@@ -133,6 +133,21 @@ class AIConversationPurpose extends Entity
     }
 
     /**
+     * @var bool The agent may ADD items to the plan this purpose seeded (frontmatter `seededTaskPlanAcceptsNewItems`):
+     * `update_task_plan` is offered on the seeded plan and adds top-level items or subtasks (one per ticket of a support
+     * run, say) and ticks them; the seeded items keep their text, place and order and are never dropped
+     * ({@see \DDD\Domain\AI\Entities\Conversations\Agent\TaskPlanUpdateCheck}). The planned turn's budget counts
+     * the added leaves. False (default): a seeded plan is worked, never written.
+     */
+    public bool $seededTaskPlanAcceptsNewItems = false;
+
+    /** Whether the agent may add items to this purpose's seeded plan ({@see $seededTaskPlanAcceptsNewItems}); false for a purpose without a seed. */
+    public function acceptsNewItemsOnSeededTaskPlan(): bool
+    {
+        return $this->seededTaskPlanAcceptsNewItems && $this->seedsTaskPlan();
+    }
+
+    /**
      * Whether this purpose SEEDS a task plan of its own (an intake, a staged build) — such a plan is found and worked,
      * never rewritten, and never questioned by the plan-dynamics site. Read from the seed the loop seeds
      * ({@see buildSeedTaskPlanDefinition()}); a purpose's override changes gates, never the item count.

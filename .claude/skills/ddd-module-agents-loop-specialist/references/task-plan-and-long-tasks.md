@@ -83,7 +83,10 @@ cut at `DROP_WARNING_OWNER_WORDS_MAX_LENGTH`), so the model sees whether the own
 
 A status sent on an item passes the same tick application as `set_task_status`
 (`applyStatusUpdatesWithoutTheTurnStamps()`); the stored status again is no transition, and a status never rejects
-the call. A conversation whose purpose seeded its plan is not offered `update_task_plan` at all.
+the call. A conversation whose purpose seeded its plan is not offered `update_task_plan` at all — unless the purpose
+sets `seededTaskPlanAcceptsNewItems: true`: then the agent adds top-level items and subtasks (one per ticket, say) and
+ticks them, while the update check keeps every seeded item's text, place and order and refuses dropping one; the
+planned budget counts the added leaves.
 
 Every plan-tool call records `ToolCall::$taskPlanCallOutcome` (`ToolCall::TASK_PLAN_CALL_OUTCOME_*` (applied keyed,
 unchanged, refused)).

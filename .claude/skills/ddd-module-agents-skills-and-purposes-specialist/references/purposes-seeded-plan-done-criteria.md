@@ -65,6 +65,7 @@ misspelt key is silently ignored.
 | `blockedToolNames`, `blockedToolsRefusalText` | tools refused for the conversation and its whole delegation tree, named in the directive block. The purpose class adds the tools it blocks by what they declare (`AIConversationPurpose::getToolNamesBlockedByDeclaration()`, none by default) |
 | `maxStepsPerTurn` | the per-turn step cap, copied into the run settings at the start |
 | `maxTurnCostUsd` | the cost cap (USD) of every turn of the purpose's conversations, read live by `AIConversationTurnBudget`; an explicit `RunSettings::$maxTurnCostUsd` wins; unset = a raised turn is capped at 2.00, a plain turn not at all |
+| `seededTaskPlanAcceptsNewItems` | `true`: the agent may add items and subtasks to the seeded plan with `update_task_plan` (the seeded items stay fixed: no rename, drop, move or reorder); default false: the seeded plan is worked, never written |
 | `stepsPerPlanItem` | steps a planned turn gets per open plan leaf, 1–20 (default 3): work whose items each take several tool calls |
 | `plannedTurnMaxStepsCeiling` | an optional ceiling of a planned turn's steps (unset: none, the cost cap is the brake) and of a tool's or skill's step floor (unset: 60), at most 120 |
 | `contextBudgetTokens`, `contextRetention` | the working-context budget and the retention knobs (context skill) |
