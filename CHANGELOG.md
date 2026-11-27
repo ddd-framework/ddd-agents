@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.9
 
 - `readConversation` takes `aroundMessageId`: the dialogue around a message named only by its id (a signal, a link,
   an owner report); its conversation and number are found from it, so `conversationId` is optional then
