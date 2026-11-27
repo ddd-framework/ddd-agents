@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.8
 
 - **Conversation search for every host (`agent.conversations`).** The package now carries what applications built
   themselves:
