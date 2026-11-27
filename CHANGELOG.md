@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.10
+
+- Web: the signal-source parity fixture (`web/src/chat/signal-source-parity.json`) carries `CONNECTION_APPROVAL`
+  (a case of the PHP registry since 0.11.8); a host test that compares the fixture with the registry passes again.
+- Web: preview fixtures for the connection widgets (`ContinueInPersonalSpace`, `ExtendConnectionPermission`,
+  `MailDraftPreview` with DRAFT, SENT and a body with a table and an image). The preview host stands in for the app
+  hooks these widgets need (`startConversationInPersonalSpace`, `openConnectionPermissions`) when the app set none,
+  and logs the click (`widget-preview-app-hooks.ts`); a hook the app set stays the app's.
+- Web: the docs of the three widgets name the emitter `tool` (written during a tool call, never by the model) instead
+  of `backend`, a value no other widget used.
+
 ## 0.11.9
 
 - `readConversation` takes `aroundMessageId`: the dialogue around a message named only by its id (a signal, a link,
