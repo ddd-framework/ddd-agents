@@ -3,6 +3,7 @@
         "Agent.Mandates",
         "Agent.Tasks",
         "Agent.TaskRunReports",
+        "Agent.Conversations",
         "Agent.Images",
         "Agent.UI",
         "System.Health",
@@ -11,6 +12,21 @@
         "System.Crons"
     ],
     "skills": {
+        "Agent.Conversations": {
+            "isLoadable": true,
+            "decisionCriteria": "#a988a8862254 (223 characters)",
+            "description": "#81bb6d8ea94a (262 characters)",
+            "instruction": "#7c22b0bd8acb (810 characters)",
+            "name": "Agent.Conversations",
+            "shortDescription": "search and read the owner's earlier conversations in every space",
+            "toolNames": [
+                "searchConversations",
+                "readConversation"
+            ],
+            "packages": [
+                "AgentConversationsMCPPackage"
+            ]
+        },
         "Agent.Images": {
             "isLoadable": true,
             "decisionCriteria": "#71e449bac304 (154 characters)",
@@ -185,6 +201,124 @@
         }
     },
     "packages": {
+        "AgentConversationsMCPPackage": {
+            "packageId": "agent.conversations",
+            "description": "#4ccfd802192f (132 characters)",
+            "tools": {
+                "searchConversations": {
+                    "annotations": {
+                        "idempotentHint": true,
+                        "readOnlyHint": true
+                    },
+                    "description": "#29ea423fe62e (264 characters)",
+                    "effect": {
+                        "effect": "READ",
+                        "resultIsReusedWithinTurn": true
+                    },
+                    "isParallelSafe": true,
+                    "returnsUntrustedContent": true,
+                    "summary": "#c04b4999ceee (181 characters)",
+                    "title": "searchConversations",
+                    "parameters": {
+                        "query": "#50caffb8f343 (255 characters)",
+                        "onlySpaceId": {
+                            "description": "Only conversations of this space; omit it to search every space",
+                            "name": "onlySpaceId",
+                            "type": "integer"
+                        },
+                        "fromDate": {
+                            "description": "Only conversations active on or after this day (YYYY-MM-DD)",
+                            "name": "fromDate",
+                            "type": "string"
+                        },
+                        "toDate": {
+                            "description": "Only conversations started on or before this day (YYYY-MM-DD)",
+                            "name": "toDate",
+                            "type": "string"
+                        },
+                        "limit": {
+                            "description": "The most conversations returned (default 6, at most 15)",
+                            "name": "limit",
+                            "type": "integer"
+                        }
+                    },
+                    "inputSchemaWithoutParameters": "#d869c66fb7e5 (327 characters)",
+                    "declarations": {
+                        "MCPToolEffect": [
+                            "READ"
+                        ],
+                        "MCPToolParallelSafe": [
+                            "reads conversation and message rows only"
+                        ],
+                        "MCPToolSummary": "#a7f870a60e38 (185 characters)"
+                    },
+                    "wire": {
+                        "description": "#29ea423fe62e (264 characters)",
+                        "parameters": {
+                            "query": "#062109a67a45 (156 characters)",
+                            "onlySpaceId": "#89d9b280416b (98 characters)",
+                            "fromDate": "#0edd01c04380 (93 characters)",
+                            "toDate": "#5ef283f614d0 (95 characters)",
+                            "limit": "#05d5df743133 (90 characters)"
+                        },
+                        "rest": "#409805080c8a (255 characters)"
+                    }
+                },
+                "readConversation": {
+                    "annotations": {
+                        "idempotentHint": true,
+                        "readOnlyHint": true
+                    },
+                    "description": "#23dc4562541d (191 characters)",
+                    "effect": {
+                        "effect": "READ",
+                        "resultIsReusedWithinTurn": true
+                    },
+                    "isParallelSafe": true,
+                    "returnsUntrustedContent": true,
+                    "summary": "Reads one earlier conversation by id (owner + assistant messages, paged).",
+                    "title": "readConversation",
+                    "parameters": {
+                        "conversationId": {
+                            "description": "The conversation's id, as searchConversations names it (required)",
+                            "name": "conversationId",
+                            "type": "integer"
+                        },
+                        "fromIndex": {
+                            "description": "The first message index to read (default 0; the result names the next page)",
+                            "name": "fromIndex",
+                            "type": "integer"
+                        },
+                        "limit": {
+                            "description": "The most messages returned (default 30, at most 80)",
+                            "name": "limit",
+                            "type": "integer"
+                        }
+                    },
+                    "inputSchemaWithoutParameters": "#0931ef5527fd (299 characters)",
+                    "declarations": {
+                        "MCPToolEffect": [
+                            "READ"
+                        ],
+                        "MCPToolParallelSafe": [
+                            "reads conversation and message rows only"
+                        ],
+                        "MCPToolSummary": [
+                            "Reads one earlier conversation by id (owner + assistant messages, paged)."
+                        ]
+                    },
+                    "wire": {
+                        "description": "#23dc4562541d (191 characters)",
+                        "parameters": {
+                            "conversationId": "#6ca3fad0239d (100 characters)",
+                            "fromIndex": "#b759104fc0ee (110 characters)",
+                            "limit": "#e798bf138553 (86 characters)"
+                        },
+                        "rest": "#10d8aed3c18e (224 characters)"
+                    }
+                }
+            }
+        },
         "AgentImagesMCPPackage": {
             "packageId": "agent.images",
             "description": "#aff82e644009 (136 characters)",

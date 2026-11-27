@@ -31,6 +31,17 @@ class AgentConversationRecallRow extends ValueObject
     /** @var DateTime|null The conversation's latest activity */
     public ?DateTime $updated = null;
 
-    /** @var SemanticSearchHit[] The best matching messages, best first (empty for a title match or a list) */
-    public array $hits = [];
+    /** @var SemanticSearchHits The best matching messages, best first (empty for a title match or a list) */
+    public SemanticSearchHits $hits;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->hits = new SemanticSearchHits();
+    }
+
+    public function uniqueKey(): string
+    {
+        return self::uniqueKeyStatic($this->conversationId);
+    }
 }

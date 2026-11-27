@@ -220,7 +220,7 @@ class AgentEvalCaseRowFactoriesTest extends UnitTestCase
         $row = AgentEvalCaseRow::buildForRecallRun($case, $conversation, ['trace'], [11, 12], null, 900);
 
         self::assertSame(
-            ['id', 'case', 'passed', 'failures', 'performance', 'durationMs', 'totalTokens', 'costUsd', 'seededConversationIds', 'calledTools', 'toolOk', 'missingMentions', 'finalText', 'error', 'messages'],
+            ['id', 'case', 'passed', 'failures', 'performance', 'durationMs', 'totalTokens', 'costUsd', 'seededConversationIds', 'calledTools', 'toolOk', 'missingMentions', 'leakedMentions', 'finalText', 'error', 'messages'],
             array_keys($row->toArray())
         );
         self::assertFalse($row->isPassed(), 'one mention is missing');

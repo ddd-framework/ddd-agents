@@ -12,9 +12,15 @@ class AgentConversationRecallTranscript extends ValueObject
     /** @var AgentConversationRecallRow The conversation read */
     public AgentConversationRecallRow $conversation;
 
-    /** @var AgentConversationRecallMessage[] The messages of the page, oldest first */
-    public array $messages = [];
+    /** @var AgentConversationRecallMessages The messages of the page, oldest first */
+    public AgentConversationRecallMessages $messages;
 
     /** @var int|null The fromIndex of the next page; null when the page reached the end */
     public ?int $nextFromIndex = null;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->messages = new AgentConversationRecallMessages();
+    }
 }

@@ -13,6 +13,7 @@ use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallResult;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallRow;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallTranscript;
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHit;
+use DDD\Domain\AI\Services\Connections\AgentConnectionsService;
 use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessages;
 use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
@@ -101,9 +102,9 @@ class AgentConversationRecallService extends Service
 
         $result = new AgentConversationRecallResult();
         $result->query = $query;
-        $result->currentConversationIsShared = $currentConversation !== null && $this->isConversationReadByOthers($currentConversation);
+        $result->currentConversationIsShared = $currentConversation !== null && $this->isConversationSharedWithOthers($currentConversation);
         foreach ($orderedConversationIds as $conversationId) {
-            if ($conversationId === $currentConversationId || count($result->rows) >= $limit) {
+            if ($conversationId === $currentConversationId || $result->rows->count() >= $limit) {
                 continue;
             }
             $conversation = $conversationsById[$conversationId] ?? $this->findReadableConversation($conversationId);
@@ -117,7 +118,8 @@ class AgentConversationRecallService extends Service
                 $result->leftOutForAudienceCount++;
                 continue;
             }
-            $result->rows[] = $this->buildRow($conversation, array_slice($hitsByConversationId[$conversationId] ?? [], 0, static::HITS_PER_CONVERSATION));
+            $row = $this->buildRow($conversation, array_slice($hitsByConversationId[$conversationId] ?? [], 0, static::HITS_PER_CONVERSATION));
+            $result->rows->add($row);
         }
         return $result;
     }
@@ -148,7 +150,8 @@ class AgentConversationRecallService extends Service
         $transcript = new AgentConversationRecallTranscript();
         $transcript->conversation = $this->buildRow($conversation, []);
         foreach (array_slice(array_values($messages), 0, $limit) as $message) {
-            $transcript->messages[] = $this->buildRecallMessage($message);
+            $recallMessage = $this->buildRecallMessage($message);
+            $transcript->messages->add($recallMessage);
         }
         if (count($messages) > $limit) {
             $transcript->nextFromIndex = (int)$messages[$limit]->indexInConversation;
@@ -163,6 +166,22 @@ class AgentConversationRecallService extends Service
     public function isConversationReadByOthers(AIConversation $conversation): bool
     {
         return true;
+    }
+
+    /**
+     * Whether others read `$conversation`: a thread of a shared chat channel (AgentConnections, while enabled) or the
+     * host's answer ({@see isConversationReadByOthers()}).
+     */
+    public function isConversationSharedWithOthers(AIConversation $conversation): bool
+    {
+        if (isset($conversation->id)) {
+            /** @var AgentConnectionsService $agentConnectionsService */
+            $agentConnectionsService = DDDService::instance()->getService(AgentConnectionsService::class);
+            if ($agentConnectionsService->isSharedChatThread((int)$conversation->id)) {
+                return true;
+            }
+        }
+        return $this->isConversationReadByOthers($conversation);
     }
 
     /**
@@ -182,7 +201,7 @@ class AgentConversationRecallService extends Service
     /** Whether text of `$sourceConversation` may be shown in `$targetConversation` (see the class comment) */
     public function mayContentFlowInto(AIConversation $sourceConversation, ?AIConversation $targetConversation): bool
     {
-        if ($targetConversation === null || !$this->isConversationReadByOthers($targetConversation)) {
+        if ($targetConversation === null || !$this->isConversationSharedWithOthers($targetConversation)) {
             return true;
         }
         $sourceSpaceId = $sourceConversation->agentSpaceId ?? null;
@@ -258,7 +277,7 @@ class AgentConversationRecallService extends Service
         $row->agentSpace = $this->describeAgentSpace($row->agentSpaceId);
         $row->created = $conversation->getCreatedTime();
         $row->updated = $conversation->getModifiedTime();
-        $row->hits = $hits;
+        $row->hits->add(...$hits);
         return $row;
     }
 

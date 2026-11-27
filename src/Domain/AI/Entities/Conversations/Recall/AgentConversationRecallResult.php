@@ -12,12 +12,18 @@ class AgentConversationRecallResult extends ValueObject
     /** @var string The query searched for; empty = the most recent conversations */
     public string $query = '';
 
-    /** @var AgentConversationRecallRow[] The conversations found, best first */
-    public array $rows = [];
+    /** @var AgentConversationRecallRows The conversations found, best first */
+    public AgentConversationRecallRows $rows;
 
     /** @var int Conversations found but left out because their readers are narrower than this conversation's */
     public int $leftOutForAudienceCount = 0;
 
     /** @var bool Whether others read the current conversation (a shared space) */
     public bool $currentConversationIsShared = false;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->rows = new AgentConversationRecallRows();
+    }
 }

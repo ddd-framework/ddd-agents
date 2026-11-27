@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.11.4
+
+- **New: the skill `Agent.Conversations` (package `agent.conversations`, READ, parallel safe).** `searchConversations`
+  searches the owner's earlier conversations in every space they may read (titles and summaries by word, messages
+  through the chat's own search: fulltext, vector, rerank); without a query it lists the most recent. `readConversation`
+  reads one page by page. Visibility is the chat's list and search (read rights, customer-visible, the owner's
+  dialogue); every text is an untrusted passage. Audience rule: a conversation others read receives text only from
+  conversations of its own space (`AgentConversationRecallService::isConversationReadByOthers()`, host hook, default
+  true = fail closed; a thread of a shared chat channel always counts as read by others). Honours
+  `isCrossConversationRecallEnabled()`. Bound in the package's `skillPackages.php`; a host that replaces the file adds
+  `AISkill::AGENT_CONVERSATIONS => [AgentConversationsMCPPackage::class]` and answers the hook for its spaces.
+  `Agent.Memory` points to it for what was said.
+- Eval recall: a seed block may name its own space (`agentSpaceId`: id or `{{ref:agentSpace:…}}`) and owner
+  (`ownerOperatorKind`, hook `AgentEvalRunHooksService::resolveSeedOwnerAccountId()`); the case key
+  `expectAbsentMentions` fails a case whose answer leaks the text. The result row has a new column `leakedMentions`.
+
 ## 0.11.3
 
 - Fix (web): the default glyph of `lockOpen` (a key, ⚷) differs from `lock` (⚿).

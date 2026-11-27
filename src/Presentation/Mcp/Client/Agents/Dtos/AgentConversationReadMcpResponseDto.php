@@ -38,12 +38,12 @@ class AgentConversationReadMcpResponseDto extends RestResponseDto implements Llm
         }
         $headParts[] = $this->transcript->nextFromIndex !== null ? 'more: fromIndex ' . $this->transcript->nextFromIndex : 'end of conversation';
         $lines = [implode(' · ', $headParts)];
-        if ($this->transcript->messages === []) {
+        if ($this->transcript->messages->isEmpty()) {
             $lines[] = 'No messages from this index on.';
             return implode("\n", $lines);
         }
         $dialogue = [];
-        foreach ($this->transcript->messages as $message) {
+        foreach ($this->transcript->messages->getElements() as $message) {
             $when = $message->created !== null ? ' (' . AgentClock::formatMoment($message->created) . ')' : '';
             $dialogue[] = '[' . $message->indexInConversation . '] ' . $message->role . $when . ': ' . $message->text;
         }
@@ -53,6 +53,6 @@ class AgentConversationReadMcpResponseDto extends RestResponseDto implements Llm
 
     public function buildPlatformNoteForModel(): ?string
     {
-        return $this->transcript->messages !== [] ? ToolResultUntrustedSegments::READING_RULE : null;
+        return !$this->transcript->messages->isEmpty() ? ToolResultUntrustedSegments::READING_RULE : null;
     }
 }

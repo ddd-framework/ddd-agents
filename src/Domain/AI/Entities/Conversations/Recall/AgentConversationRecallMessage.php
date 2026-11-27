@@ -21,4 +21,9 @@ class AgentConversationRecallMessage extends ValueObject
 
     /** @var string The message's text (widget blocks removed, long text cut) */
     public string $text = '';
+
+    public function uniqueKey(): string
+    {
+        return self::uniqueKeyStatic($this->indexInConversation);
+    }
 }

@@ -106,7 +106,7 @@ class AgentEvalRecallCommandTest extends IntegrationTestCase
             $resultDocument['cases'][0]
         );
         self::assertSame(
-            ['id', 'case', 'passed', 'failures', 'performance', 'durationMs', 'totalTokens', 'costUsd', 'seededConversationIds', 'calledTools', 'toolOk', 'missingMentions', 'finalText', 'error', 'messages'],
+            ['id', 'case', 'passed', 'failures', 'performance', 'durationMs', 'totalTokens', 'costUsd', 'seededConversationIds', 'calledTools', 'toolOk', 'missingMentions', 'leakedMentions', 'finalText', 'error', 'messages'],
             array_keys($resultDocument['cases'][1])
         );
         self::assertSame('the model did not answer', $resultDocument['cases'][1]['error']);
