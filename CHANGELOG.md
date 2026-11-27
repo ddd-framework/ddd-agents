@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.1
 
 - **Decision fixtures: the owner-consent site.** `app:agent:decision-fixtures` runs `"site": "ownerConsent"` fixtures:
   each case's rows go through the live dialogue builder (`buildOwnerConsentDialogue`, `addShownContentLine`) and the
