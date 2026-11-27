@@ -13,6 +13,7 @@ use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallResult;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallRow;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallTranscript;
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHit;
+use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHits;
 use DDD\Domain\AI\Services\Connections\AgentConnectionsService;
 use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessages;
@@ -25,8 +26,15 @@ use DDD\Infrastructure\Exceptions\NotFoundException;
 use DDD\Infrastructure\Services\DDDService;
 
 /**
- * The agent's recall of the owner's earlier conversations (tools `searchConversations` and `readConversation` of
- * {@see \DDD\Presentation\Mcp\Client\Agents\AgentConversationsMCPPackage}).
+ * The agent's recall of what was said: in the owner's earlier conversations (tools `searchConversations` and
+ * `readConversation`) and earlier in the conversation the call runs in (`searchThisConversation`, which the model needs
+ * once compaction or eviction took a detail out of its context), all of
+ * {@see \DDD\Presentation\Mcp\Client\Agents\AgentConversationsMCPPackage}.
+ *
+ * An application customises it through a same-path subclass: the audience of its conversations
+ * ({@see isConversationReadByOthers()}), the space label ({@see describeAgentSpace()}), the candidates of a search
+ * ({@see findRecallCandidates()}), the readable conversation ({@see findReadableConversation()}) and the result rows
+ * ({@see buildRow()}, {@see buildRecallMessage()}); the retrieval itself through {@see SemanticSearchService}.
  *
  * Visibility is the one of the chat's own list and search: the conversations of the acting account in EVERY space,
  * read under the read rights of the conversation table, customer-visible, the owner's dialogue only
@@ -43,15 +51,71 @@ class AgentConversationRecallService extends Service
 {
     public const int DEFAULT_SEARCH_LIMIT = 6;
     public const int MAX_SEARCH_LIMIT = 15;
+    /** The most conversations a search without a query lists (a period: "what did we discuss last week") */
+    public const int MAX_LIST_LIMIT = 25;
     public const int HITS_PER_CONVERSATION = 2;
     public const int EXCERPT_CHARS = 320;
     public const int DEFAULT_READ_LIMIT = 30;
+    /** The messages a read around one message returns by default: the message and the dialogue before and after it */
+    public const int DEFAULT_READ_AROUND_LIMIT = 10;
     public const int MAX_READ_LIMIT = 80;
     public const int MAX_READ_MESSAGE_CHARS = 1500;
+    public const int DEFAULT_THIS_CONVERSATION_LIMIT = 5;
+    public const int MAX_THIS_CONVERSATION_LIMIT = 10;
+    /** Long excerpts: a hit of the conversation the model works in replaces a detail that left its context */
+    public const int THIS_CONVERSATION_EXCERPT_CHARS = 1500;
+
+    /**
+     * The conversation the owner talks in when a call runs in `$currentConversation`: the root of its delegation tree
+     * (a delegated sub-task works for the root's dialogue), the conversation itself for a root or when the root cannot
+     * be read.
+     */
+    public function findThisConversation(AIConversation $currentConversation): AIConversation
+    {
+        $treeRootConversationId = $currentConversation->getTreeRootConversationId();
+        if ($treeRootConversationId < 1 || $treeRootConversationId === (int)($currentConversation->id ?? 0)) {
+            return $currentConversation;
+        }
+        $treeRootConversation = $this->findOwnConversation($treeRootConversationId);
+        return $treeRootConversation instanceof AIConversation ? $treeRootConversation : $currentConversation;
+    }
+
+    /** Whether `$conversationId` is the conversation the call runs in or the root of its delegation tree */
+    public function isOwnConversation(?AIConversation $currentConversation, int $conversationId): bool
+    {
+        if ($currentConversation === null || $conversationId < 1) {
+            return false;
+        }
+        return $conversationId === (int)($currentConversation->id ?? 0) || $conversationId === $currentConversation->getTreeRootConversationId();
+    }
+
+    /**
+     * Searches the conversation `$conversation` ({@see findThisConversation()}) by meaning and by words: its messages
+     * and the regions of its compaction nodes ({@see SemanticSearchService::searchWithinConversation()}), best hit
+     * first. For a detail that left the model's context; the conversation's own text, so no audience rule and no recall
+     * switch applies.
+     */
+    public function searchThisConversation(AIConversation $conversation, string $query, int $limit): SemanticSearchHits
+    {
+        $hits = new SemanticSearchHits();
+        $query = trim($query);
+        if ($query === '') {
+            return $hits;
+        }
+        $limit = max(1, min($limit, static::MAX_THIS_CONVERSATION_LIMIT));
+        /** @var SemanticSearchService $semanticSearchService */
+        $semanticSearchService = DDDService::instance()->getService(SemanticSearchService::class);
+        $foundHits = $semanticSearchService->searchWithinConversation($conversation, $query, $limit, static::THIS_CONVERSATION_EXCERPT_CHARS);
+        if ($foundHits !== []) {
+            $hits->add(...$foundHits);
+        }
+        return $hits;
+    }
 
     /**
      * Searches the account's conversations: titles and summaries (any word) and messages (fulltext + semantic). An
-     * empty query lists the most recent conversations. The current conversation is left out.
+     * empty query lists the most recent conversations (up to {@see MAX_LIST_LIMIT}). The current conversation is left
+     * out.
      *
      * @throws ForbiddenException when cross-conversation recall is switched off for the current conversation
      */
@@ -65,9 +129,8 @@ class AgentConversationRecallService extends Service
         int $limit
     ): AgentConversationRecallResult {
         $this->requireRecallEnabled($currentConversation);
-        $limit = max(1, min($limit, static::MAX_SEARCH_LIMIT));
         $query = trim($query);
-        $currentConversationId = isset($currentConversation->id) ? (int)$currentConversation->id : null;
+        $limit = max(1, min($limit, $query === '' ? static::MAX_LIST_LIMIT : static::MAX_SEARCH_LIMIT));
 
         /** @var array<int, SemanticSearchHit[]> $hitsByConversationId best conversation first */
         $hitsByConversationId = [];
@@ -76,7 +139,7 @@ class AgentConversationRecallService extends Service
             $semanticSearchService = DDDService::instance()->getService(SemanticSearchService::class);
             $hits = $semanticSearchService->searchAcrossConversations($account, $query, $limit * 4, static::EXCERPT_CHARS);
             foreach ($hits as $hit) {
-                if ($hit->conversationId === null || $hit->conversationId === $currentConversationId) {
+                if ($hit->conversationId === null || $this->isOwnConversation($currentConversation, $hit->conversationId)) {
                     continue;
                 }
                 if (!$this->isMomentInWindow($hit->created, $from, $to)) {
@@ -104,7 +167,7 @@ class AgentConversationRecallService extends Service
         $result->query = $query;
         $result->currentConversationIsShared = $currentConversation !== null && $this->isConversationSharedWithOthers($currentConversation);
         foreach ($orderedConversationIds as $conversationId) {
-            if ($conversationId === $currentConversationId || $result->rows->count() >= $limit) {
+            if ($this->isOwnConversation($currentConversation, $conversationId) || $result->rows->count() >= $limit) {
                 continue;
             }
             $conversation = $conversationsById[$conversationId] ?? $this->findReadableConversation($conversationId);
@@ -125,19 +188,30 @@ class AgentConversationRecallService extends Service
     }
 
     /**
-     * One page of the dialogue of a conversation the account may read.
+     * One page of the dialogue of a conversation the account may read: from `$fromIndex` on, or, with `$aroundIndex`
+     * (the index of a search hit), the dialogue around that message — a few messages before it, the message, the rest
+     * after it. The conversation the call runs in (and the root of its delegation tree, {@see isOwnConversation()}) is
+     * read under the read rights alone, without the recall switch and the audience rule (its own text).
      *
      * @throws NotFoundException for an unknown, unreadable or hidden conversation
      * @throws ForbiddenException when the audience rule keeps its text out of the current conversation
      */
-    public function readConversation(?AIConversation $currentConversation, int $conversationId, int $fromIndex, int $limit): AgentConversationRecallTranscript
-    {
-        $this->requireRecallEnabled($currentConversation);
-        $conversation = $this->findReadableConversation($conversationId);
+    public function readConversation(
+        ?AIConversation $currentConversation,
+        int $conversationId,
+        int $fromIndex,
+        int $limit,
+        ?int $aroundIndex = null
+    ): AgentConversationRecallTranscript {
+        $isOwnConversation = $this->isOwnConversation($currentConversation, $conversationId);
+        if (!$isOwnConversation) {
+            $this->requireRecallEnabled($currentConversation);
+        }
+        $conversation = $isOwnConversation ? $this->findOwnConversation($conversationId) : $this->findReadableConversation($conversationId);
         if (!$conversation instanceof AIConversation) {
             throw new NotFoundException("Conversation #$conversationId was not found or may not be read. Find conversations with searchConversations.");
         }
-        if (!$this->mayContentFlowInto($conversation, $currentConversation)) {
+        if (!$isOwnConversation && !$this->mayContentFlowInto($conversation, $currentConversation)) {
             throw new ForbiddenException(
                 "Conversation #$conversationId lies in a space with fewer readers than this conversation; its text is not shown here. The owner can read it from that space."
             );
@@ -145,10 +219,14 @@ class AgentConversationRecallService extends Service
         $limit = max(1, min($limit, static::MAX_READ_LIMIT));
         /** @var DBAIConversationMessages $messagesRepository */
         $messagesRepository = AIConversationMessages::getRepoClassInstance();
+        if ($aroundIndex !== null) {
+            $fromIndex = $this->findFirstIndexOfReadAround($messagesRepository, $conversationId, max(0, $aroundIndex), $limit);
+        }
         $messages = $messagesRepository->findContentMessagesFromIndex($conversationId, $fromIndex, $limit + 1)?->getElements() ?? [];
 
         $transcript = new AgentConversationRecallTranscript();
         $transcript->conversation = $this->buildRow($conversation, []);
+        $transcript->aroundIndex = $aroundIndex !== null ? max(0, $aroundIndex) : null;
         foreach (array_slice(array_values($messages), 0, $limit) as $message) {
             $recallMessage = $this->buildRecallMessage($message);
             $transcript->messages->add($recallMessage);
@@ -209,6 +287,22 @@ class AgentConversationRecallService extends Service
         return $sourceSpaceId !== null && $targetSpaceId !== null && (int)$sourceSpaceId === (int)$targetSpaceId;
     }
 
+    /**
+     * Where a read around the message at `$aroundIndex` starts: the earliest of the dialogue messages right before it
+     * that the page holds (about a third of the page), the message itself when none is before it.
+     */
+    protected function findFirstIndexOfReadAround(DBAIConversationMessages $messagesRepository, int $conversationId, int $aroundIndex, int $limit): int
+    {
+        $messagesBeforeCount = intdiv($limit - 1, 3);
+        $messagesBefore = $messagesBeforeCount > 0
+            ? ($messagesRepository->findContentMessagesBeforeIndex($conversationId, $aroundIndex, $messagesBeforeCount)?->getElements() ?? [])
+            : [];
+        $earliestMessageBefore = $messagesBefore !== [] ? end($messagesBefore) : null;
+        return $earliestMessageBefore instanceof AIConversationMessage && isset($earliestMessageBefore->indexInConversation)
+            ? (int)$earliestMessageBefore->indexInConversation
+            : $aroundIndex;
+    }
+
     /** @throws ForbiddenException */
     protected function requireRecallEnabled(?AIConversation $currentConversation): void
     {
@@ -227,6 +321,22 @@ class AgentConversationRecallService extends Service
         } catch (NotFoundException) {
             return null;
         }
+    }
+
+    /**
+     * The conversation the call runs in or the root of its tree, under the read rights alone: also a conversation the
+     * customer does not see (an eval run, a system conversation) reads its own dialogue. Null when it cannot be read.
+     */
+    protected function findOwnConversation(int $conversationId): ?AIConversation
+    {
+        /** @var AIConversationsService $aIConversationsService */
+        $aIConversationsService = DDDService::instance()->getService(AIConversationsService::class);
+        try {
+            $conversation = $aIConversationsService->find($conversationId);
+        } catch (NotFoundException) {
+            return null;
+        }
+        return $conversation instanceof AIConversation ? $conversation : null;
     }
 
     /**

@@ -44,4 +44,24 @@ class AgentConversationRecallRow extends ValueObject
     {
         return self::uniqueKeyStatic($this->conversationId);
     }
+
+    /**
+     * The row as one group of the `ConversationSearchResults` widget (the shape of the chat's own search); null for a
+     * row without matching messages (a title match or a listed conversation), which the widget would not show.
+     */
+    public function toConversationSearchGroup(): ?AIConversationSearchGroup
+    {
+        if ($this->hits->isEmpty()) {
+            return null;
+        }
+        $group = new AIConversationSearchGroup();
+        $group->conversationId = $this->conversationId;
+        $group->title = $this->title;
+        $group->summary = $this->summary;
+        $group->created = $this->created?->format('Y-m-d H:i:s');
+        $group->updated = $this->updated?->format('Y-m-d H:i:s');
+        $group->hits = array_values($this->hits->getElements());
+        $group->relevance = $group->hits[0]->relevance ?? 0.0;
+        return $group;
+    }
 }

@@ -37,6 +37,7 @@ use DDD\Domain\Base\Entities\LazyLoad\LazyLoadRepo;
 use DDD\Infrastructure\Base\DateTime\DateTime;
 use DDD\Infrastructure\Libs\Config;
 use DDD\Infrastructure\Services\DDDService;
+use DDD\Presentation\Mcp\Client\Agents\AgentConversationsMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\AgentMandatesMCPPackage;
 use DDD\Domain\AI\Entities\MCPPackages\MCPToolReceivesCurrentConversationId;
 use DDD\Domain\AI\Entities\MCPPackages\ToolDefinition;
@@ -479,7 +480,7 @@ class ToolDeclarationsReadByTheLoopTest extends UnitTestCase
 
         $episodicHistoryText = $aIConversations->buildEpisodicHistoryText();
 
-        self::assertStringEndsWith("\n\nWhere one of your skills has a recall tool, that tool reads any of these sessions in full: pass the session's #conversationId.", $episodicHistoryText);
+        self::assertStringEndsWith("\n\nRead any of these sessions with readConversation (skill Agent.Conversations) and the session's #conversationId.", $episodicHistoryText);
         self::assertStringContainsString('(#31)', $episodicHistoryText);
 
         $aIConversationsOfAnApplication = new class extends AIConversations {
@@ -492,10 +493,17 @@ class ToolDeclarationsReadByTheLoopTest extends UnitTestCase
         self::assertStringEndsWith("\n\nRead a session with `readSessionOfTheApplication`.", $aIConversationsOfAnApplication->buildEpisodicHistoryText());
     }
 
-    public function testTheCatalogTextsOfTheSearchResultsWidgetNameNoTool(): void
+    public function testTheCatalogTextsOfTheSearchResultsWidgetNameOnlyThePackagesSearchTools(): void
     {
         self::assertStringNotContainsString('`', ConversationSearchResultsConversationWidget::SUMMARY);
-        // a tool name is a camel-case word in backticks; the widget's own field `display` is not one
-        self::assertSame(0, preg_match('/`[a-z]+[A-Z][A-Za-z]*`/', ConversationSearchResultsConversationWidget::WHEN_TO_USE));
+        // a tool name is a camel-case word in backticks; the widget's own fields (`display`, `groupsFromToolCallId`,
+        // `groups`) are none of the package's tools
+        preg_match_all('/`([a-z]+[A-Z][A-Za-z]*)`/', ConversationSearchResultsConversationWidget::WHEN_TO_USE, $namedWords);
+        $namedToolNames = array_values(array_diff(array_unique($namedWords[1]), ['groupsFromToolCallId']));
+        sort($namedToolNames);
+        self::assertSame(['searchConversations', 'searchThisConversation'], $namedToolNames);
+        foreach ($namedToolNames as $namedToolName) {
+            self::assertTrue(method_exists(AgentConversationsMCPPackage::class, $namedToolName), $namedToolName . ' is a tool of the package');
+        }
     }
 }

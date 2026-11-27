@@ -18,6 +18,9 @@ class AgentConversationRecallTranscript extends ValueObject
     /** @var int|null The fromIndex of the next page; null when the page reached the end */
     public ?int $nextFromIndex = null;
 
+    /** @var int|null The index of the message the page was read around (a search hit); null for a page from an index */
+    public ?int $aroundIndex = null;
+
     public function __construct()
     {
         parent::__construct();

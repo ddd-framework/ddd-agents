@@ -2,7 +2,7 @@
 name: ConversationSearchResults
 emitter: agent
 canvas: conversationSearchResults
-summary: Grouped cross-conversation recall results from `searchConversations`. DATA-COMPLETE; ≤5 groups inline, more → canvas.
+summary: Grouped results of a search across earlier conversations. DATA-COMPLETE; ≤5 groups inline, more → canvas.
 description: Renders the result of searchConversations (cross-chat semantic recall) — matches grouped by conversation (title · date · matched message excerpts with the query bolded), each with an arrow to jump to that chat. Few groups inline, many in the canvas side panel.
 ---
 
@@ -46,9 +46,9 @@ What the widget receives after the platform filled it:
 ```
 
 ## When to use
-- After a search across earlier conversations — write the block with `groupsFromToolCallId` instead of re-listing the matches in prose.
+- After `searchConversations`, when the owner wants to SEE or open the matches — copy the block its result names (it carries `groupsFromToolCallId`; the platform fills `groups`) instead of re-listing them in prose.
 - Few matches → they render inline; many → they open in the canvas side panel automatically (or set `display`).
-- Skip for a single in-conversation recall (`recallConversation`) — that's the current chat, answer inline in prose.
+- Skip for `searchThisConversation` (the current chat — answer inline in prose) and when the owner asked for a summary of what was discussed.
 
 ## ASCII layout (inline / canvas)
 ```

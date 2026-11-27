@@ -40,6 +40,11 @@ class AgentConversationRecallServiceWithFixedConversations extends AgentConversa
         return null;
     }
 
+    protected function findOwnConversation(int $conversationId): ?AIConversation
+    {
+        return $this->findReadableConversation($conversationId);
+    }
+
     protected function requireRecallEnabled(?AIConversation $currentConversation): void
     {
     }

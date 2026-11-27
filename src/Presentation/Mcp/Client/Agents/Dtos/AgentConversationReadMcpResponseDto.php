@@ -36,6 +36,9 @@ class AgentConversationReadMcpResponseDto extends RestResponseDto implements Llm
         if ($row->title !== null && $row->title !== '') {
             $headParts[] = '"' . str_replace(["\n", '"'], [' ', "'"], $row->title) . '"';
         }
+        if ($this->transcript->aroundIndex !== null) {
+            $headParts[] = 'around message ' . $this->transcript->aroundIndex;
+        }
         $headParts[] = $this->transcript->nextFromIndex !== null ? 'more: fromIndex ' . $this->transcript->nextFromIndex : 'end of conversation';
         $lines = [implode(' · ', $headParts)];
         if ($this->transcript->messages->isEmpty()) {
@@ -45,7 +48,8 @@ class AgentConversationReadMcpResponseDto extends RestResponseDto implements Llm
         $dialogue = [];
         foreach ($this->transcript->messages->getElements() as $message) {
             $when = $message->created !== null ? ' (' . AgentClock::formatMoment($message->created) . ')' : '';
-            $dialogue[] = '[' . $message->indexInConversation . '] ' . $message->role . $when . ': ' . $message->text;
+            $matchMark = $this->transcript->aroundIndex === $message->indexInConversation ? ' (the match)' : '';
+            $dialogue[] = '[' . $message->indexInConversation . '] ' . $message->role . $when . $matchMark . ': ' . $message->text;
         }
         $lines[] = ToolResultUntrustedSegments::wrap('conversation #' . $row->conversationId, implode("\n", $dialogue));
         return implode("\n", $lines);

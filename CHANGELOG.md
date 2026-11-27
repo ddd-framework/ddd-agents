@@ -1,5 +1,47 @@
 # Changelog
 
+## Unreleased
+
+- **Conversation search for every host (`agent.conversations`).** The package now carries what applications built
+  themselves:
+  - New tool `searchThisConversation(query, limit?)`: searches the conversation the owner talks in (the root of a
+    delegation tree) by meaning and words, its messages and the regions of its compaction nodes
+    (`SemanticSearchService::searchWithinConversation()`); long excerpts, the message number of each match; a failed
+    index answers with a note (issue logged), never an error. Service: `AgentConversationRecallService::findThisConversation()`,
+    `searchThisConversation()`, `isOwnConversation()`.
+  - `readConversation` takes `aroundIndex` (a match's message number): the dialogue around it (a third of the page
+    before it, default 10 messages), the match marked. The conversation the call runs in and its tree root are read
+    under the read rights alone, without the recall switch and the audience rule.
+  - `searchConversations` without a query lists up to 25 conversations (a period with `fromDate`/`toDate`); the
+    current conversation and its tree root are left out of every search.
+  - `searchConversations` hands its matches to the `ConversationSearchResults` widget: the result carries the top-level
+    `groups` (`AIConversationSearchGroup[]`, the chat search's shape) and `query`, is a `ComposedViewBindableResult`,
+    and names the ready block with `groupsFromToolCallId` = the call (`conversationSearchResultsWidget`, also in the
+    markdown); the platform fills the groups when the answer is stored. Outside the loop no block is named.
+  - `ConversationSearchResultsConversationWidget`: `WHEN_TO_USE` names `searchConversations` and `searchThisConversation`;
+    a host's same-type subclass is needed only for a search tool of its own. The widget doc
+    (`web/src/widgets/ConversationSearchResultsConversationWidget/…md`) carries the class's `SUMMARY` and `WHEN_TO_USE`
+    again (its "When to use" named `recallConversation`, a host tool; a host test that compares class and doc failed
+    once the host's subclass was gone).
+  - Skill `Agent.Conversations`: this conversation, reading around a match, listing a period, showing the matches,
+    telling a match as what it is (which conversation, who said it); `providesWidgetTypes: ['ConversationSearchResults']`;
+    `decisionCriteria` within 200 characters (0.11.7 had 226; a host's catalog test may cap it).
+  - The default closing line of the earlier-sessions text (`AIConversations::getSentenceOnReadingASessionInFull()`)
+    names `readConversation` (skill `Agent.Conversations`).
+  - Extension points stay the same-path subclass of `AgentConversationRecallService` (`isConversationReadByOthers`,
+    `describeAgentSpace`, `findRecallCandidates`, `findReadableConversation`, `findOwnConversation`, `buildRow`,
+    `buildRecallMessage`) and of `AgentConversationsMCPPackage`.
+  - Backward compatible: the tool names and arguments stay; `aroundIndex` and the `forResult()` tool call id are optional.
+- Web: `package.json` exports the widget docs of `ContinueInPersonalSpace`, `ExtendConnectionPermission` and
+  `MailDraftPreview` (0.11.x shipped the widgets without them; the build has to copy the three `.md` files to
+  `dist/files/widgets/` like the others).
+- Fix: the search of a space's conversation list by summary (`DBAIConversations::findByAgentSpaceAndSearchTerm()`)
+  read `LOWER()` over the JSON column `summary`, which PostgreSQL refuses; it now reads the summary's title and text as
+  text (`JSON_FIELD_TEXT`) on both engines, and a `%` or `_` in the term is a literal character.
+- `AIConversationSignalSource::CONNECTION_APPROVAL`: the core source the connection approval writes
+  (`AIConversationMessage::SIGNAL_SOURCE_CONNECTION_APPROVAL`) is a case of the core enum (a platform statement; it
+  starts no turn). A test keeps every core `SIGNAL_SOURCE_*` constant a case of the enum.
+
 ## 0.11.7
 
 - Voice: with a fixed call language, speech in another language is side talk in the room; the agent does not answer,

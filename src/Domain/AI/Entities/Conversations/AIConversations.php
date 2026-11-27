@@ -80,13 +80,14 @@ class AIConversations extends EntitySet
     }
 
     /**
-     * The closing line of the earlier-sessions text: how the model reads one of the listed sessions in full. The
-     * default names no tool, because which skill carries the recall tools is the application's binding; an application
-     * that binds them overrides this in its set class at the same path and names them.
+     * The closing line of the earlier-sessions text: how the model reads one of the listed sessions in full — the
+     * package's `readConversation` (skill `Agent.Conversations`, bound by the package's skill binding). An application
+     * that does not bind that skill, or reads sessions with a tool of its own, overrides this in its set class at the
+     * same path.
      */
     public function getSentenceOnReadingASessionInFull(): string
     {
-        return 'Where one of your skills has a recall tool, that tool reads any of these sessions in full: pass the session\'s #conversationId.';
+        return 'Read any of these sessions with readConversation (skill Agent.Conversations) and the session\'s #conversationId.';
     }
 
     /**
