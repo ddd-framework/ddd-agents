@@ -1,6 +1,6 @@
 ---
 name: MailDraftPreview
-emitter: backend
+emitter: tool
 summary: The exact mail of a send step as one compact preview (from, to, subject, body) with one send button, or the mail as sent.
 description: Written by the mail tool (never by the model) before a send step that waits for the owner's yes (status DRAFT) and after the mail went out (status SENT). Shows the sender, the recipients, the subject and the body rendered as markdown (lists and tables read as one; a long body folds with "Show more"). A DRAFT carries one button "Send"; the click posts the button's label, translated as the owner reads it, as the owner's message, which is the confirmation of exactly this mail. The button goes away once a later row carries the SENT preview of the same contentHash, or once a later owner message answered the preview without the click. A SENT preview shows a "Sent" chip and no button. Without a recipient in the block the widget renders nothing.
 ---

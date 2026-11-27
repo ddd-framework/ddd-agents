@@ -1,6 +1,6 @@
 ---
 name: ContinueInPersonalSpace
-emitter: backend
+emitter: tool
 summary: Offer to continue a request in the owner's personal space, written when a connection only the owner may use is refused in a conversation others read.
 description: Written by the backend (never by the model) when the owner asks, in a conversation that other people read, for something only a connection of their own may answer. Shows one line saying so and a button "Continue in your personal space"; the click hands the request to the app (AgentsEnvironment.startConversationInPersonalSpace), which starts a new conversation in the owner's personal space with the request as its first message. Nothing goes back into the conversation the widget sits in. Without the app hook, or without a request in the block, the widget renders nothing.
 ---

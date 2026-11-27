@@ -1,0 +1,51 @@
+{
+  "wireName": "MailDraftPreview",
+  "fixtures": [
+    {
+      "name": "draft",
+      "description": "The draft the send step waits on: sender, two recipients, a copy, subject and a markdown body with a list, before the owner's yes.",
+      "payload": {
+        "status": "DRAFT",
+        "connectionId": 7,
+        "from": "praxis@example.org",
+        "to": ["anna@example.org", "ben@example.org"],
+        "cc": ["team@example.org"],
+        "subject": "Termine nächste Woche",
+        "bodyText": "Hallo Anna, hallo Ben,\n\nfür nächste Woche sind diese Termine frei:\n\n- Dienstag, 10:00\n- Donnerstag, 14:30\n\nViele Grüße",
+        "contentHash": "preview-draft"
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "sent",
+      "description": "The same mail after it went out: the card marks it sent.",
+      "payload": {
+        "status": "SENT",
+        "connectionId": 7,
+        "from": "praxis@example.org",
+        "to": ["anna@example.org", "ben@example.org"],
+        "subject": "Termine nächste Woche",
+        "bodyText": "Hallo Anna, hallo Ben,\n\nfür nächste Woche sind Dienstag, 10:00 und Donnerstag, 14:30 frei.\n\nViele Grüße",
+        "contentHash": "preview-sent"
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "table-and-image",
+      "description": "A body with a table and a markdown image: the table renders, the image shows only its alt text (no remote load).",
+      "payload": {
+        "status": "DRAFT",
+        "to": ["einkauf@example.org"],
+        "subject": "Bestellung",
+        "bodyText": "| Artikel | Menge |\n|---|---|\n| Handschuhe | 200 |\n| Masken | 500 |\n\n![Logo der Praxis](https://example.org/logo.png)"
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

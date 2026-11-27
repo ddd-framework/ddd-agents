@@ -1,0 +1,19 @@
+{
+  "wireName": "ContinueInPersonalSpace",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "The owner asked in a team conversation for their own mailbox: the notice that only they may use the connection, and the button that continues in their personal space (the preview's stand-in logs the click).",
+      "payload": {
+        "request": "Was steht heute in meinem Postfach?",
+        "reason": "The step needs a connection only its owner may use, and others read this conversation."
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528,
+      "interactions": [
+        { "name": "continue", "click": { "selector": "[data-testid=\"continue-in-personal-space-widget-button\"]" }, "expectedState": "data" }
+      ]
+    }
+  ]
+}

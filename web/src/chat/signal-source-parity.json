@@ -35,6 +35,14 @@
             "owesWork": true,
             "marksAnOwnerReport": false
         },
+        "CONNECTION_APPROVAL": {
+            "enum": "AIConversationSignalSource",
+            "speaker": "PLATFORM",
+            "carriesAnOwnerStatement": false,
+            "isPhoneCallLifecycle": false,
+            "owesWork": true,
+            "marksAnOwnerReport": false
+        },
         "CONTINUE_AFTER_PAUSE": {
             "enum": "AIConversationSignalSource",
             "speaker": "LOOP",

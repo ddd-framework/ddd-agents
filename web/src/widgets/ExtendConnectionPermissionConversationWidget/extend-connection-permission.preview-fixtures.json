@@ -1,0 +1,30 @@
+{
+  "wireName": "ExtendConnectionPermission",
+  "fixtures": [
+    {
+      "name": "default",
+      "description": "A send step needs a higher mail level than the connection has: the open-lock notice and the button that opens the connection's settings with that permission preselected (the preview's stand-in logs the click).",
+      "payload": {
+        "connectionId": 7,
+        "capability": "MAIL",
+        "level": "SEND_WITH_APPROVAL",
+        "reason": "Sending mail needs the level SEND_WITH_APPROVAL; the connection allows DRAFT."
+      },
+      "locale": "de",
+      "expectedState": "data",
+      "width": 528
+    },
+    {
+      "name": "calendar-in-english",
+      "description": "The same notice for a calendar write, for an English-speaking owner.",
+      "payload": {
+        "connectionId": 9,
+        "capability": "CALENDAR",
+        "level": "WRITE_WITH_APPROVAL"
+      },
+      "locale": "en",
+      "expectedState": "data",
+      "width": 528
+    }
+  ]
+}

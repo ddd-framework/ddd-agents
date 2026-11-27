@@ -25,6 +25,7 @@ import { CANVAS_VIABLE_MIN_WIDTH } from "../widgets/CanvasLauncherWidget/use-can
 import { WidgetImageRenderContext } from "../image-render/WidgetImageRenderContext";
 import { ComposedViewComponentsContext } from "../kit/composed-view-components";
 import { buildPreviewComposedViewComponents } from "./preview-stub-components";
+import { installWidgetPreviewAppHooks } from "./widget-preview-app-hooks";
 import { buildWidgetPreviewFence } from "./widget-preview-fixtures";
 import type { WidgetPreviewReadiness } from "./widget-preview-readiness";
 import type { WidgetPreviewBootstrap, WidgetPreviewFixture } from "./widget-preview.types";
@@ -45,7 +46,7 @@ export const PREVIEW_AGENT_SPACE_KEY = 1;
 const PREVIEW_MESSAGE_ID = 1;
 
 interface ComposerLogEntry {
-  kind: "message" | "prefill" | "signal";
+  kind: "message" | "prefill" | "signal" | "app";
   text: string;
 }
 
@@ -86,6 +87,8 @@ export const WidgetPreview = (props: WidgetPreviewProps) => {
     (kind: ComposerLogEntry["kind"], text: string) => setComposerLog((entries) => [...entries, { kind, text }]),
     [],
   );
+  // Before the widget renders: a widget that needs an app hook (a connection widget) renders with a stand-in that logs.
+  installWidgetPreviewAppHooks((text) => appendComposerLog("app", text));
   // The chat's opening rule decides, as in the conversation slice: a live delivery on a narrow window does not take
   // over for a canvas without an overlay, so the narrow shot shows the inline rows and the "Open in canvas" card.
   const openCanvas = useCallback((request: CanvasOpenRequestFromOpener) => {

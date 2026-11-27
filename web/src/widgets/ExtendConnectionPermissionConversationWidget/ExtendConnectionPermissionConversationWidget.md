@@ -1,6 +1,6 @@
 ---
 name: ExtendConnectionPermission
-emitter: backend
+emitter: tool
 summary: Offer to open a connection's settings when a step needs a level or provider permission the connection does not have yet.
 description: Written by the backend (never by the model) when a step needs a level the agent connection does not have, or a permission the provider has not granted yet. Shows one line saying so and a button "Extend the permission"; the click hands the connection, capability and level to the app (AgentsEnvironment.openConnectionPermissions), which opens its connection settings with that permission preselected. The level takes effect only once the owner raised it there. Without the app hook, or without a connection, capability and level in the block, the widget renders nothing.
 ---
