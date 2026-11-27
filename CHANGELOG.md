@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.3
+
+- Fix (web): the default glyph of `lockOpen` (a key, ⚷) differs from `lock` (⚿).
+
 ## 0.11.2
 
 - **Fix (web): the `ContinueInPersonalSpace` and `ExtendConnectionPermission` widgets lay out as one row.** The widget
