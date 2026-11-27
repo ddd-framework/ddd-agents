@@ -563,6 +563,15 @@
       ]
     },
     {
+      "key": "Continue in your personal space",
+      "defaultText": "Continue in your personal space",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/ContinueInPersonalSpaceConversationWidget/ContinueInPersonalSpaceConversationWidget.tsx"
+      ]
+    },
+    {
       "key": "Conversation",
       "defaultText": "Conversation",
       "placeholders": [],
@@ -1212,6 +1221,15 @@
       "contexts": [],
       "usedIn": [
         "src/renderer/WindowedWidget/WindowedWidget.tsx"
+      ]
+    },
+    {
+      "key": "Only you may use this connection, and others read this conversation.",
+      "defaultText": "Only you may use this connection, and others read this conversation.",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/ContinueInPersonalSpaceConversationWidget/ContinueInPersonalSpaceConversationWidget.tsx"
       ]
     },
     {

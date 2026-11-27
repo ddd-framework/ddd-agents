@@ -193,6 +193,13 @@ export interface AgentsEnvironment {
   onOpenEntity?: (target: OpenEntityActionTarget) => boolean;
   /** Opens the images in the app's lightbox, starting at `startIndex`. Default: the start image in a new tab. */
   openImageGallery?: (images: AgentsGalleryImage[], startIndex: number) => void;
+  /**
+   * Starts a NEW conversation in the owner's personal agent space whose first message is `ownerText`, and shows it (the
+   * `ContinueInPersonalSpace` widget's button: a request that only a connection of the owner alone may answer, asked in
+   * a conversation others read). Nothing goes back into the conversation the button sits in. Default: none — the
+   * widget then renders nothing.
+   */
+  startConversationInPersonalSpace?: (ownerText: string) => void;
   /** Reports a widget that crashed while rendering. Default: nothing (the crash is logged to the console). */
   reportWidgetCrash?: (widgetName: string, error: Error, errorInfo: ErrorInfo) => void;
   /**
@@ -304,6 +311,16 @@ export const openImageGallery = (images: AgentsGalleryImage[], startIndex: numbe
   if (!startImage) return;
   if (appEnvironment.onNavigate?.(startImage.url, null) === true) return;
   window.open(startImage.url, "_blank", "noopener,noreferrer");
+};
+
+/** Whether the app can start a conversation in the owner's personal space (`AgentsEnvironment.startConversationInPersonalSpace`). */
+export const canStartConversationInPersonalSpace = (): boolean => appEnvironment.startConversationInPersonalSpace !== undefined;
+
+/** Starts a conversation in the owner's personal space with `ownerText` as its first message; false when the app cannot. */
+export const startConversationInPersonalSpace = (ownerText: string): boolean => {
+  if (!appEnvironment.startConversationInPersonalSpace) return false;
+  appEnvironment.startConversationInPersonalSpace(ownerText);
+  return true;
 };
 
 /** The block field of the package's backend default (`WidgetBlockFieldNames::WIDGET_SELF_HYDRATION_KEY`). */

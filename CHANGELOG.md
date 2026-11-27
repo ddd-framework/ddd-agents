@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Web: the `ContinueInPersonalSpace` widget.** A notice and a button "Continue in your personal space" for a request
+  that only a connection of the owner alone may answer, asked in a conversation others read. The click calls the new
+  environment hook `startConversationInPersonalSpace(ownerText)`, which starts a new conversation in the owner's
+  personal space; nothing goes back into the shared conversation. Without the hook, or without a `request` in the
+  block, the widget renders nothing. The backend that writes it arrives with the agent connections.
+
 ## 0.10.7
 
 - **The newest row a tool wrote.** `AIConversationMessages::getNewestIndexOfRowWrittenByTool(string $toolName)` (pure,

@@ -32,6 +32,7 @@ const PACKAGE_CANONICAL_WIRE_NAMES = [
   "Clock",
   "ComposedView",
   "ConceptExplainer",
+  "ContinueInPersonalSpace",
   "ConversationSearchResults",
   "CurrencyConverter",
   "CustomVisualization",
