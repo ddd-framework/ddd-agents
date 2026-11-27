@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.0
 
 - **Web: the `ContinueInPersonalSpace` widget.** A notice and a button "Continue in your personal space" for a request
   that only a connection of the owner alone may answer, asked in a conversation others read. The click calls the new
