@@ -39,6 +39,11 @@ enum AIConversationSignalSource: string implements ConversationSignalSource
     case FRONTEND_CHANNEL_CONNECTION = 'FRONTEND_CHANNEL_CONNECTION';
     case FRONTEND_NAVIGATION = 'FRONTEND_NAVIGATION';
     case OWNER_ACTION_CONFIRM = 'OWNER_ACTION_CONFIRM';
+    /**
+     * The outcome of a connection approval another person decided (granted, declined, expired): a platform statement
+     * the run reads at its next turn; it starts no turn of its own and is no owner statement.
+     */
+    case CONNECTION_APPROVAL = 'CONNECTION_APPROVAL';
     /** A MARKER on an assistant TEXT row (the unattended run's report), not a signal. */
     case OWNER_REPORT = 'OWNER_REPORT';
     case SUPERVISOR_STEERING = 'SUPERVISOR_STEERING';
@@ -129,7 +134,7 @@ enum AIConversationSignalSource: string implements ConversationSignalSource
             self::INJECTION_REMOVED, self::MEMORY_CONFLICT, self::MEMORY_CLARIFY,
             self::PURPOSE_CONSEQUENCE, self::FRONTEND_WIDGET_INVALID, self::FRONTEND_WIDGET_RENDER_REPORT, self::DASHBOARD_WIDGET_CONTEXT,
             self::PURPOSE_KICKOFF, self::OWNER_WIDGET_EDIT_APPLIED, self::LEGACY_OWNER_CARD_EDIT_APPLIED,
-            self::PLATFORM_WIDGET_EMITTED => ConversationSignalSpeaker::PLATFORM,
+            self::PLATFORM_WIDGET_EMITTED, self::CONNECTION_APPROVAL => ConversationSignalSpeaker::PLATFORM,
         };
     }
 

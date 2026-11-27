@@ -284,23 +284,12 @@ class DBAIConversations extends DBEntitySet
             $queryBuilder->andWhere("$alias.summary is not null");
         }
 
-        // filter by search term like this since JSON_CONTAINS is not supported in query builder
+        // the summary is a JSON column: its title and text are read as text (LOWER over json fails on PostgreSQL)
         if ($searchTerm) {
-            $searchTerm = trim(urldecode($searchTerm));
-            $searchTermLower = mb_strtolower($searchTerm);
-            // we need to escape backslashes for the LIKE clause, especially for json encoded unicode characters like \u00fc
-            $jsonSearchTermLower = str_replace('\\', '\\\\', mb_strtolower(trim(json_encode($searchTerm), '"')));
-
-            if ($searchTermLower !== $jsonSearchTermLower) {
-                $queryBuilder
-                    ->andWhere("(LOWER($alias.summary) LIKE :search_term OR LOWER($alias.summary) LIKE :json_search_term)")
-                    ->setParameter('search_term', '%' . $searchTermLower . '%')
-                    ->setParameter('json_search_term', '%' . $jsonSearchTermLower . '%');
-            } else {
-                $queryBuilder
-                    ->andWhere("LOWER($alias.summary) LIKE :search_term")
-                    ->setParameter('search_term', '%' . $searchTermLower . '%');
-            }
+            $searchTermLower = mb_strtolower(trim(urldecode($searchTerm)));
+            $queryBuilder
+                ->andWhere("(LOWER(JSON_FIELD_TEXT($alias.summary, 'title')) LIKE :search_term OR LOWER(JSON_FIELD_TEXT($alias.summary, 'text')) LIKE :search_term)")
+                ->setParameter('search_term', '%' . addcslashes($searchTermLower, '%_\\') . '%');
         }
 
         return $this->find($queryBuilder);
