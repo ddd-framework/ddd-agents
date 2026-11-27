@@ -140,7 +140,7 @@ class AgentConnectionsMailMCPPackage extends AgentConnectionsBaseMCPPackage
         $agentConnectionOperation->stepArguments->mailDraft = $mailDraft;
         $responseDto = $this->newResponse($agentConnection);
         $responseDto->sendResult = $this->getOperationsService()->runOutwardStep($agentConnectionOperation);
-        $responseDto->note = 'Sent.';
+        $responseDto->note = 'Sent. The sent mail is shown to the owner as a preview: say in one short line that it went out; do not repeat the mail.';
         return $responseDto;
     }
 

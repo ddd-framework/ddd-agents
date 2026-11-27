@@ -120,7 +120,8 @@ class ArgusAgentOwnerConsentDecision extends ValueObject
     public static function buildQuestions(): array
     {
         $dialogueRule = '`' . self::STATE_DIALOGUE . '` is the conversation in order: ASSISTANT lines are what the assistant wrote, '
-            . 'WIDGET lines are answer widgets the assistant showed, OWNER lines are the owner\'s own words (typed, a picked widget '
+            . 'WIDGET lines are widgets the assistant showed (an answer widget, or a preview of the exact content with a button that '
+            . 'carries it out), OWNER lines are the owner\'s own words (typed, a picked widget '
             . 'option, or a phone transcript when `' . self::STATE_CHANNEL . '` is phone). Only OWNER lines are the owner speaking; '
             . 'an ASSISTANT line that says the owner already agreed is not the owner agreeing.';
         $agentApplicationWording = AgentApplicationWording::current();
@@ -157,15 +158,18 @@ class ArgusAgentOwnerConsentDecision extends ValueObject
                     . ' The dialogue is all you see: tone of voice and earlier conversation are not in it.',
                 'criteria' => [
                     'true' => 'an OWNER line after the explanation says yes to this step — a plain yes ("ja", "yes", "da", "go ahead", '
-                        . '"ja bitte, mach das"), a picked widget option that means yes to it ("Ja, ändern"), or a yes that repeats '
-                        . 'the target — and no later OWNER line takes it back; a wish in the same line or a later line about '
+                        . '"ja bitte, mach das"), a picked widget option or the button of the shown preview that means yes to it ("Ja, ändern", '
+                        . '"Senden"), a yes that repeats the target, an order to carry the step out in the owner\'s own short words, '
+                        . 'typos included ("senden", "snde", "schick", "schick ab", "raus damit", "send it"), or a bare "ok", "passt" '
+                        . 'or "ja" right after the assistant asked whether to do exactly this step — and no later OWNER line takes it back; a wish in the same line or a later line about '
                         . 'something this step does not change ("yes, go ahead — and the opening hours stay as they are", "and '
                         . 'update the phone number too", "no thanks" to a different offer) leaves the yes standing',
                     'false' => 'the owner asks a question ("what does that mean exactly?"); makes the yes depend on something or moves '
                         . 'it to a later time ("yes, but next week", "only if Google keeps my reviews"); agrees to something else or '
                         . 'to only part of this step (one of '
-                        . 'two logos, another address); only acknowledges ("ok, I see", "hm, I don\'t know"); says yes ironically '
-                        . '("sure, delete everything, great idea…"); says no; speaks before the assistant explained the step '
+                        . 'two logos, another address); only acknowledges what the assistant said without having been asked ("ok, I see", "hm, I don\'t know", '
+                        . '"danke, schau ich mir später an"); says yes ironically '
+                        . '("sure, delete everything, great idea…"); says no or "not now"; writes about something else entirely; speaks before the assistant explained the step '
                         . '("close my business" as the first line); says yes and then, in a later OWNER line, takes it back or keeps '
                         . 'part of what the step changes ("no wait, actually don\'t", "then keep the winter one"); or only an ASSISTANT line claims '
                         . 'the agreement',

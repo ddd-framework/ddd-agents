@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace DDD\Symfony\Commands\Agents;
 
+use DDD\Domain\AI\Entities\Conversations\Widgets\ConversationWidgetOrigin;
+use DDD\Domain\AI\Entities\Conversations\Widgets\MailDraftPreviewConversationWidget;
+use DDD\Domain\AI\Entities\Connections\Adapters\AgentConnectionMailDraft;
 use DDD\Domain\AI\Services\Conversations\Agent\OwnerConsentsService;
 use DDD\Domain\AI\Repo\Argus\Conversations\Decisions\ArgusAgentOwnerConsentDecision;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
@@ -67,6 +70,8 @@ use Throwable;
  *   {"site": "ownerConsent", "agentSpaceId": 7, "cases": [{"id": "...", "ownerRequest": "...", "assistantText": "...",
  *     "ownerMessage": "...", "toolName": "sendMail", "actionKind": "...", "targetLine": "...", "consequenceLine": "...",
  *     "shownContent": "true", "expected": "consent" | "refuse"}]}
+ * With `"shownAs": "mailPreview"` (and `mailTo`, comma-separated, `mailSubject`, `mailBody`) the content is shown as the
+ * mail tool's DRAFT preview row instead, and `assistantText` is the agent's one line under it.
  *
  * The run acts as the account that owns the space the fixture names ({@see resolveBillingScope()}); every call is
  * booked under its own evaluation envelope for that account and billed to the space's billing entity. An application
@@ -192,9 +197,24 @@ class AgentDecisionFixturesCommand extends AgentConsoleCommand
         $caseId = $agentDecisionFixtureCase->getId();
         $messages = AIConversationMessages::newInstance();
         $ownerRequestRow = $this->buildOwnerConsentRow(0, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, $agentDecisionFixtureCase->getText('ownerRequest'));
-        $shownContentRow = $this->buildOwnerConsentRow(1, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_ASSISTANT, $agentDecisionFixtureCase->getText('assistantText'));
-        $ownerMessageRow = $this->buildOwnerConsentRow(2, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, $agentDecisionFixtureCase->getText('ownerMessage'));
-        $messages->add($ownerRequestRow, $shownContentRow, $ownerMessageRow);
+        $messages->add($ownerRequestRow);
+        $nextMessageIndex = 1;
+        $shownAsMailPreview = $agentDecisionFixtureCase->getText('shownAs') === 'mailPreview';
+        if ($shownAsMailPreview) {
+            // the tool-written preview row (the live sendMail's DRAFT preview), its content hash = the case's target key
+            $mailDraft = AgentConnectionMailDraft::newInstance();
+            $mailDraft->to = array_values(array_filter(array_map('trim', explode(',', $agentDecisionFixtureCase->getText('mailTo')))));
+            $mailDraft->subject = $agentDecisionFixtureCase->getText('mailSubject');
+            $mailDraft->bodyText = $agentDecisionFixtureCase->getText('mailBody');
+            $mailDraftPreviewWidget = MailDraftPreviewConversationWidget::forMailDraft($mailDraft, 0, 'owner@example.org', $caseId, MailDraftPreviewConversationWidget::STATUS_DRAFT);
+            $previewRow = $this->buildOwnerConsentRow($nextMessageIndex++, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_TOOL, $mailDraftPreviewWidget->buildWidgetRowEmittedBy(ConversationWidgetOrigin::tool('sendMail')));
+            $previewRow->messageType = AIConversationMessage::MESSAGE_TOOL_MESSAGE;
+            $messages->add($previewRow);
+        }
+        $shownContentMessageIndex = $nextMessageIndex - ($shownAsMailPreview ? 1 : 0);
+        $assistantRow = $this->buildOwnerConsentRow($nextMessageIndex++, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_ASSISTANT, $agentDecisionFixtureCase->getText('assistantText'));
+        $ownerMessageRow = $this->buildOwnerConsentRow($nextMessageIndex, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, $agentDecisionFixtureCase->getText('ownerMessage'));
+        $messages->add($assistantRow, $ownerMessageRow);
         $ownerConsentRequest = OwnerConsentRequest::forAction(
             $agentDecisionFixtureCase->getText('toolName'),
             $agentDecisionFixtureCase->getText('actionKind'),
@@ -203,7 +223,7 @@ class AgentDecisionFixturesCommand extends AgentConsoleCommand
             $caseId
         );
         if ($agentDecisionFixtureCase->getText('shownContent') === 'true') {
-            $ownerConsentRequest->shownContentMessageIndex = 1;
+            $ownerConsentRequest->shownContentMessageIndex = $shownContentMessageIndex;
         }
         $ownerConsentsService = $this->getOwnerConsentsService();
         $dialogue = $ownerConsentsService->buildOwnerConsentDialogue($messages, -1, null);

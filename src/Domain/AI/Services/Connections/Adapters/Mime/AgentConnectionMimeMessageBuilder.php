@@ -6,11 +6,13 @@ namespace DDD\Domain\AI\Services\Connections\Adapters\Mime;
 
 use DDD\Domain\AI\Entities\Connections\Adapters\AgentConnectionMailDraft;
 use DDD\Infrastructure\Base\DateTime\DateTime;
+use Parsedown;
 use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
 /**
- * Builds the RFC 5322 text of a mail (plain text, UTF-8, quoted-printable) for Gmail's raw upload, IMAP APPEND and
- * SMTP. Header values are stripped of line breaks (no header injection from model text). Bcc recipients never appear
+ * Builds the RFC 5322 text of a mail (UTF-8, quoted-printable) for Gmail's raw upload, IMAP APPEND and SMTP: the body
+ * as written (plain text) and, as its alternative, the body's markdown rendered to HTML (safe mode: no raw HTML from model
+ * text), so a list or a small table reads as one in the recipient's mail program. Header values are stripped of line breaks (no header injection from model text). Bcc recipients never appear
  * in a message that travels by SMTP: SMTP delivers to them by RCPT TO. The header is written only where the provider
  * itself removes it before delivery (Gmail's send API reads Bcc from the raw message and strips it) or where the text
  * stays in the owner's own mailbox (a draft): `$withBccHeader`.
@@ -40,9 +42,29 @@ class AgentConnectionMimeMessageBuilder
             $headers[] = 'References: ' . static::cleanHeaderValue($mailDraft->inReplyToInternetMessageId);
         }
         $headers[] = 'MIME-Version: 1.0';
-        $headers[] = 'Content-Type: text/plain; charset=UTF-8';
-        $headers[] = 'Content-Transfer-Encoding: quoted-printable';
-        return implode("\r\n", $headers) . "\r\n\r\n" . quoted_printable_encode(str_replace(["\r\n", "\r"], "\n", $mailDraft->bodyText));
+        $bodyText = str_replace(["\r\n", "\r"], "\n", $mailDraft->bodyText);
+        $boundary = 'alt-' . bin2hex(random_bytes(12));
+        $headers[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
+        $parts = [
+            "--$boundary\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode($bodyText),
+            "--$boundary\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n" . quoted_printable_encode(static::buildHtmlBody($bodyText)),
+        ];
+        return implode("\r\n", $headers) . "\r\n\r\n" . implode("\r\n", $parts) . "\r\n--$boundary--\r\n";
+    }
+
+    /** The body's markdown as a small HTML document (safe mode, line breaks kept, tables with borders) */
+    public static function buildHtmlBody(string $bodyText): string
+    {
+        $parsedown = new Parsedown();
+        $parsedown->setSafeMode(true);
+        $parsedown->setBreaksEnabled(true);
+        $bodyHtml = $parsedown->text($bodyText);
+        $bodyHtml = str_replace(
+            ['<table>', '<th>', '<td>'],
+            ['<table style="border-collapse:collapse">', '<th style="border:1px solid #ccc;padding:4px 8px;text-align:left">', '<td style="border:1px solid #ccc;padding:4px 8px">'],
+            $bodyHtml
+        );
+        return '<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.4">' . $bodyHtml . '</body></html>';
     }
 
     public static function cleanHeaderValue(string $value): string

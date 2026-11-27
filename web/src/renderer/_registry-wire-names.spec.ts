@@ -40,6 +40,7 @@ const PACKAGE_CANONICAL_WIRE_NAMES = [
   "EntityMention",
   "ExtendConnectionPermission",
   "ImageGallery",
+  "MailDraftPreview",
   "MultiChoice",
   "QuickReplies",
   "SuggestedActions",

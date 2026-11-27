@@ -1,0 +1,117 @@
+@import "../../styles/spacings";
+
+// The mail as a mail program heads it: the header fields (label column, value column) with the "Sent" chip beside
+// them, a hairline, the body as markdown (a long body folds under a fade), the send button at the end.
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $x1_5;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $x1_5;
+  min-width: 0;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: $x1_5;
+  row-gap: $x0_5;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+// One row of the grid: the label and the value become its cells.
+.field {
+  display: contents;
+
+  dt,
+  dd {
+    margin: 0;
+  }
+}
+
+.fieldValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sentChip {
+  flex: none;
+}
+
+.bodySection {
+  display: flex;
+  flex-direction: column;
+  gap: $x0_5;
+  padding-top: $x1_5;
+  border-top: $x0_125 solid var(--agents-divider-gl);
+  min-width: 0;
+}
+
+.body {
+  position: relative;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+
+  // A table in a mail: compact, ruled cells, a tinted head row and banded rows.
+  & :global(.agents-markdown) table {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  & :global(.agents-markdown) th,
+  & :global(.agents-markdown) td {
+    padding: $x0_25 $x1;
+    border: 1px solid var(--agents-divider-gl);
+  }
+
+  & :global(.agents-markdown) th {
+    background: var(--agents-bg-var);
+  }
+
+  & :global(.agents-markdown) tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--agents-bg-var) 45%, transparent);
+  }
+}
+
+// The folded body (its height set by the component) fades out into the card.
+.bodyFolded {
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: $x8;
+    background: linear-gradient(to bottom, transparent, var(--agents-bg-surface));
+    pointer-events: none;
+  }
+}
+
+.foldToggle {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--agents-fg-light);
+  text-underline-offset: $x0_5;
+
+  &:hover {
+    text-decoration-style: solid;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

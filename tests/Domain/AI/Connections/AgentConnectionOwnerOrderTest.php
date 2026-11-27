@@ -17,6 +17,9 @@ use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
 use DDD\Domain\AI\Services\Connections\AgentConnectionOperation;
 use DDD\Domain\AI\Services\Connections\AgentConnectionOperationsService;
 use DDD\Infrastructure\Services\DDDService;
+use DDD\Domain\AI\Entities\Conversations\Widgets\MailDraftPreviewConversationWidget;
+use DDD\Domain\AI\Entities\Conversations\Widgets\ConversationWidgetOrigin;
+use DDD\Domain\AI\Services\Connections\Adapters\Mime\AgentConnectionMimeMessageBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -87,6 +90,95 @@ class AgentConnectionOwnerOrderTest extends TestCase
         $request->shownContentMessageIndex = 1;
         $dialogue = $this->getOwnerConsentsService()->buildOwnerConsentDialogue($messages, 2, null);
         self::assertFalse($this->getOwnerConsentsService()->addShownContentLine($dialogue, $messages, $request), 'a tool or widget row gives no evidence even when named');
+    }
+
+    public function testTheMailToolsPreviewForExactlyThisMailIsTheEvidence(): void
+    {
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY, 'snde', shownByTheAgent: false);
+        $messages = $agentConnectionOperation->callProvenance->conversationMessages;
+        $previewRow = $this->buildPreviewRow(2, $agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_DRAFT, ConversationWidgetOrigin::tool('sendMail'));
+        $this->replaceRow($messages, $previewRow);
+        self::assertSame(2, $this->getOperationsService()->findShownContentMessageIndex($agentConnectionOperation), 'the tool-written DRAFT preview of this content');
+
+        $request = OwnerConsentRequest::forAction('sendMail', 'send through Test', 'Send mail', 'It reaches anna@example.org.', $agentConnectionOperation->getContentHash());
+        $request->shownContentMessageIndex = 2;
+        $dialogue = $this->getOwnerConsentsService()->buildOwnerConsentDialogue($messages, 2, null);
+        self::assertTrue($this->getOwnerConsentsService()->addShownContentLine($dialogue, $messages, $request));
+        $previewLineText = '';
+        foreach ($dialogue->getElements() as $dialogueLine) {
+            if ($dialogueLine->messageIndex === 2) {
+                $previewLineText = $dialogueLine->text;
+            }
+        }
+        self::assertStringContainsString('To: anna@example.org', $previewLineText);
+        self::assertStringContainsString('send button', $previewLineText);
+    }
+
+    public function testAPreviewTheModelTypedOrOfOtherContentIsNoEvidence(): void
+    {
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY, 'senden', shownByTheAgent: false);
+        $messages = $agentConnectionOperation->callProvenance->conversationMessages;
+        $typedRow = $this->buildPreviewRow(2, $agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_DRAFT, ConversationWidgetOrigin::tool('sendMail'));
+        $typedRow->messageType = AIConversationMessage::MESSAGE_TEXT;
+        $typedRow->authorType = AIConversationMessage::AUTHOR_ASSISTANT;
+        $this->replaceRow($messages, $typedRow);
+        self::assertNull(AgentConnectionOperationsService::findShownMailPreviewIndex($messages, $agentConnectionOperation->getContentHash(), 3), 'a block in the model\'s own text reads as the model\'s');
+
+        $sentRow = $this->buildPreviewRow(2, $agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_SENT, ConversationWidgetOrigin::tool('sendMail'));
+        $this->replaceRow($messages, $sentRow);
+        self::assertNull(AgentConnectionOperationsService::findShownMailPreviewIndex($messages, $agentConnectionOperation->getContentHash(), 3), 'a SENT preview asks nothing');
+
+        $draftRow = $this->buildPreviewRow(2, $agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_DRAFT, ConversationWidgetOrigin::tool('sendMail'));
+        $this->replaceRow($messages, $draftRow);
+        self::assertNull(AgentConnectionOperationsService::findShownMailPreviewIndex($messages, 'another-hash', 3), 'another mail\'s preview');
+    }
+
+    public function testAddressesTheOwnerWroteAreCoveredByTheRuleAndOthersAreNot(): void
+    {
+        $agentConnectionOperation = $this->buildSend(['marius@example.org'], self::BODY, 'Sende die Übersicht an Marius@Example.org.');
+        self::assertSame(['marius@example.org'], $this->getOperationsService()->findAddressesNamedByOwner($agentConnectionOperation));
+
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY, 'senden');
+        self::assertSame([], $this->getOperationsService()->findAddressesNamedByOwner($agentConnectionOperation), 'an address only the agent wrote is not the owner\'s');
+    }
+
+    public function testTheMimeMessageCarriesThePlainBodyAndItsMarkdownAsHtml(): void
+    {
+        $mailDraft = AgentConnectionMailDraft::newInstance();
+        $mailDraft->to = ['anna@example.org'];
+        $mailDraft->subject = 'Kampagnen';
+        $mailDraft->bodyText = "Hallo\n\n| # | Name |\n|---|---|\n| 1 | <b>x</b> |";
+        $rawMessage = AgentConnectionMimeMessageBuilder::build($mailDraft, 'owner@example.org');
+        self::assertStringContainsString('Content-Type: multipart/alternative', $rawMessage);
+        self::assertStringContainsString('Content-Type: text/plain; charset=UTF-8', $rawMessage);
+        self::assertStringContainsString('Content-Type: text/html; charset=UTF-8', $rawMessage);
+        $htmlBody = AgentConnectionMimeMessageBuilder::buildHtmlBody($mailDraft->bodyText);
+        self::assertStringContainsString('<table', $htmlBody);
+        self::assertStringContainsString('&lt;b&gt;x&lt;/b&gt;', $htmlBody, 'safe mode: no raw HTML from model text');
+    }
+
+    protected function buildPreviewRow(int $index, AgentConnectionOperation $agentConnectionOperation, string $status, ConversationWidgetOrigin $conversationWidgetOrigin): AIConversationMessage
+    {
+        $mailDraftPreviewWidget = MailDraftPreviewConversationWidget::forMailDraft(
+            $agentConnectionOperation->stepArguments->mailDraft,
+            3,
+            'owner@example.org',
+            $agentConnectionOperation->getContentHash(),
+            $status
+        );
+        $previewRow = $this->buildRow($index, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_TOOL, $mailDraftPreviewWidget->buildWidgetRowEmittedBy($conversationWidgetOrigin));
+        $previewRow->messageType = AIConversationMessage::MESSAGE_TOOL_MESSAGE;
+        return $previewRow;
+    }
+
+    protected function replaceRow(AIConversationMessages $messages, AIConversationMessage $replacementRow): void
+    {
+        foreach ($messages->getElements() as $row) {
+            if ($row->indexInConversation === $replacementRow->indexInConversation) {
+                $messages->remove($row);
+            }
+        }
+        $messages->add($replacementRow);
     }
 
     /** @return int[] */

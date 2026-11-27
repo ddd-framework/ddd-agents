@@ -600,6 +600,7 @@
             "EntityMention",
             "ExtendConnectionPermission",
             "ImageGallery",
+            "MailDraftPreview",
             "MultiChoice",
             "QuickReplies",
             "StubCompact",

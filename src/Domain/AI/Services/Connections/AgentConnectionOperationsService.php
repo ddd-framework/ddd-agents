@@ -10,6 +10,9 @@ use DDD\Domain\AI\Entities\Conversations\Messages\OwnerDevice;
 use DDD\Domain\AI\Entities\Conversations\Widgets\ShownConversationWidgets;
 use DDD\Domain\AI\Entities\Conversations\Widgets\ConversationWidget;
 use DDD\Domain\AI\Entities\Conversations\Widgets\ExtendConnectionPermissionConversationWidget;
+use DDD\Domain\AI\Entities\Conversations\Widgets\MailDraftPreviewConversationWidget;
+use DDD\Domain\AI\Entities\Conversations\Widgets\ConversationWidgetOrigin;
+use DDD\Domain\AI\Exceptions\Conversations\OwnerConsentMissingException;
 use DDD\Domain\AI\Services\Conversations\AIConversationMessagesService;
 use DDD\Domain\AI\Entities\Conversations\Widgets\ContinueInPersonalSpaceConversationWidget;
 use DDD\Domain\AI\Entities\Connections\AgentConnectionThreads;
@@ -50,7 +53,11 @@ use Throwable;
  *      package's consent step (the yes is bound to the exact step); unattended runs create an
  *      {@see AgentConnectionApprovalRequest} with the exact content and its hash, post it to the approval channel,
  *      and stop ({@see AgentConnectionApprovalPendingException}); a person's yes executes exactly that step;
- *    - SEND_BY_RULE towards internal recipients only (never a removal): runs.
+ *    - SEND_BY_RULE towards internal recipients only, or in an attended run towards recipients the owner named
+ *      in their own messages of this conversation (never a removal): runs;
+ *    - a mail send that waits for the owner's yes shows the exact mail once as a tool-written preview with one send
+ *      button ({@see MailDraftPreviewConversationWidget}); that preview is the consent step's evidence, so the owner's
+ *      next send order is the one confirmation; a sent mail is shown as a SENT preview.
  * 4. the adapter call; 5. the audit row ({@see AgentConnectionAction}), the refused and failed ones included.
  */
 class AgentConnectionOperationsService
@@ -61,6 +68,10 @@ class AgentConnectionOperationsService
     ];
 
     public const string APPROVAL_PENDING = 'NOT DONE YET: this step needs a person\'s approval. An approval request #%d was created with the exact content%s. Do not repeat the call: when a person approves, exactly this step is carried out and you are told here. Tell the owner it waits for approval.';
+
+    public const string MAIL_PREVIEW_SHOWN = 'NOT DONE — nothing was sent yet. The exact mail is shown to the owner right now as a preview with one send button (to, subject, body). Write ONE short line that asks whether to send it, in the owner\'s language — do NOT repeat the mail, its recipients or its text, do NOT call askOwner or write any other widget, and do not say the mail needs a confirmation. When the owner then says to send it (the button, or their own words, typos included), call this tool again with the SAME arguments.';
+
+    public const string MAIL_PREVIEW_NOT_AGREED = 'NOT DONE — nothing was sent. The owner already saw this exact mail as a preview, and their last message was not read as an order to send it. Do NOT ask again, do NOT show the mail again and do NOT call askOwner: answer what the owner wrote. Call this tool again with the SAME arguments only when the owner says to send it.';
 
     /**
      * Runs a read (list, search, read, draft) after the checks.
@@ -109,9 +120,11 @@ class AgentConnectionOperationsService
         // a removal (a delete, a merge that deletes its donor) always needs a yes; a rule covers sends and writes towards internal targets only
         $needsApproval = $level !== AgentConnectionPermission::LEVEL_SEND_BY_RULE
             || in_array($agentConnectionOperation->operation, AgentConnectionPermission::REMOVING_OPERATIONS, true)
-            || !$this->areAllRecipientsInternal($agentConnectionOperation);
+            || !$this->isCoveredByRule($agentConnectionOperation);
         if (!$needsApproval) {
-            return $this->callProvider($agentConnectionOperation, AgentConnectionProviderCall::of($this, 'executeStep', $agentConnectionOperation), $target);
+            $sendResult = $this->callProvider($agentConnectionOperation, AgentConnectionProviderCall::of($this, 'executeStep', $agentConnectionOperation), $target);
+            $this->showMailPreview($agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_SENT);
+            return $sendResult;
         }
         if ($this->isRunUnattended($agentConnectionOperation)) {
             $agentConnectionApprovalRequest = $this->getApprovalRequestsService()->openRequest($agentConnectionOperation);
@@ -134,14 +147,19 @@ class AgentConnectionOperationsService
         );
         // evidence for the consent step: the agent's own text that showed exactly this content (never a widget or tool row)
         $ownerConsentRequest->shownContentMessageIndex = $this->findShownContentMessageIndex($agentConnectionOperation);
+        $contentWasShown = $ownerConsentRequest->shownContentMessageIndex !== null;
         try {
             $ownerConsentReservation = $ownerConsentsService->requireOwnerConsentForStep($agentConnectionOperation->callProvenance, $ownerConsentRequest);
+        } catch (OwnerConsentMissingException $consentMissing) {
+            $this->audit($agentConnectionOperation, AgentConnectionAction::OUTCOME_REFUSED_BY_GUARD, $target, 'waiting for the owner\'s yes');
+            throw $this->buildMailConsentMissing($agentConnectionOperation, $consentMissing, $contentWasShown);
         } catch (Throwable $consentMissing) {
             $this->audit($agentConnectionOperation, AgentConnectionAction::OUTCOME_REFUSED_BY_GUARD, $target, 'waiting for the owner\'s yes');
             throw $consentMissing;
         }
         $sendResult = $this->callProvider($agentConnectionOperation, AgentConnectionProviderCall::of($this, 'executeStep', $agentConnectionOperation), $target);
         $ownerConsentsService->markConsentUsed($agentConnectionOperation->callProvenance, $ownerConsentReservation);
+        $this->showMailPreview($agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_SENT);
         return $sendResult;
     }
 
@@ -290,6 +308,107 @@ class AgentConnectionOperationsService
             }
         }
         return $aIConversationMessagesService->appendWidget($callProvenance, $conversationWidget)->isWritten();
+    }
+
+
+    /**
+     * A refused consent of a mail send, in the words that keep it at ONE confirmation: before the mail was shown, the
+     * preview is written and the model writes one short line; after it was shown, the model never asks again. Other
+     * steps (and a chat thread, which shows no widget) keep the consent step's own text.
+     */
+    protected function buildMailConsentMissing(AgentConnectionOperation $agentConnectionOperation, OwnerConsentMissingException $consentMissing, bool $contentWasShown): OwnerConsentMissingException
+    {
+        if ($agentConnectionOperation->stepArguments->mailDraft === null) {
+            return $consentMissing;
+        }
+        if ($contentWasShown) {
+            return new OwnerConsentMissingException(static::MAIL_PREVIEW_NOT_AGREED, 0, $consentMissing);
+        }
+        if (!$this->showMailPreview($agentConnectionOperation, MailDraftPreviewConversationWidget::STATUS_DRAFT)) {
+            return $consentMissing;
+        }
+        return new OwnerConsentMissingException(static::MAIL_PREVIEW_SHOWN, 0, $consentMissing);
+    }
+
+    /**
+     * Shows the step's exact mail as a tool-written preview (once per owner message and content): DRAFT with the send
+     * button, or SENT. True when the preview is there.
+     */
+    protected function showMailPreview(AgentConnectionOperation $agentConnectionOperation, string $status): bool
+    {
+        $mailDraft = $agentConnectionOperation->stepArguments->mailDraft;
+        if ($mailDraft === null) {
+            return false;
+        }
+        $agentConnection = $agentConnectionOperation->agentConnection;
+        $contentHash = $agentConnectionOperation->getContentHash();
+        $mailDraftPreviewWidget = MailDraftPreviewConversationWidget::forMailDraft(
+            $mailDraft,
+            (int)$agentConnection->id,
+            (string)($agentConnection->externalAddress ?? $agentConnection->getLabel()),
+            $contentHash,
+            $status
+        );
+        return $this->appendOwnerWidgetOnce($agentConnectionOperation, $mailDraftPreviewWidget, ['contentHash' => $contentHash, 'status' => $status]);
+    }
+
+    /**
+     * Whether SEND_BY_RULE covers the step without asking: every recipient is internal, or — in an attended run outside
+     * a chat thread — every recipient is an address the owner wrote in their own messages of this conversation (the
+     * owner's order names whom it reaches; a tool result or a mail the agent read never counts).
+     */
+    protected function isCoveredByRule(AgentConnectionOperation $agentConnectionOperation): bool
+    {
+        if ($this->areAllRecipientsInternal($agentConnectionOperation)) {
+            return true;
+        }
+        if ($agentConnectionOperation->recipients === [] || $agentConnectionOperation->capability === AgentConnectionPermission::CAPABILITY_CHAT
+            || $this->isRunUnattended($agentConnectionOperation) || static::isChatConnectionTurn($agentConnectionOperation)
+        ) {
+            return false;
+        }
+        $ownerNamedAddresses = $this->findAddressesNamedByOwner($agentConnectionOperation);
+        foreach ($agentConnectionOperation->recipients as $recipient) {
+            if (!in_array(mb_strtolower(trim($recipient)), $ownerNamedAddresses, true)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * The mail addresses (lower case) in the owner's own text rows up to the turn's owner message — never a row the
+     * platform wrote for the owner or one the injection check blocked.
+     *
+     * @return string[]
+     */
+    public function findAddressesNamedByOwner(AgentConnectionOperation $agentConnectionOperation): array
+    {
+        $callProvenance = $agentConnectionOperation->callProvenance;
+        $ownerMessageIndex = $callProvenance?->sourceUserMessage?->indexInConversation ?? null;
+        $conversation = $callProvenance?->conversation;
+        $messages = $callProvenance?->conversationMessages ?? ($conversation instanceof AIConversation && isset($conversation->messages) ? $conversation->messages : null);
+        if ($ownerMessageIndex === null || !$messages instanceof AIConversationMessages) {
+            return [];
+        }
+        $agentWorkingState = $conversation instanceof AIConversation ? $conversation->getAgentWorkingState() : null;
+        $ownerNamedAddresses = [];
+        foreach ($messages->getRowsSortedByIndex() as $row) {
+            $rowIndex = $row->indexInConversation ?? null;
+            if ($rowIndex === null || $rowIndex > (int)$ownerMessageIndex || !$row->isOwnerText()) {
+                continue;
+            }
+            if ($agentWorkingState !== null
+                && (in_array($rowIndex, $agentWorkingState->platformWrittenOwnerMessageIndexes, true) || $agentWorkingState->isOwnerMessageSecurityFiltered($rowIndex))
+            ) {
+                continue;
+            }
+            preg_match_all('/[^\s<>"\'(),;:\[\]]+@[^\s<>"\'(),;:\[\]]+\.[^\s<>"\'(),;:\[\]]+/u', (string)($row->message ?? ''), $addressMatches);
+            foreach ($addressMatches[0] as $address) {
+                $ownerNamedAddresses[] = mb_strtolower(rtrim($address, '.!?'));
+            }
+        }
+        return array_values(array_unique($ownerNamedAddresses));
     }
 
     /** A turn whose owner message came in through a chat connection (a chat thread shows no buttons) */
@@ -516,7 +635,35 @@ class AgentConnectionOperationsService
                 $shownContentMessageIndex = (int)$rowIndex;
             }
         }
+        $previewMessageIndex = static::findShownMailPreviewIndex($messages, $agentConnectionOperation->getContentHash(), (int)$ownerMessageIndex);
+        if ($previewMessageIndex !== null && ($shownContentMessageIndex === null || $previewMessageIndex > $shownContentMessageIndex)) {
+            $shownContentMessageIndex = $previewMessageIndex;
+        }
         return $shownContentMessageIndex;
+    }
+
+    /**
+     * The row of the newest DRAFT mail preview a TOOL wrote for exactly this content (`contentHash`) before the owner's
+     * message; a block the model typed into its own text reads as the model's and never counts.
+     */
+    public static function findShownMailPreviewIndex(AIConversationMessages $messages, string $contentHash, int $beforeMessageIndex): ?int
+    {
+        $previewMessageIndex = null;
+        foreach (ShownConversationWidgets::buildFor($messages)->getElements() as $shownConversationWidget) {
+            $hostIndex = $shownConversationWidget->hostIndexInConversation;
+            if ($hostIndex === null || $hostIndex >= $beforeMessageIndex || !$shownConversationWidget->isOfType(MailDraftPreviewConversationWidget::WIDGET_TYPE)
+                || !$shownConversationWidget->isOnToolRow() || $shownConversationWidget->getOrigin()->type !== ConversationWidgetOrigin::TYPE_TOOL
+            ) {
+                continue;
+            }
+            $mailDraftPreviewWidget = $shownConversationWidget->buildWidget();
+            if ($mailDraftPreviewWidget instanceof MailDraftPreviewConversationWidget && $mailDraftPreviewWidget->status === MailDraftPreviewConversationWidget::STATUS_DRAFT
+                && $mailDraftPreviewWidget->contentHash === $contentHash
+            ) {
+                $previewMessageIndex = $hostIndex;
+            }
+        }
+        return $previewMessageIndex;
     }
 
     /** Text as the owner saw it, for a content comparison: lower case, no markdown marks, single spaces */

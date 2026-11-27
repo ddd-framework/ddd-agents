@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace DDD\Domain\AI\Services\Conversations\Agent;
 
+use DDD\Domain\AI\Entities\Conversations\Widgets\ShownConversationWidgets;
+use DDD\Domain\AI\Entities\Conversations\Widgets\MailDraftPreviewConversationWidget;
+use DDD\Domain\AI\Services\Connections\AgentConnectionOperationsService;
 use ArrayObject;
 use DDD\Domain\AI\Entities\Conversations\AIConversation;
 use DDD\Domain\AI\Entities\Conversations\Agent\AgentToolCallProvenance;
@@ -677,6 +680,13 @@ class OwnerConsentsService extends Service
         if ($shownContentMessageIndex === null || $newestOwnerMessageIndex === null || $shownContentMessageIndex >= $newestOwnerMessageIndex) {
             return false;
         }
+        $shownPreviewText = static::composeShownMailPreviewText($messages, $request, $shownContentMessageIndex);
+        if ($shownPreviewText !== null) {
+            $previewLine = OwnerConsentDialogueLine::create(OwnerConsentDialogueLine::SPEAKER_WIDGET, $shownContentMessageIndex, $shownPreviewText);
+            $dialogue->add($previewLine);
+            $dialogue->sort(static fn (OwnerConsentDialogueLine $first, OwnerConsentDialogueLine $second): int => $first->messageIndex <=> $second->messageIndex);
+            return true;
+        }
         foreach ($messages->getRowsSortedByIndex() as $row) {
             if (($row->indexInConversation ?? null) !== $shownContentMessageIndex || !$row->isAssistantText()) {
                 continue;
@@ -689,11 +699,30 @@ class OwnerConsentsService extends Service
                     return true;
                 }
             }
-            $dialogue->add(OwnerConsentDialogueLine::create(OwnerConsentDialogueLine::SPEAKER_ASSISTANT, $shownContentMessageIndex, $shownText));
+            $shownLine = OwnerConsentDialogueLine::create(OwnerConsentDialogueLine::SPEAKER_ASSISTANT, $shownContentMessageIndex, $shownText);
+            $dialogue->add($shownLine);
             $dialogue->sort(static fn (OwnerConsentDialogueLine $first, OwnerConsentDialogueLine $second): int => $first->messageIndex <=> $second->messageIndex);
             return true;
         }
         return false;
+    }
+
+    /**
+     * The mail preview a tool wrote for exactly this step (its `contentHash` is the request's target key) at the shown
+     * row, read as the owner saw it; null when that row holds none.
+     */
+    public static function composeShownMailPreviewText(AIConversationMessages $messages, OwnerConsentRequest $request, int $shownContentMessageIndex): ?string
+    {
+        if (AgentConnectionOperationsService::findShownMailPreviewIndex($messages, $request->targetKey, $shownContentMessageIndex + 1) !== $shownContentMessageIndex) {
+            return null;
+        }
+        foreach (ShownConversationWidgets::buildFor($messages)->getElements() as $shownConversationWidget) {
+            $mailDraftPreviewWidget = $shownConversationWidget->hostIndexInConversation === $shownContentMessageIndex ? $shownConversationWidget->buildWidget() : null;
+            if ($mailDraftPreviewWidget instanceof MailDraftPreviewConversationWidget && $mailDraftPreviewWidget->contentHash === $request->targetKey) {
+                return $mailDraftPreviewWidget->buildReadableText();
+            }
+        }
+        return null;
     }
 
     /**

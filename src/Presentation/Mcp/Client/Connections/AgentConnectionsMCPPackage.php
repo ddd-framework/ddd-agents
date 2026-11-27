@@ -58,7 +58,7 @@ class AgentConnectionsMCPPackage extends AgentConnectionsBaseMCPPackage
             $allowedRecipients = $agentConnectionsConfiguration->getNonProductionAllowedRecipients();
             $responseDto->stageRecipientNote = 'Stage ' . $agentConnectionsConfiguration->getCurrentStage() . ': only '
                 . ($allowedRecipients === [] ? 'nobody' : implode(', ', $allowedRecipients))
-                . ' receive what is sent through a real connection; any other recipient is refused there even with the level. A FAKE connection (provider FAKE) takes any address. Drafts are never limited: show the mail anyway, name the refused recipients in the same message and leave them out.';
+                . ' receive what is sent through a real connection; any other recipient is refused there even with the level. A FAKE connection (provider FAKE) takes any address. Drafts are never limited: prepare the mail anyway, name the refused recipients in the same message and leave them out.';
         }
         return $responseDto;
     }
