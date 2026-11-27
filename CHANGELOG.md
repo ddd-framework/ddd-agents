@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.2
+
+- **Fix (web): the `ContinueInPersonalSpace` and `ExtendConnectionPermission` widgets lay out as one row.** The widget
+  surface's column direction won over the widget's own row, so the notice's flex basis became a 240px height and the
+  button dropped below it; the notice and the button now sit in a row of their own inside the surface (wrapping on a
+  narrow pane).
+- **Fix (web): every icon name has a glyph in the package default.** 35 names of `AGENTS_ICON_NAMES` (among them
+  `lockOpen` and `settings`, used by the new widgets) drew the fallback dot; the default glyph map now covers the whole
+  list, and a test keeps it so.
+- `ExtendConnectionPermission` documents that the block's `reason` is not shown (the widget shows its own interface text).
+
 ## 0.11.1
 
 - **Decision fixtures: the owner-consent site.** `app:agent:decision-fixtures` runs `"site": "ownerConsent"` fixtures:

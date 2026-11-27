@@ -10,7 +10,9 @@ description: Written by the backend (never by the model) when a step needs a lev
 ## Description
 A notice with an open-lock icon ("This step needs a permission the connection does not have yet.") and a button
 "Extend the permission". Each click calls the app's `openConnectionPermissions({connectionId, capability, level})`;
-the button stays usable, since the owner may leave the settings unchanged. Both texts are interface keys.
+the button stays usable, since the owner may leave the settings unchanged. Both texts are interface keys, translated
+through the app's texts; the block's `reason` (the backend's English sentence for logs and the model) is deliberately
+not shown.
 
 ## Data structure
 ```ts

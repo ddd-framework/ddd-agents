@@ -34,21 +34,23 @@ export const ContinueInPersonalSpaceConversationWidget = (props: PayloadConversa
   };
 
   return (
-    <WidgetSurface testId={TEST_ID} compact className={styles.root}>
-      <span className={styles.notice}>
-        <Icon name="lock" size="small" />
-        <Text testId={`${TEST_ID}-notice`}>Only you may use this connection, and others read this conversation.</Text>
-      </span>
-      <Button
-        size="small"
-        icon="arrowRight"
-        iconPosition="right"
-        onClick={continueInPersonalSpace}
-        disabled={interactive === false || isStarted}
-        testId={`${TEST_ID}-button`}
-      >
-        Continue in your personal space
-      </Button>
+    <WidgetSurface testId={TEST_ID} compact>
+      <div className={styles.row}>
+        <span className={styles.notice}>
+          <Icon name="lock" size="small" />
+          <Text testId={`${TEST_ID}-notice`}>Only you may use this connection, and others read this conversation.</Text>
+        </span>
+        <Button
+          size="small"
+          icon="arrowRight"
+          iconPosition="right"
+          onClick={continueInPersonalSpace}
+          disabled={interactive === false || isStarted}
+          testId={`${TEST_ID}-button`}
+        >
+          Continue in your personal space
+        </Button>
+      </div>
     </WidgetSurface>
   );
 };

@@ -28,21 +28,23 @@ export const ExtendConnectionPermissionConversationWidget = (props: PayloadConve
   if (parsedPayload === null || !canOpen) return null;
 
   return (
-    <WidgetSurface testId={TEST_ID} compact className={styles.root}>
-      <span className={styles.notice}>
-        <Icon name="lockOpen" size="small" />
-        <Text testId={`${TEST_ID}-notice`}>This step needs a permission the connection does not have yet.</Text>
-      </span>
-      <Button
-        size="small"
-        variant="default"
-        icon="settings"
-        onClick={() => openConnectionPermissions(parsedPayload.target)}
-        disabled={interactive === false}
-        testId={`${TEST_ID}-button`}
-      >
-        Extend the permission
-      </Button>
+    <WidgetSurface testId={TEST_ID} compact>
+      <div className={styles.row}>
+        <span className={styles.notice}>
+          <Icon name="lockOpen" size="small" />
+          <Text testId={`${TEST_ID}-notice`}>This step needs a permission the connection does not have yet.</Text>
+        </span>
+        <Button
+          size="small"
+          variant="default"
+          icon="settings"
+          onClick={() => openConnectionPermissions(parsedPayload.target)}
+          disabled={interactive === false}
+          testId={`${TEST_ID}-button`}
+        >
+          Extend the permission
+        </Button>
+      </div>
     </WidgetSurface>
   );
 };

@@ -1,5 +1,6 @@
-// The notice beside (wide) or above (narrow) the button.
-.root {
+// One row inside the surface (whose own direction is a column): the notice beside the button, wrapping on a narrow
+// pane.
+.row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
