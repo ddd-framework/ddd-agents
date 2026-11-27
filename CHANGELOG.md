@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **The newest row a tool wrote.** `AIConversationMessages::getNewestIndexOfRowWrittenByTool(string $toolName)` (pure,
+  over the loaded set) and `AIConversationMessagesService::findNewestIndexOfRowWrittenByTool(AIConversation, string)`
+  (the persisted, not truncated rows, whatever window is loaded): the highest `indexInConversation` of a TOOL_MESSAGE
+  authored by TOOL whose row label (`signalSource`) is the tool's name, as `writeWidgetRow()` writes it; null when there
+  is none. A block the model wrote into its own text never counts. For a purpose that closes a plan item on the card a
+  tool delivered.
+- **Fix (web): the owner's own message and the name of an agent space reach the app's text components as plain text.**
+  `ConversationMessageUser` hands its prose, and `ConversationWidgetAgentSpaceHeader` the tooltip's explanation, through
+  the environment's `escapePlainTextForText`, so an app whose `Text` or `Tooltip` replacement reads a string as markup
+  shows them as written (before: markup in a customer message or in a business name was read as markup there). The
+  prose line carries the test id `conversation-message-user-text`. With the default components nothing changes.
+
 ## 0.10.6
 
 - **A seeded plan can grow.** New purpose frontmatter key `seededTaskPlanAcceptsNewItems` (default false). With `true`,
@@ -86,6 +100,7 @@
   from its facts and never says `[DONE]` or `[GIVE-UP]` while it is open; `[DONE]` only when every part of the goal is
   confirmed (a reply counts once it is reported sent). Before, a partial result read as the goal and the case failed as
   "reply never sent".
+
 
 ## 0.10.0
 

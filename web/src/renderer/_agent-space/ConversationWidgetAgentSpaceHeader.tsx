@@ -3,6 +3,7 @@ import { Tooltip } from "../../provider/components";
 import {
   buildUnnamedAgentSpaceLabel,
   buildWidgetOfAnotherAgentSpaceExplanation,
+  escapePlainTextForText,
   translateText,
 } from "../../provider/environment";
 import { useWidgetHydration } from "../widget-hydration";
@@ -39,10 +40,13 @@ export const ConversationWidgetAgentSpaceHeader = (props: ConversationWidgetAgen
   const label = data?.name ?? buildUnnamedAgentSpaceLabel(agentSpaceKey);
   const explanation = buildWidgetOfAnotherAgentSpaceExplanation(label);
   const noteLabel = translateText("Showing data for %label%", { label });
+  // The explanation carries the name of the agent space (data, not interface copy): it reaches the tooltip as plain
+  // text, so an app's tooltip that reads a string as markup shows the name as written. The chip and the aria-label are
+  // rendered by React and need no escaping.
 
   return (
     <div className={inFlow ? styles.inFlowAnchor : styles.anchor}>
-      <Tooltip text={explanation} placement="top" dark wrapsChild>
+      <Tooltip text={escapePlainTextForText(explanation)} placement="top" dark wrapsChild>
         <span className={styles.root} role="note" aria-label={noteLabel} tabIndex={0}>
           <span className={styles.name}>{label}</span>
         </span>

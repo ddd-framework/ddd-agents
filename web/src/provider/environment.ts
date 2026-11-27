@@ -175,8 +175,8 @@ export interface AgentsEnvironment {
   components?: Partial<AgentsComponents>;
   texts?: AgentsTexts;
   /**
-   * Prepares a plain text (a model's words, a business name) for the app's `Text`, `Button` and `StatusBadge`
-   * replacements, which may read a string as markup. Default: the text unchanged.
+   * Prepares a plain text (a model's words, the owner's own message, a business name) for the app's `Text`, `Button`,
+   * `StatusBadge` and `Tooltip` replacements, which may read a string as markup. Default: the text unchanged.
    */
   escapePlainTextForText?: (text: string) => string;
   /**

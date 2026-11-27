@@ -480,6 +480,34 @@ class AIConversationMessages extends EntitySet
     }
 
     /**
+     * The highest `indexInConversation` of a row the tool `$toolName` wrote into the loaded set — a TOOL_MESSAGE authored
+     * by TOOL whose row label (`signalSource`) is the tool's name, as {@see \DDD\Domain\AI\Services\Conversations\AIConversationMessagesService::writeWidgetRow()}
+     * writes it; null when the loaded set holds none. A block the model wrote into its own text never counts. Pure over
+     * the loaded set.
+     *
+     * @param string $toolName The writing tool's name
+     * @return int|null
+     */
+    public function getNewestIndexOfRowWrittenByTool(string $toolName): ?int
+    {
+        $newestIndex = null;
+        foreach ($this->getElements() as $message) {
+            $messageIndex = $message->indexInConversation ?? null;
+            if ($messageIndex === null
+                || ($message->messageType ?? null) !== AIConversationMessage::MESSAGE_TOOL_MESSAGE
+                || ($message->authorType ?? null) !== AIConversationMessage::AUTHOR_TOOL
+                || ($message->signalSource ?? null) !== $toolName
+            ) {
+                continue;
+            }
+            if ($newestIndex === null || $messageIndex > $newestIndex) {
+                $newestIndex = $messageIndex;
+            }
+        }
+        return $newestIndex;
+    }
+
+    /**
      * The lowest `indexInConversation` in the loaded set (null when empty) — the boundary between the history the
      * compaction cover summarises and the raw rows the set carries.
      */

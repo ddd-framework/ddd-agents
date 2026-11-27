@@ -224,6 +224,36 @@ class AIConversationMessagesService extends EntitiesService
     }
 
     /**
+     * The highest `indexInConversation` of a persisted, not truncated row the tool `$toolName` wrote into the
+     * conversation — a TOOL_MESSAGE authored by TOOL whose row label (`signalSource`) is the tool's name
+     * ({@see writeWidgetRow()}); null when there is none or the conversation is not persisted. Reads the rows, whatever
+     * window the caller has loaded — the persisted twin of {@see AIConversationMessages::getNewestIndexOfRowWrittenByTool()}.
+     *
+     * @param AIConversation $conversation The conversation whose rows are read
+     * @param string $toolName The writing tool's name
+     * @return int|null
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function findNewestIndexOfRowWrittenByTool(AIConversation $conversation, string $toolName): ?int
+    {
+        if (!isset($conversation->id)) {
+            return null;
+        }
+        $newestIndex = EntityManagerFactory::getInstance()->getConnection()->fetchOne(
+            'SELECT MAX(`indexInConversation`) FROM `' . DBAIConversationMessageModel::getTableName() . '`'
+            . ' WHERE `aiConversationId` = :conversationId AND `messageType` = :messageType AND `authorType` = :authorType'
+            . ' AND `signalSource` = :toolName AND `truncatedAt` IS NULL',
+            [
+                'conversationId' => (int)$conversation->id,
+                'messageType' => AIConversationMessage::MESSAGE_TOOL_MESSAGE,
+                'authorType' => AIConversationMessage::AUTHOR_TOOL,
+                'toolName' => $toolName,
+            ]
+        );
+        return is_numeric($newestIndex) ? (int)$newestIndex : null;
+    }
+
+    /**
      * A fork-join child claims the call row it was started for: `PENDING → RUNNING` plus its lease, in ONE statement
      * (the fork-join claim of the call row). Affected rows = 1 is the owner; 0 means another delivery claimed it, the
      * row was truncated, or the turn already closed it — the child stops without executing.
