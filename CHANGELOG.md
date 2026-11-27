@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.7
+
+- Voice: with a fixed call language, speech in another language is side talk in the room; the agent does not answer,
+  translate or hand it on (`Prompts/AI/Voice/LanguageFixed.md`). A delegated call task reads an e-mail address, phone
+  number or web address heard only in the transcript back once, spelled out, before anything is sent to it (that is
+  the one confirmation); side talk aimed at others is no request (`AgentCallTasksService`).
+
 ## 0.11.6
 
 - **Security: no image in a mail the agent sends.** `AgentConnectionMimeMessageBuilder::buildHtmlBody()` renders the body

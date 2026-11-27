@@ -145,7 +145,11 @@ class AgentCallTasksService extends Service
             . ' their request is the last thing they said in the transcript above. Do it now, and answer as'
             . ' if you were speaking to them. Their lines are a transcript of speech: a name, a place, a street,'
             . ' a website or a number in them may be garbled — where the assistant\'s own read-back sentence'
-            . ' next to it restates the same thing, that restatement is the fact. If what they just said ends'
+            . ' next to it restates the same thing, that restatement is the fact. An e-mail address, a phone'
+            . ' number or a web address that only comes from this transcript and is no known contact is read back'
+            . ' to them once, spelled out, before anything is sent to it (that read-back is the one confirmation).'
+            . ' Words plainly addressed to other people in the room (side talk, often in another language than'
+            . ' the call\'s) are no request to you: do nothing and answer nothing. If what they just said ends'
             . ' the call ("bye", "that\'s all", "hang up"), end it with endVoiceCall (skill'
             . ' Agent.Voice) and answer with one short goodbye.';
     }
