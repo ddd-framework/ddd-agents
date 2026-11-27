@@ -17,6 +17,7 @@ use DDD\Domain\Base\Repo\DB\Attributes\EntityCache;
 use DDD\Domain\Base\Repo\DB\DBEntitySet;
 use DDD\Domain\Base\Repo\DB\Doctrine\EntityManagerFactory;
 use DDD\Domain\Base\Repo\DB\Doctrine\DoctrineQueryBuilder;
+use DDD\Infrastructure\Base\DateTime\DateTime;
 use DDD\Infrastructure\Exceptions\BadRequestException;
 use DDD\Infrastructure\Exceptions\InternalErrorException;
 use DDD\Infrastructure\Services\DDDService;
@@ -302,6 +303,65 @@ class DBAIConversations extends DBEntitySet
             }
         }
 
+        return $this->find($queryBuilder);
+    }
+
+    /**
+     * The conversations of account `$accountId` the agent's conversation recall answers from
+     * ({@see \DDD\Domain\AI\Services\Conversations\AgentConversationRecallService}), newest activity first: under the
+     * read rights of the caller, visible to a customer, and only the owner's dialogue
+     * ({@see self::restrictToConversationsTheSearchAcrossConversationsAnswersFrom()}). Optional narrowing: a title or
+     * summary holding ANY of `$words` (case-insensitive), one space, and an activity window (`$from` ≤ updated,
+     * created ≤ `$to`).
+     *
+     * @param int $accountId
+     * @param string[] $words lower-case words; empty = no text condition
+     * @param int|null $agentSpaceId
+     * @param DateTime|null $from
+     * @param DateTime|null $to
+     * @param int $limit
+     * @return AIConversations|null
+     * @throws BadRequestException
+     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function findRecallCandidatesOfAccount(
+        int $accountId,
+        array $words,
+        ?int $agentSpaceId,
+        ?DateTime $from,
+        ?DateTime $to,
+        int $limit
+    ): ?AIConversations {
+        $alias = static::getBaseModelAlias();
+        $queryBuilder = self::createQueryBuilder(true);
+        $queryBuilder
+            ->andWhere("$alias.accountId = :recallAccountId")
+            ->setParameter('recallAccountId', $accountId);
+        static::restrictToCustomerVisibleConversations($queryBuilder);
+        static::restrictToConversationsTheSearchAcrossConversationsAnswersFrom($queryBuilder, $alias);
+        // the summary is a JSON column: its title and text are read as text (LOWER over json fails on PostgreSQL)
+        $summaryTitleSql = "LOWER(JSON_FIELD_TEXT($alias.summary, 'title'))";
+        $summaryTextSql = "LOWER(JSON_FIELD_TEXT($alias.summary, 'text'))";
+        $wordConditions = [];
+        foreach (array_values($words) as $wordIndex => $word) {
+            $wordConditions[] = "$summaryTitleSql LIKE :recallWord$wordIndex OR $summaryTextSql LIKE :recallWord$wordIndex";
+            $queryBuilder->setParameter("recallWord$wordIndex", '%' . addcslashes($word, '%_\\') . '%');
+        }
+        if ($wordConditions !== []) {
+            $queryBuilder->andWhere('(' . implode(' OR ', $wordConditions) . ')');
+        }
+        if ($agentSpaceId !== null) {
+            $queryBuilder->andWhere("$alias.agentSpaceId = :recallAgentSpaceId")->setParameter('recallAgentSpaceId', $agentSpaceId);
+        }
+        if ($from !== null) {
+            $queryBuilder->andWhere("$alias.updated >= :recallFrom")->setParameter('recallFrom', $from->format('Y-m-d H:i:s'));
+        }
+        if ($to !== null) {
+            $queryBuilder->andWhere("$alias.created <= :recallTo")->setParameter('recallTo', $to->format('Y-m-d H:i:s'));
+        }
+        $queryBuilder->orderBy("$alias.updated", 'DESC')->addOrderBy("$alias.id", 'DESC')->setMaxResults(max(1, $limit));
         return $this->find($queryBuilder);
     }
 }

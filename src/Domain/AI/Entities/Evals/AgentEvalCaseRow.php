@@ -317,6 +317,14 @@ class AgentEvalCaseRow extends ValueObject
             $expectedMentions,
             static fn (string $mention): bool => $mention !== '' && mb_stripos($finalText, $mention) === false
         ));
+        // `expectAbsentMentions`: text a seeded conversation holds that must NOT reach the answer (a conversation the
+        // owner may not read, or one the audience rule keeps out)
+        $absentMentions = $agentEvalCase->getApplicationValue('expectAbsentMentions');
+        $absentMentions = array_map('strval', is_array($absentMentions) ? $absentMentions : []);
+        $leakedMentions = array_values(array_filter(
+            $absentMentions,
+            static fn (string $mention): bool => $mention !== '' && mb_stripos($finalText, $mention) !== false
+        ));
         $failures = [];
         if (!$toolOk) {
             $failures[] = sprintf('tool not called: expected one of [%s], called [%s]', implode(', ', $expectedToolNames), implode(', ', $calledToolNames));
@@ -324,10 +332,13 @@ class AgentEvalCaseRow extends ValueObject
         foreach ($missingMentions as $missingMention) {
             $failures[] = "the answer does not mention '{$missingMention}'";
         }
+        foreach ($leakedMentions as $leakedMention) {
+            $failures[] = "the answer mentions '{$leakedMention}', which must stay out";
+        }
         return static::fromArray([
             'id' => $caseId,
             'case' => $caseId,
-            'passed' => $error === null && $toolOk && $missingMentions === [],
+            'passed' => $error === null && $toolOk && $missingMentions === [] && $leakedMentions === [],
             'failures' => $failures,
             'performance' => $performance,
             'durationMs' => $durationMs,
@@ -337,6 +348,7 @@ class AgentEvalCaseRow extends ValueObject
             'calledTools' => array_values($calledToolNames),
             'toolOk' => $toolOk,
             'missingMentions' => $missingMentions,
+            'leakedMentions' => $leakedMentions,
             'finalText' => $finalText,
             'error' => $error,
             'messages' => $messagesTrace,

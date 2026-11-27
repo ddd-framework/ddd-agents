@@ -12,8 +12,8 @@ description: >-
 **Scope.** Every question about what you know, remember or have stored about the owner or their business, however it
 is worded: an OPEN question about everything you know or every rule you hold → `listMemories`; a check of ONE fact →
 `searchMemory` — FIRST, before you answer that you do not know it. An explicit wish to remember, correct or forget
-something → `remember`, `updateMemory`, `forget`. A question about what was SAID in a conversation is not this skill:
-use the application's conversation recall tools when they are offered.
+something → `remember`, `updateMemory`, `forget`. A question about what was SAID in an earlier conversation is not this skill:
+load `Agent.Conversations` (`searchConversations`, `readConversation`).
 
 **Automatic and explicit.** After a conversation settles, a background curator reviews what the owner said and stores
 the durable residual on its own (facts, standing rules, approaches), and when a new statement contradicts a stored one

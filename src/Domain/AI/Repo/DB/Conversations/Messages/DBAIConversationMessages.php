@@ -449,4 +449,35 @@ class DBAIConversationMessages extends DBEntitySet
             AIConversationMessages::restoreDefaultQueryOptionsSnapshot();
         }
     }
+
+    /**
+     * One page of the dialogue of a conversation for the agent's `readConversation`: user input and assistant prose
+     * (TEXT, role USER or ASSISTANT, not empty, not truncated) from index `$fromIndex` on, oldest first, at most
+     * `$limit`. Reduced columns ({@see findWithSearchHitColumns()}), under the read rights.
+     *
+     * @return AIConversationMessages|null
+     */
+    public function findContentMessagesFromIndex(int $conversationId, int $fromIndex, int $limit): ?AIConversationMessages
+    {
+        if ($limit < 1) {
+            return AIConversationMessages::newInstance();
+        }
+        $alias = self::getBaseModelAlias();
+        $queryBuilder = self::createQueryBuilder();
+        $queryBuilder
+            ->andWhere("$alias.aiConversationId = :conversationId")
+            ->andWhere("$alias.messageType = :textType")
+            ->andWhere("$alias.role IN (:roles)")
+            ->andWhere("$alias.message IS NOT NULL")
+            ->andWhere("TRIM($alias.message) != ''")
+            ->andWhere("$alias.truncatedAt IS NULL")
+            ->andWhere("$alias.indexInConversation >= :fromIndex")
+            ->addOrderBy("$alias.indexInConversation", 'ASC')
+            ->setParameter('conversationId', $conversationId)
+            ->setParameter('textType', AIConversationMessage::MESSAGE_TEXT)
+            ->setParameter('roles', [AIConversationMessage::ROLE_USER, AIConversationMessage::ROLE_ASSISTANT])
+            ->setParameter('fromIndex', max(0, $fromIndex))
+            ->setMaxResults($limit);
+        return $this->findWithSearchHitColumns($queryBuilder);
+    }
 }

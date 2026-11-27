@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use DDD\Domain\AI\Entities\Skills\AISkill;
+use DDD\Presentation\Mcp\Client\Agents\AgentConversationsMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\AgentGoalBlueprintMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\AgentGoalsMCPPackage;
 use DDD\Presentation\Mcp\Client\Agents\AgentImagesMCPPackage;
@@ -42,6 +43,7 @@ return [
     AISkill::AGENT_TASK_RUN_REPORTS => [AgentTaskRunReportsMCPPackage::class],
     // offered only while the memory store is switched on (AI.agentMemory.enabled): the package is unavailable otherwise
     AISkill::AGENT_MEMORY => [AgentMemoriesMCPPackage::class],
+    AISkill::AGENT_CONVERSATIONS => [AgentConversationsMCPPackage::class],
     // offered only while the goal register is switched on (AI.agentGoals.enabled); the standard goal tree's package only
     // while an application binds a blueprint provider (AgentGoalBlueprintMCPPackage::isAvailable())
     AISkill::AGENT_GOALS => [AgentGoalsMCPPackage::class, AgentGoalBlueprintMCPPackage::class],

@@ -188,6 +188,15 @@ class AgentEvalRunHooksService extends Service
     }
 
     /**
+     * The account of another evaluation operator a recall seed names (`ownerOperatorKind`): the owner of a seeded
+     * conversation the case's owner must never find. Default: none (the case does not apply).
+     */
+    public function resolveSeedOwnerAccountId(string $ownerOperatorKind): ?int
+    {
+        return null;
+    }
+
+    /**
      * The account a run names (`--accountId`), read as the caller reads it (the rights are lifted by the caller). An
      * application whose account class is its own overrides it. Null for an id without an account.
      */

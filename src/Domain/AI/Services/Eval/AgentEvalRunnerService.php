@@ -1310,7 +1310,9 @@ class AgentEvalRunnerService extends Service
                 $seededConversation = $this->seedPersistedConversation(
                     $agentEvalScope,
                     is_array($seedConversationBlock['messages'] ?? null) ? $seedConversationBlock['messages'] : [],
-                    $agentEvalRunOptions
+                    $agentEvalRunOptions,
+                    $this->resolveSeedAgentSpaceId($seedConversationBlock['agentSpaceId'] ?? null),
+                    $this->resolveSeedOwnerAccountId($seedConversationBlock['ownerOperatorKind'] ?? null)
                 );
                 $agentEvalRunOptions->recordSeededConversationId((int)$seededConversation->id);
                 $seededConversations->add($seededConversation);
@@ -1334,6 +1336,48 @@ class AgentEvalRunnerService extends Service
                 $this->deleteSeededConversations($seededConversations);
             }
         }
+    }
+
+    /**
+     * The space of a seed block (`agentSpaceId`: an id or an agent space reference `{{ref:agentSpace:<name>}}`); null =
+     * the case's space.
+     *
+     * @throws AgentEvalPreconditionNotEstablishedException when a reference resolves to no space
+     */
+    protected function resolveSeedAgentSpaceId(mixed $agentSpaceValue): ?int
+    {
+        if (is_int($agentSpaceValue) || (is_string($agentSpaceValue) && ctype_digit($agentSpaceValue))) {
+            return (int)$agentSpaceValue;
+        }
+        if (!is_string($agentSpaceValue) || trim($agentSpaceValue) === '') {
+            return null;
+        }
+        if (preg_match('/^\{\{ref:' . preg_quote(AgentEvalCase::AGENT_SPACE_REFERENCE_KIND, '/') . ':([^}]+)\}\}$/', trim($agentSpaceValue), $matches) !== 1) {
+            throw new AgentEvalPreconditionNotEstablishedException("seed agentSpaceId '$agentSpaceValue' is neither an id nor an agent space reference");
+        }
+        $agentSpaceId = $this->getAgentEvalRunHooksService()->resolveAgentSpaceReference($matches[1]);
+        if ($agentSpaceId === null) {
+            throw new AgentEvalPreconditionNotEstablishedException("seed agentSpaceId: no agent space named '{$matches[1]}'");
+        }
+        return (int)$agentSpaceId;
+    }
+
+    /**
+     * The owner of a seed block (`ownerOperatorKind`: another evaluation operator, through
+     * {@see AgentEvalRunHooksService::resolveSeedOwnerAccountId()}); null = the scope's owner.
+     *
+     * @throws AgentEvalPreconditionNotEstablishedException when the application knows no such operator
+     */
+    protected function resolveSeedOwnerAccountId(mixed $ownerOperatorKind): ?int
+    {
+        if (!is_string($ownerOperatorKind) || trim($ownerOperatorKind) === '') {
+            return null;
+        }
+        $ownerAccountId = $this->getAgentEvalRunHooksService()->resolveSeedOwnerAccountId(trim($ownerOperatorKind));
+        if ($ownerAccountId === null) {
+            throw new AgentEvalPreconditionNotEstablishedException("seed ownerOperatorKind: no evaluation operator of kind '$ownerOperatorKind'");
+        }
+        return $ownerAccountId;
     }
 
     /**
@@ -1365,11 +1409,21 @@ class AgentEvalRunnerService extends Service
      * @param AgentEvalRunOptions $agentEvalRunOptions
      * @return AIConversation the stored conversation
      */
-    protected function seedPersistedConversation(AgentEvalScope $agentEvalScope, array $messageBlocks, AgentEvalRunOptions $agentEvalRunOptions): AIConversation
-    {
+    protected function seedPersistedConversation(
+        AgentEvalScope $agentEvalScope,
+        array $messageBlocks,
+        AgentEvalRunOptions $agentEvalRunOptions,
+        ?int $agentSpaceId = null,
+        ?int $ownerAccountId = null
+    ): AIConversation {
         $conversation = AIConversation::newInstance();
-        $conversation->accountId = $agentEvalScope->getOwnerAccountId();
+        $conversation->accountId = $ownerAccountId ?? $agentEvalScope->getOwnerAccountId();
         $this->getAgentEvalRunHooksService()->attachNewConversationToScope($conversation, $agentEvalScope);
+        if ($agentSpaceId !== null) {
+            // a seed of another space than the case's (recall across spaces)
+            $conversation->agentSpaceId = $agentSpaceId;
+            unset($conversation->agentSpace);
+        }
         $conversation->messages = AIConversationMessages::newInstance();
         $seedRunSettings = RunSettings::newInstance();
         $seedRunSettings->evalRun = true;
