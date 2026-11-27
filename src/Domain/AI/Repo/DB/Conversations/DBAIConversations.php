@@ -284,11 +284,16 @@ class DBAIConversations extends DBEntitySet
             $queryBuilder->andWhere("$alias.summary is not null");
         }
 
-        // the summary is a JSON column: its title and text are read as text (LOWER over json fails on PostgreSQL)
+        // the summary is a JSON column: its title, text and outcome are read as text, decoded (an umlaut is a letter,
+        // not its JSON escape) and on both databases (LOWER over json fails on PostgreSQL)
         if ($searchTerm) {
             $searchTermLower = mb_strtolower(trim(urldecode($searchTerm)));
+            $summaryTextConditions = [];
+            foreach (['title', 'text', 'outcome'] as $summaryFieldName) {
+                $summaryTextConditions[] = "LOWER(JSON_FIELD_TEXT($alias.summary, '$summaryFieldName')) LIKE :search_term";
+            }
             $queryBuilder
-                ->andWhere("(LOWER(JSON_FIELD_TEXT($alias.summary, 'title')) LIKE :search_term OR LOWER(JSON_FIELD_TEXT($alias.summary, 'text')) LIKE :search_term)")
+                ->andWhere('(' . implode(' OR ', $summaryTextConditions) . ')')
                 ->setParameter('search_term', '%' . addcslashes($searchTermLower, '%_\\') . '%');
         }
 

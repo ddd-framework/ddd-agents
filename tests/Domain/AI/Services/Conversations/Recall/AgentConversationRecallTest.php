@@ -6,6 +6,7 @@ namespace DDD\Tests\Agents\Domain\AI\Services\Conversations\Recall;
 
 use DDD\Domain\AI\Entities\Conversations\AIConversation;
 use DDD\Domain\AI\Entities\Conversations\AIConversations;
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallMessage;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallResult;
 use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallRow;
@@ -13,7 +14,9 @@ use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallTranscrip
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHit;
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHits;
 use DDD\Domain\AI\Entities\Conversations\Widgets\Composed\Bindings\ComposedViewBindableResult;
+use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
 use DDD\Domain\Common\Entities\Accounts\Account;
+use DDD\Infrastructure\Exceptions\NotFoundException;
 use DDD\Infrastructure\Traits\Serializer\Serializer;
 use DDD\Presentation\Mcp\Client\Agents\Dtos\AgentConversationReadMcpResponseDto;
 use DDD\Presentation\Mcp\Client\Agents\Dtos\AgentConversationSearchThisMcpResponseDto;
@@ -274,6 +277,69 @@ class AgentConversationRecallTest extends UnitTestCase
         self::assertStringContainsString('around message 14', $markdown);
         self::assertStringContainsString('[12] USER: Where is the second shop?', $markdown);
         self::assertStringContainsString('[14] ASSISTANT (the match): In Graz.', $markdown);
+    }
+
+    public function testAReadByIdKeepsToTheConversationsOfTheActingAccount(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $currentConversation = $this->buildConversation(40, 2);
+        $currentConversation->accountId = 7;
+        $foreignConversation = $this->buildConversation(41, 2);
+        $foreignConversation->accountId = 8;
+        $agentConversationRecallService->candidateConversations = $this->buildConversations($foreignConversation);
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Conversation #41 was not found or may not be read.');
+        $agentConversationRecallService->readConversation($currentConversation, 41, 0, 10);
+    }
+
+    public function testAConversationIsOfTheActingAccountOnlyWithTheSameAccount(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $currentConversation = $this->buildConversation(40, 2);
+        $currentConversation->accountId = 7;
+        $ownAccountConversation = $this->buildConversation(42, 1);
+        $ownAccountConversation->accountId = 7;
+        $foreignConversation = $this->buildConversation(41, 2);
+        $foreignConversation->accountId = 8;
+
+        self::assertTrue($agentConversationRecallService->isConversationOfActingAccount($ownAccountConversation, $currentConversation), 'another space of the same account');
+        self::assertFalse($agentConversationRecallService->isConversationOfActingAccount($foreignConversation, $currentConversation));
+        self::assertFalse($agentConversationRecallService->isConversationOfActingAccount($this->buildConversation(43, 2), $currentConversation), 'a conversation without an account');
+    }
+
+    public function testAReadAroundAMessageIdReadsItsConversationAroundItsNumber(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->recordsReadsInsteadOfReading = true;
+        $reportMessage = AIConversationMessage::newInstance();
+        $reportMessage->id = 3941258;
+        $reportMessage->aiConversationId = 31;
+        $reportMessage->indexInConversation = 14;
+        $agentConversationRecallService->messagesById = [3941258 => $reportMessage];
+
+        $agentConversationRecallService->readConversationAroundMessage(null, 3941258, 10);
+
+        self::assertSame([31, 0, 10, 14], $agentConversationRecallService->recordedRead);
+    }
+
+    public function testAReadAroundAnUnknownMessageIdIsNotFound(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->recordsReadsInsteadOfReading = true;
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Message #3941259 was not found or may not be read.');
+        $agentConversationRecallService->readConversationAroundMessage(null, 3941259, 10);
+    }
+
+    public function testTheDefaultSpaceLabelNamesTheSpaceIdThatTheSpaceFilterTakes(): void
+    {
+        $agentSpacesService = self::instantiateWithoutConstructor(AgentSpacesService::class);
+
+        self::assertSame('space:42', $agentSpacesService->buildAgentSpaceLabelForTheModel(42));
+        self::assertSame(42, $agentSpacesService->findAgentSpaceIdOfLabelNumber(42));
+        self::assertNull($agentSpacesService->findAgentSpaceIdOfLabelNumber(0));
     }
 
     public function testTheConversationsSkillProvidesTheSearchResultsWidget(): void

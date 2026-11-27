@@ -785,6 +785,21 @@ class AgentSpacesService extends EntitiesService
     }
 
     /**
+     * Override point, the inverse of {@see buildAgentSpaceLabelForTheModel()}: the space whose label names the number
+     * `$numberInLabel` — for a tool argument the model copies from a label (the space filter `onlySpaceId` of
+     * `searchConversations`). The default label names the space id, so the number is the id. An application whose
+     * label names the id of its own entity answers with that entity's space. Null = no space has that number; never
+     * creates a space.
+     *
+     * @param int $numberInLabel the number after the label's prefix
+     * @return int|null the id of the space
+     */
+    public function findAgentSpaceIdOfLabelNumber(int $numberInLabel): ?int
+    {
+        return $numberInLabel > 0 ? $numberInLabel : null;
+    }
+
+    /**
      * The key the widget blocks of `$conversation` hydrate themselves from
      * ({@see AgentSpace::getWidgetSelfHydrationKey()}).
      *

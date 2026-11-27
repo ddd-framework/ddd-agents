@@ -12,6 +12,7 @@ use DDD\Domain\AI\Entities\MCPPackages\MCPToolEffect;
 use DDD\Domain\AI\Entities\MCPPackages\MCPToolParallelSafe;
 use DDD\Domain\AI\Entities\MCPPackages\MCPToolSummary;
 use DDD\Domain\AI\Exceptions\Conversations\AgentToolExecutionTimeoutException;
+use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
 use DDD\Domain\AI\Services\Conversations\AgentConversationRecallService;
 use DDD\Domain\Common\Entities\Accounts\Account;
 use DDD\Infrastructure\Base\DateTime\DateTime;
@@ -111,7 +112,7 @@ class AgentConversationsMCPPackage extends MCPPackage
             $this->requireActingAccount($callProvenance),
             $callProvenance->conversation,
             (string)($requestDto->query ?? ''),
-            $requestDto->onlySpaceId !== null && $requestDto->onlySpaceId > 0 ? $requestDto->onlySpaceId : null,
+            $this->findAgentSpaceIdOfSpaceFilter($requestDto->onlySpaceId),
             $fromDate,
             $toDate,
             $requestDto->limit !== null && $requestDto->limit > 0 ? $requestDto->limit : AgentConversationRecallService::DEFAULT_SEARCH_LIMIT
@@ -122,11 +123,13 @@ class AgentConversationsMCPPackage extends MCPPackage
     /**
      * Reads the dialogue of ONE conversation (owner and assistant messages, oldest first, page by page) by the id
      * searchConversations or searchThisConversation named: from fromIndex on, or with aroundIndex (a match's message
-     * number) the messages around that match. The result names the fromIndex of the next page.
+     * number) the messages around that match. A message named only by its id (a signal or a link: "message #3941258")
+     * is read with aroundMessageId alone. The result names the fromIndex of the next page.
      *
      * @example {"conversationId": 31008}
      * @example {"conversationId": 31008, "fromIndex": 30}
      * @example {"conversationId": 31008, "aroundIndex": 14}
+     * @example {"aroundMessageId": 3941258}
      */
     #[MCPTool]
     #[MCPToolEffect(MCPToolEffect::READ)]
@@ -137,10 +140,20 @@ class AgentConversationsMCPPackage extends MCPPackage
         AgentConversationRecallService $agentConversationRecallService,
         AgentToolCallProvenance $callProvenance
     ): AgentConversationReadMcpResponseDto {
-        if ($requestDto->conversationId < 1) {
-            throw new BadRequestException('readConversation needs the conversationId that searchConversations or searchThisConversation named.');
+        $aroundMessageId = $requestDto->aroundMessageId !== null && $requestDto->aroundMessageId > 0 ? $requestDto->aroundMessageId : null;
+        if ($requestDto->conversationId < 1 && $aroundMessageId === null) {
+            throw new BadRequestException(
+                'readConversation needs the conversationId that searchConversations or searchThisConversation named, or the aroundMessageId of a message named by its id.'
+            );
         }
         $this->requireActingAccount($callProvenance);
+        if ($aroundMessageId !== null) {
+            return AgentConversationReadMcpResponseDto::forTranscript($agentConversationRecallService->readConversationAroundMessage(
+                $callProvenance->conversation,
+                $aroundMessageId,
+                $requestDto->limit !== null && $requestDto->limit > 0 ? $requestDto->limit : AgentConversationRecallService::DEFAULT_READ_AROUND_LIMIT
+            ));
+        }
         $aroundIndex = $requestDto->aroundIndex !== null && $requestDto->aroundIndex >= 0 ? $requestDto->aroundIndex : null;
         $defaultLimit = $aroundIndex !== null ? AgentConversationRecallService::DEFAULT_READ_AROUND_LIMIT : AgentConversationRecallService::DEFAULT_READ_LIMIT;
         return AgentConversationReadMcpResponseDto::forTranscript($agentConversationRecallService->readConversation(
@@ -165,6 +178,28 @@ class AgentConversationsMCPPackage extends MCPPackage
         } catch (Throwable) {
             error_log('AgentConversationsMCPPackage: searchThisConversation failed — ' . $searchError->getMessage());
         }
+    }
+
+    /**
+     * The space the filter `onlySpaceId` names: the number of a space label in a result, which the application's label
+     * may take from another entity ({@see AgentSpacesService::findAgentSpaceIdOfLabelNumber()}); null = no filter.
+     *
+     * @throws BadRequestException when no space has that number
+     */
+    protected function findAgentSpaceIdOfSpaceFilter(?int $onlySpaceId): ?int
+    {
+        if ($onlySpaceId === null || $onlySpaceId < 1) {
+            return null;
+        }
+        /** @var AgentSpacesService $agentSpacesService */
+        $agentSpacesService = DDDService::instance()->getService(AgentSpacesService::class);
+        $agentSpaceId = $agentSpacesService->findAgentSpaceIdOfLabelNumber($onlySpaceId);
+        if ($agentSpaceId === null) {
+            throw new BadRequestException(
+                "onlySpaceId $onlySpaceId names no space: take the number of a result's space label, or leave onlySpaceId out to search every space."
+            );
+        }
+        return $agentSpaceId;
     }
 
     /**

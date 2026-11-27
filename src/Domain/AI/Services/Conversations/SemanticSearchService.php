@@ -29,7 +29,7 @@ use Throwable;
 
 /**
  * The ONE search primitive behind every conversation-recall surface: the REST search box, the global
- * "search all my chats" endpoint, and the agent recall tools (`recallConversation`, `searchConversations`, `searchMemory`).
+ * "search all my chats" endpoint, and the agent recall tools (`searchThisConversation`, `searchConversations`, `searchMemory`).
  * They differ only in WHAT they search, the EXCERPT size, and the OUTPUT shape — the retrieval + fuse + rerank +
  * excerpt logic is shared HERE so a fix lands once for all of them.
  *

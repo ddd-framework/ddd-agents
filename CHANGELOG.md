@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- `readConversation` takes `aroundMessageId`: the dialogue around a message named only by its id (a signal, a link,
+  an owner report); its conversation and number are found from it, so `conversationId` is optional then
+  (`AgentConversationRecallService::readConversationAroundMessage()`, hook `findMessageToReadAround()`).
+- Account boundary of a read by id: `readConversation` of another conversation reads only one of the acting account
+  (`isConversationOfActingAccount()`), also for a role whose read rights cover every account.
+- `searchConversations`' `onlySpaceId` takes the number of a space label: `AgentSpacesService::findAgentSpaceIdOfLabelNumber()`,
+  the inverse of `buildAgentSpaceLabelForTheModel()` (default: the number is the id). An application whose label names
+  its own entity overrides both; an unknown number is refused with the next move.
+- The summary search of a space's conversation list also matches the summary's `outcome`.
+- Docs: the context skill's recall reference describes the package's recall tools and their hooks.
+
 ## 0.11.8
 
 - **Conversation search for every host (`agent.conversations`).** The package now carries what applications built

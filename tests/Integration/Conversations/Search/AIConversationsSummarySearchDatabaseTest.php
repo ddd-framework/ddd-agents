@@ -14,7 +14,7 @@ use DDD\Tests\Agents\Support\DatabaseTestCase;
 
 /**
  * The search of a space's conversation list by their summaries ({@see DBAIConversations::findByAgentSpaceAndSearchTerm()})
- * on both engines: the summary is a JSON column, so its title and text are read as text (a LOWER over the JSON fails
+ * on both engines: the summary is a JSON column, so its title, text and outcome are read as text (a LOWER over the JSON fails
  * on PostgreSQL); case and umlauts do not matter, and a LIKE wildcard in the term is a literal character.
  */
 class AIConversationsSummarySearchDatabaseTest extends DatabaseTestCase
@@ -34,7 +34,7 @@ class AIConversationsSummarySearchDatabaseTest extends DatabaseTestCase
         $this->insertAgentSpaceRow(['id' => self::AGENT_SPACE_ID, 'accountId' => self::ACCOUNT_ID]);
         $this->insertConversation(self::BAKERY_CONVERSATION_ID, ['title' => 'Bakery opening hours', 'text' => 'The owner moves the opening to six.']);
         $this->insertConversation(self::MUNICH_CONVERSATION_ID, ['title' => 'Second shop', 'text' => 'The second shop opens in München next spring.']);
-        $this->insertConversation(self::DISCOUNT_CONVERSATION_ID, ['title' => 'Spring campaign', 'text' => 'A 10% discount for regulars.']);
+        $this->insertConversation(self::DISCOUNT_CONVERSATION_ID, ['title' => 'Spring campaign', 'text' => 'A 10% discount for regulars.', 'outcome' => 'The flyer goes to the printer on Friday.']);
     }
 
     protected function onTearDown(): void
@@ -50,6 +50,16 @@ class AIConversationsSummarySearchDatabaseTest extends DatabaseTestCase
     public function testATermInTheTextFindsTheConversationAlsoWithAnUmlaut(): void
     {
         $this->assertSame([self::MUNICH_CONVERSATION_ID], $this->findConversationIdsBySearchTerm('münchen'));
+    }
+
+    public function testATermInTheOutcomeFindsTheConversation(): void
+    {
+        $this->assertSame([self::DISCOUNT_CONVERSATION_ID], $this->findConversationIdsBySearchTerm('printer'));
+    }
+
+    public function testAKeyOfTheSummaryIsNoMatch(): void
+    {
+        $this->assertSame([], $this->findConversationIdsBySearchTerm('outcome'));
     }
 
     public function testAPercentSignInTheTermIsALiteralCharacter(): void

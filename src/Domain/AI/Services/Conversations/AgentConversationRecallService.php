@@ -18,6 +18,7 @@ use DDD\Domain\AI\Services\Connections\AgentConnectionsService;
 use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessages;
 use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
+use DDD\Infrastructure\Services\AuthService;
 use DDD\Infrastructure\Services\Service;
 use DDD\Domain\Common\Entities\Accounts\Account;
 use DDD\Infrastructure\Base\DateTime\DateTime;
@@ -208,7 +209,10 @@ class AgentConversationRecallService extends Service
             $this->requireRecallEnabled($currentConversation);
         }
         $conversation = $isOwnConversation ? $this->findOwnConversation($conversationId) : $this->findReadableConversation($conversationId);
-        if (!$conversation instanceof AIConversation) {
+        if (
+            !$conversation instanceof AIConversation
+            || (!$isOwnConversation && !$this->isConversationOfActingAccount($conversation, $currentConversation))
+        ) {
             throw new NotFoundException("Conversation #$conversationId was not found or may not be read. Find conversations with searchConversations.");
         }
         if (!$isOwnConversation && !$this->mayContentFlowInto($conversation, $currentConversation)) {
@@ -235,6 +239,37 @@ class AgentConversationRecallService extends Service
             $transcript->nextFromIndex = (int)$messages[$limit]->indexInConversation;
         }
         return $transcript;
+    }
+
+    /**
+     * One page of the dialogue around the message `$messageId` — a message a signal, a link or a widget names by its
+     * id — read as {@see readConversation()} reads around a match: the message is found under the read rights
+     * ({@see findMessageToReadAround()}), its conversation under every rule of a read.
+     *
+     * @throws NotFoundException for an unknown or unreadable message, and as {@see readConversation()}
+     * @throws ForbiddenException as {@see readConversation()}
+     */
+    public function readConversationAroundMessage(?AIConversation $currentConversation, int $messageId, int $limit): AgentConversationRecallTranscript
+    {
+        $message = $this->findMessageToReadAround($messageId);
+        if (!$message instanceof AIConversationMessage || !isset($message->aiConversationId, $message->indexInConversation)) {
+            throw new NotFoundException("Message #$messageId was not found or may not be read. Find conversations with searchConversations.");
+        }
+        return $this->readConversation($currentConversation, (int)$message->aiConversationId, 0, $limit, (int)$message->indexInConversation);
+    }
+
+    /**
+     * Whether `$conversation` belongs to the account the call acts for: the account of the current conversation, or
+     * the signed-in account of an MCP client. A search answers from the acting account's conversations only
+     * ({@see findRecallCandidates()}, {@see SemanticSearchService::searchAcrossConversations()}); a read by id keeps
+     * the same boundary, also for a role whose read rights cover every account's rows.
+     */
+    public function isConversationOfActingAccount(AIConversation $conversation, ?AIConversation $currentConversation): bool
+    {
+        $actingAccountId = $currentConversation !== null && isset($currentConversation->accountId)
+            ? (int)$currentConversation->accountId
+            : (int)(AuthService::instance()->getAccount()?->id ?? 0);
+        return $actingAccountId > 0 && isset($conversation->accountId) && (int)$conversation->accountId === $actingAccountId;
     }
 
     /**
@@ -321,6 +356,19 @@ class AgentConversationRecallService extends Service
         } catch (NotFoundException) {
             return null;
         }
+    }
+
+    /** The message `$messageId` under the read rights of the message table; null when it cannot be read */
+    protected function findMessageToReadAround(int $messageId): ?AIConversationMessage
+    {
+        /** @var AIConversationMessagesService $aIConversationMessagesService */
+        $aIConversationMessagesService = DDDService::instance()->getService(AIConversationMessagesService::class);
+        try {
+            $message = $aIConversationMessagesService->find($messageId);
+        } catch (NotFoundException) {
+            return null;
+        }
+        return $message instanceof AIConversationMessage ? $message : null;
     }
 
     /**

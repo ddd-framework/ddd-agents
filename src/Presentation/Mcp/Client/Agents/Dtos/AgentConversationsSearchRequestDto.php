@@ -14,7 +14,7 @@ class AgentConversationsSearchRequestDto extends RequestDto
     #[Parameter(in: Parameter::BODY, required: false)]
     public ?string $query = null;
 
-    /** @var int|null Only conversations of this space; omit it to search every space */
+    /** @var int|null Only conversations of this space: the number of its label in a result (42 of space:42); omit it to search every space */
     #[Parameter(in: Parameter::BODY, required: false)]
     public ?int $onlySpaceId = null;
 

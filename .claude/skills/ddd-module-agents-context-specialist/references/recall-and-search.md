@@ -112,8 +112,25 @@ The context window (`AIConversationMessagesService::loadMessageContext()` → `M
 and the owner and agent prose around it under three token caps (default `MESSAGE_CONTEXT_DEFAULT_CAP_TOKENS` 2000 for
 the anchor); every line carries its message id so the caller can walk further.
 
-The package ships no recall tool for the agent. A host builds its recall tools on these service methods (the tools
-skill describes how); the episodic history segment points the model at them by `#conversationId`
+The agent's recall tools are the package's: `AgentConversationsMCPPackage` (package id `agent.conversations`, skill
+`Agent.Conversations`) over `AgentConversationRecallService`. A host binds the package to the skill and changes it
+through a same-path subclass of the service; it builds no recall tool of its own.
+
+| Tool | What it reads |
+|---|---|
+| `searchThisConversation(query, limit?)` | the conversation the owner talks in (the root of a delegation tree), messages and compaction regions, through `searchWithinConversation()`; each match with its message number |
+| `searchConversations(query?, onlySpaceId?, fromDate?, toDate?, limit?)` | the acting account's earlier conversations in every space, through `searchAcrossConversations()` and a title search; without a query the newest or those of a period (up to 25); never the current conversation or its tree root; hands its groups to the `ConversationSearchResults` widget (`groupsFromToolCallId`) |
+| `readConversation(conversationId?, fromIndex?, aroundIndex?, aroundMessageId?, limit?)` | one conversation page by page, around a match's number, or around a message named by its id (a signal, a link) |
+
+- `onlySpaceId` is the number of a space label in a result: `AgentSpacesService::findAgentSpaceIdOfLabelNumber()`
+  inverts `buildAgentSpaceLabelForTheModel()`; a host whose label names its own entity's id overrides both.
+- A read by id keeps to the acting account (`isConversationOfActingAccount()`), as the search does; the conversation
+  the call runs in and its tree root are read under the read rights alone (`findOwnConversation()`).
+- Hooks of the service: `isConversationReadByOthers()` (the audience rule), `describeAgentSpace()`,
+  `findRecallCandidates()`, `findReadableConversation()`, `findOwnConversation()`, `findMessageToReadAround()`,
+  `buildRow()`, `buildRecallMessage()`.
+
+The episodic history segment points the model at `readConversation` by `#conversationId`
 ([memories-and-standing-directives.md](memories-and-standing-directives.md)). A host endpoint or tool that searches runs inside a usage envelope, so the rerank is attributed.
 
 ## 6. Cost
