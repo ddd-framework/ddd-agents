@@ -7,6 +7,11 @@
   environment hook `startConversationInPersonalSpace(ownerText)`, which starts a new conversation in the owner's
   personal space; nothing goes back into the shared conversation. Without the hook, or without a `request` in the
   block, the widget renders nothing. The backend that writes it arrives with the agent connections.
+- **Web: the `ExtendConnectionPermission` widget.** A notice and a button "Extend the permission" for a step that needs a
+  level or provider permission an agent connection does not have yet. The click calls the new environment hook
+  `openConnectionPermissions({connectionId, capability, level})` (type `AgentsConnectionPermissionTarget`), which opens
+  the app's connection settings with that permission preselected. Without the hook, or without a connection, capability
+  and level in the block, the widget renders nothing.
 
 ## 0.10.7
 

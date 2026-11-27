@@ -16,6 +16,7 @@ export {
   type AgentsAssistantIconBadgeProps,
   type AgentsBudgetLimit,
   type AgentsEnvironment,
+  type AgentsConnectionPermissionTarget,
   type AgentsGalleryImage,
   type AgentsMapsLoaderState,
   type AgentsOwnerSettings,

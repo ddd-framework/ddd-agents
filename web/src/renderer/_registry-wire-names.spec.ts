@@ -38,6 +38,7 @@ const PACKAGE_CANONICAL_WIRE_NAMES = [
   "CustomVisualization",
   "DriveFiles",
   "EntityMention",
+  "ExtendConnectionPermission",
   "ImageGallery",
   "MultiChoice",
   "QuickReplies",

@@ -862,6 +862,15 @@
       ]
     },
     {
+      "key": "Extend the permission",
+      "defaultText": "Extend the permission",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/ExtendConnectionPermissionConversationWidget/ExtendConnectionPermissionConversationWidget.tsx"
+      ]
+    },
+    {
       "key": "Failed",
       "defaultText": "Failed",
       "placeholders": [],
@@ -2491,6 +2500,15 @@
       "contexts": [],
       "usedIn": [
         "src/widgets/EntityMentionConversationWidget/shared/entity-mention-presentation.ts"
+      ]
+    },
+    {
+      "key": "This step needs a permission the connection does not have yet.",
+      "defaultText": "This step needs a permission the connection does not have yet.",
+      "placeholders": [],
+      "contexts": [],
+      "usedIn": [
+        "src/widgets/ExtendConnectionPermissionConversationWidget/ExtendConnectionPermissionConversationWidget.tsx"
       ]
     },
     {

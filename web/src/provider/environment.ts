@@ -12,6 +12,16 @@ export interface AgentsTexts {
   translate: (key: string, replacements?: Record<string, string | number>, context?: string) => string;
 }
 
+/** The permission of an agent connection a step needs (`AgentsEnvironment.openConnectionPermissions`). */
+export interface AgentsConnectionPermissionTarget {
+  /** The connection's id. */
+  connectionId: number;
+  /** The capability: MAIL, CALENDAR, CONTACTS, FILES or CHAT. */
+  capability: string;
+  /** The level the step needs (a level constant of the backend, e.g. SEND_WITH_APPROVAL). */
+  level: string;
+}
+
 /** One image of a gallery the app opens over the page. */
 export interface AgentsGalleryImage {
   /** Identifies the image within the gallery. */
@@ -200,6 +210,12 @@ export interface AgentsEnvironment {
    * widget then renders nothing.
    */
   startConversationInPersonalSpace?: (ownerText: string) => void;
+  /**
+   * Opens the app's settings of an agent connection with the permission a step needs preselected (the
+   * `ExtendConnectionPermission` widget's button). The level takes effect only once the owner raised it there.
+   * Default: none — the widget then renders nothing.
+   */
+  openConnectionPermissions?: (target: AgentsConnectionPermissionTarget) => void;
   /** Reports a widget that crashed while rendering. Default: nothing (the crash is logged to the console). */
   reportWidgetCrash?: (widgetName: string, error: Error, errorInfo: ErrorInfo) => void;
   /**
@@ -320,6 +336,16 @@ export const canStartConversationInPersonalSpace = (): boolean => appEnvironment
 export const startConversationInPersonalSpace = (ownerText: string): boolean => {
   if (!appEnvironment.startConversationInPersonalSpace) return false;
   appEnvironment.startConversationInPersonalSpace(ownerText);
+  return true;
+};
+
+/** Whether the app can open the permissions of a connection (`AgentsEnvironment.openConnectionPermissions`). */
+export const canOpenConnectionPermissions = (): boolean => appEnvironment.openConnectionPermissions !== undefined;
+
+/** Opens the permissions of a connection in the app; false when the app cannot. */
+export const openConnectionPermissions = (target: AgentsConnectionPermissionTarget): boolean => {
+  if (!appEnvironment.openConnectionPermissions) return false;
+  appEnvironment.openConnectionPermissions(target);
   return true;
 };
 

@@ -1,0 +1,33 @@
+import React from "react";
+import { Tooltip } from "../../provider/components";
+import { buildUnnamedAgentSpaceLabel, buildWidgetOfAnotherAgentSpaceExplanation, escapePlainTextForText, translateText, } from "../../provider/environment";
+import { useWidgetHydration } from "../widget-hydration";
+import { AGENT_SPACE_NAME_WIDGET_TYPE, } from "./agent-space-name.hydrator";
+import styles from "./ConversationWidgetAgentSpaceHeader.module.scss";
+/**
+ * The chip above a widget whose block names another agent space than the one the owner works in. The name is read
+ * through the widget hydration, so several chips of one agent space share one read and the entry is cleared with the
+ * other widget data when the conversation changes. The app words what kind of thing an agent space is
+ * (`AgentsEnvironment.buildUnnamedAgentSpaceLabel`, `buildWidgetOfAnotherAgentSpaceExplanation`).
+ */
+export const ConversationWidgetAgentSpaceHeader = (props) => {
+    const { agentSpaceKey, inFlow = false } = props;
+    const { data } = useWidgetHydration(AGENT_SPACE_NAME_WIDGET_TYPE, {
+        agentSpaceKey,
+    });
+    // Each text carries the name of the agent space, so it goes through the translation with a replacement instead of a
+    // template string — a template string is a new key per agent space.
+    const label = data?.name ?? buildUnnamedAgentSpaceLabel(agentSpaceKey);
+    const explanation = buildWidgetOfAnotherAgentSpaceExplanation(label);
+    const noteLabel = translateText("Showing data for %label%", { label });
+    // The explanation carries the name of the agent space (data, not interface copy): it reaches the tooltip as plain
+    // text, so an app's tooltip that reads a string as markup shows the name as written. The chip and the aria-label are
+    // rendered by React and need no escaping.
+    return (<div className={inFlow ? styles.inFlowAnchor : styles.anchor}>
+      <Tooltip text={escapePlainTextForText(explanation)} placement="top" dark wrapsChild>
+        <span className={styles.root} role="note" aria-label={noteLabel} tabIndex={0}>
+          <span className={styles.name}>{label}</span>
+        </span>
+      </Tooltip>
+    </div>);
+};
