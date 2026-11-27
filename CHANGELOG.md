@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.7
 
 - **The newest row a tool wrote.** `AIConversationMessages::getNewestIndexOfRowWrittenByTool(string $toolName)` (pure,
   over the loaded set) and `AIConversationMessagesService::findNewestIndexOfRowWrittenByTool(AIConversation, string)`
@@ -100,7 +100,6 @@
   from its facts and never says `[DONE]` or `[GIVE-UP]` while it is open; `[DONE]` only when every part of the goal is
   confirmed (a reply counts once it is reported sent). Before, a partial result read as the goal and the case failed as
   "reply never sent".
-
 
 ## 0.10.0
 
