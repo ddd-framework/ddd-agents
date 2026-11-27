@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace DDD\Symfony\Commands\Agents;
 
+use DDD\Domain\AI\Services\Conversations\Agent\OwnerConsentsService;
+use DDD\Domain\AI\Repo\Argus\Conversations\Decisions\ArgusAgentOwnerConsentDecision;
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
+use DDD\Domain\AI\Entities\Conversations\Agent\Decisions\OwnerConsent\OwnerConsentVerdict;
+use DDD\Domain\AI\Entities\Conversations\Agent\Decisions\OwnerConsent\OwnerConsentRequest;
 use DDD\Domain\AI\Entities\AgentSpaces\AgentSpace;
 use DDD\Domain\AI\Entities\Conversations\Agent\Decisions\AgentDecisionModelSettings;
 use DDD\Domain\AI\Entities\Conversations\Agent\Decisions\AgentReplyLanguageDecision;
@@ -52,6 +58,15 @@ use Throwable;
  *     "conversationLanguage": "en" | null, "recentTurns": [...], "assistantTextBefore": "...", "ownerWords": "...",
  *     "expectedWritten": "en" | "undecidable", "expectedRequested": "none" | "fr", "expectedReply": "en"}]}
  * `--without-context` sends the context-free written-language question (the comparison arm of a measurement).
+ *
+ * Owner-consent fixture (`"site": "ownerConsent"`): the owner's request, the assistant's text that showed the step
+ * (with its question), the owner's next message; the step's target and consequence; `shownContent` "true" when the
+ * assistant's text carries the step's exact content (the evidence of a tool such as a mail send). The dialogue is built
+ * from these rows by the live code ({@see OwnerConsentsService::buildOwnerConsentDialogue()},
+ * {@see OwnerConsentsService::addShownContentLine()}) and decided by the live model; scored on consent vs expectation:
+ *   {"site": "ownerConsent", "agentSpaceId": 7, "cases": [{"id": "...", "ownerRequest": "...", "assistantText": "...",
+ *     "ownerMessage": "...", "toolName": "sendMail", "actionKind": "...", "targetLine": "...", "consequenceLine": "...",
+ *     "shownContent": "true", "expected": "consent" | "refuse"}]}
  *
  * The run acts as the account that owns the space the fixture names ({@see resolveBillingScope()}); every call is
  * booked under its own evaluation envelope for that account and billed to the space's billing entity. An application
@@ -138,10 +153,115 @@ class AgentDecisionFixturesCommand extends AgentConsoleCommand
             (bool)$input->getOption('without-context'),
             AgentDecisionModelSettings::current()->timeoutSeconds
         );
+        if ($agentDecisionFixture->getSite() === AgentDecisionModelSettings::SITE_OWNER_CONSENT) {
+            return $this->runOwnerConsentCases($agentDecisionFixtureCases, $agentDecisionFixtureScope, $agentDecisionFixtureRunSettings, $symfonyStyle);
+        }
         if ($agentDecisionFixture->getSite() === AgentDecisionModelSettings::SITE_REPLY_LANGUAGE) {
             return $this->runReplyLanguageCases($agentDecisionFixtureCases, $agentDecisionFixture, $agentDecisionFixtureScope, $agentDecisionFixtureRunSettings, $symfonyStyle);
         }
         return $this->runSubSkillPreloadCases($agentDecisionFixtureCases, $agentDecisionFixtureScope, $agentDecisionFixtureRunSettings, $symfonyStyle);
+    }
+
+    /** @var string[] The table of an owner-consent run */
+    public const array OWNER_CONSENT_TABLE_HEADERS = ['case', 'expected', 'verdict', 'step explained', 'owner agreed', 'ms'];
+
+    protected function runOwnerConsentCases(
+        AgentDecisionFixtureCases $agentDecisionFixtureCases,
+        AgentDecisionFixtureScope $agentDecisionFixtureScope,
+        AgentDecisionFixtureRunSettings $agentDecisionFixtureRunSettings,
+        SymfonyStyle $symfonyStyle
+    ): int {
+        $agentDecisionFixtureScore = AgentDecisionFixtureScore::newInstance();
+        foreach ($agentDecisionFixtureCases->getElements() as $agentDecisionFixtureCase) {
+            for ($callNumber = 0; $callNumber < $agentDecisionFixtureRunSettings->repeat; $callNumber++) {
+                $this->runOwnerConsentCase($agentDecisionFixtureCase, $agentDecisionFixtureScope, $agentDecisionFixtureRunSettings, $agentDecisionFixtureScore);
+            }
+        }
+        $agentDecisionFixtureScore->renderTable($symfonyStyle, static::OWNER_CONSENT_TABLE_HEADERS);
+        $symfonyStyle->writeln($agentDecisionFixtureScore->buildPickScoreLine());
+        return Command::SUCCESS;
+    }
+
+    /** One owner-consent case: the rows, the live dialogue builder, the live decision, the verdict against the expectation */
+    protected function runOwnerConsentCase(
+        AgentDecisionFixtureCase $agentDecisionFixtureCase,
+        AgentDecisionFixtureScope $agentDecisionFixtureScope,
+        AgentDecisionFixtureRunSettings $agentDecisionFixtureRunSettings,
+        AgentDecisionFixtureScore $agentDecisionFixtureScore
+    ): void {
+        $caseId = $agentDecisionFixtureCase->getId();
+        $messages = AIConversationMessages::newInstance();
+        $ownerRequestRow = $this->buildOwnerConsentRow(0, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, $agentDecisionFixtureCase->getText('ownerRequest'));
+        $shownContentRow = $this->buildOwnerConsentRow(1, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_ASSISTANT, $agentDecisionFixtureCase->getText('assistantText'));
+        $ownerMessageRow = $this->buildOwnerConsentRow(2, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, $agentDecisionFixtureCase->getText('ownerMessage'));
+        $messages->add($ownerRequestRow, $shownContentRow, $ownerMessageRow);
+        $ownerConsentRequest = OwnerConsentRequest::forAction(
+            $agentDecisionFixtureCase->getText('toolName'),
+            $agentDecisionFixtureCase->getText('actionKind'),
+            $agentDecisionFixtureCase->getText('targetLine'),
+            $agentDecisionFixtureCase->getText('consequenceLine'),
+            $caseId
+        );
+        if ($agentDecisionFixtureCase->getText('shownContent') === 'true') {
+            $ownerConsentRequest->shownContentMessageIndex = 1;
+        }
+        $ownerConsentsService = $this->getOwnerConsentsService();
+        $dialogue = $ownerConsentsService->buildOwnerConsentDialogue($messages, -1, null);
+        if ($ownerConsentsService->addShownContentLine($dialogue, $messages, $ownerConsentRequest)) {
+            // as the live check: the checked content answers whether the step was explained
+            $ownerConsentRequest->minimumStepExplainedProbability = 0.0;
+            $ownerConsentRequest->minimumProbability = $ownerConsentRequest->minimumOwnerAgreedProbability;
+        }
+        $startedAtNanoseconds = hrtime(true);
+        $usageEnvelopeContext = $this->openUsageEnvelope($agentDecisionFixtureScope->getOwnerAccountId(), AgentAIUsageScope::ENVELOPE_AI_AGENT_EVALUATION);
+        try {
+            $ownerConsentDecisionResult = $ownerConsentsService->decideDialogue(
+                $ownerConsentRequest,
+                $dialogue,
+                ArgusAgentOwnerConsentDecision::CHANNEL_CHAT,
+                null,
+                $agentDecisionFixtureScope->ownerAccount,
+                OwnerConsentVerdict::DECIDED_BY_DECISION_MODEL,
+                $agentDecisionFixtureRunSettings->timeoutSeconds
+            );
+        } catch (Throwable $callError) {
+            $agentDecisionFixtureScore->addTableRow($caseId, 'ERROR ' . mb_substr($callError->getMessage(), 0, 80), '', '', '', '');
+            return;
+        } finally {
+            $this->closeUsageEnvelope($usageEnvelopeContext);
+        }
+        $elapsedMs = $this->findElapsedMilliseconds($startedAtNanoseconds);
+        $agentDecisionFixtureScore->recordLatencyMs($elapsedMs);
+        $ownerConsentVerdict = $ownerConsentDecisionResult->verdict;
+        $verdictText = $ownerConsentVerdict->consented ? 'consent' : 'refuse';
+        $expectedText = $agentDecisionFixtureCase->getText('expected');
+        $agentDecisionFixtureScore->recordScoredPick($verdictText === $expectedText);
+        $agentDecisionFixtureScore->addTableRow(
+            $caseId,
+            $expectedText,
+            $verdictText . ($verdictText === $expectedText ? '' : ' ✗') . ($ownerConsentVerdict->failure !== null ? ' (' . $ownerConsentVerdict->failure . ')' : ''),
+            $ownerConsentVerdict->stepExplainedProbability !== null ? number_format((float)$ownerConsentVerdict->stepExplainedProbability, 2) : '-',
+            $ownerConsentVerdict->ownerAgreedProbability !== null ? number_format((float)$ownerConsentVerdict->ownerAgreedProbability, 2) : '-',
+            (string)$elapsedMs
+        );
+    }
+
+    protected function buildOwnerConsentRow(int $messageIndex, string $role, string $authorType, string $text): AIConversationMessage
+    {
+        $row = AIConversationMessage::newInstance();
+        $row->indexInConversation = $messageIndex;
+        $row->role = $role;
+        $row->authorType = $authorType;
+        $row->messageType = AIConversationMessage::MESSAGE_TEXT;
+        $row->message = $text;
+        return $row;
+    }
+
+    protected function getOwnerConsentsService(): OwnerConsentsService
+    {
+        /** @var OwnerConsentsService $ownerConsentsService */
+        $ownerConsentsService = DDDService::instance()->getService(OwnerConsentsService::class);
+        return $ownerConsentsService;
     }
 
     // ------------------------------------------------------------------ the scope of the calls

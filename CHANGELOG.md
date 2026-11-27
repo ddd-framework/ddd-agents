@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Decision fixtures: the owner-consent site.** `app:agent:decision-fixtures` runs `"site": "ownerConsent"` fixtures:
+  each case's rows go through the live dialogue builder (`buildOwnerConsentDialogue`, `addShownContentLine`) and the
+  live `decideDialogue`, scored on consent against the expectation. The fixture
+  `tests/Fixtures/Decisions/OwnerConsent.ConnectionSend.json` covers a connection send with the shown-content evidence:
+  an order to send what was shown is a yes, an unrelated, deferring or holding-back message stays no.
+
 ## 0.11.0
 
 - **Web: the `ContinueInPersonalSpace` widget.** A notice and a button "Continue in your personal space" for a request

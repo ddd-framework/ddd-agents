@@ -26,35 +26,35 @@ use PHPUnit\Framework\TestCase;
  */
 class AgentConnectionOwnerOrderTest extends TestCase
 {
-    protected const string BODY = "Hallo Marius,\n\nder Termin morgen um 10 Uhr passt.\n\nViele Grüße";
+    protected const string BODY = "Hallo Anna,\n\nder Termin morgen um 10 Uhr passt.\n\nViele Grüße";
 
     public function testTheAgentsOwnTextThatShowedTheWholeMailIsTheEvidence(): void
     {
-        $agentConnectionOperation = $this->buildSend(['marius@gerdan.net', 'm.gerdan@radbonus.com'], self::BODY, 'senden');
+        $agentConnectionOperation = $this->buildSend(['anna@example.org', 'team@example.org'], self::BODY, 'senden');
         self::assertSame(1, $this->getOperationsService()->findShownContentMessageIndex($agentConnectionOperation), 'one shown mail covers every recipient');
     }
 
     public function testAMailChangedAfterShowingHasNoEvidence(): void
     {
-        $agentConnectionOperation = $this->buildSend(['marius@gerdan.net'], self::BODY . "\nPS: bring Kaffee mit", 'senden');
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY . "\nPS: bring Kaffee mit", 'senden');
         self::assertNull($this->getOperationsService()->findShownContentMessageIndex($agentConnectionOperation));
     }
 
     public function testARecipientThatWasNotShownHasNoEvidence(): void
     {
-        $agentConnectionOperation = $this->buildSend(['marius@gerdan.net', 'info@example.org'], self::BODY, 'senden');
+        $agentConnectionOperation = $this->buildSend(['anna@example.org', 'info@example.org'], self::BODY, 'senden');
         self::assertNull($this->getOperationsService()->findShownContentMessageIndex($agentConnectionOperation));
     }
 
     public function testAMailShownOnlyInAWidgetOrToolRowIsNoEvidence(): void
     {
-        $agentConnectionOperation = $this->buildSend(['marius@gerdan.net'], self::BODY, 'senden', shownByTheAgent: false);
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY, 'senden', shownByTheAgent: false);
         self::assertNull($this->getOperationsService()->findShownContentMessageIndex($agentConnectionOperation), 'text from outside may sit in a widget or tool row');
     }
 
     public function testTheConsentDialogueCarriesTheShownMailBeforeTheOwnersMessage(): void
     {
-        $agentConnectionOperation = $this->buildSend(['marius@gerdan.net'], self::BODY, 'jetzt senden');
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY, 'jetzt senden');
         $messages = $agentConnectionOperation->callProvenance->conversationMessages;
         $request = OwnerConsentRequest::forAction('sendMail', 'send through Test', 'Send mail', 'the mail', 'hash');
         $request->shownContentMessageIndex = 1;
@@ -81,9 +81,9 @@ class AgentConnectionOwnerOrderTest extends TestCase
 
     public function testAWidgetRowIsNeverTakenAsTheShownContent(): void
     {
-        $agentConnectionOperation = $this->buildSend(['marius@gerdan.net'], self::BODY, 'senden', shownByTheAgent: false);
+        $agentConnectionOperation = $this->buildSend(['anna@example.org'], self::BODY, 'senden', shownByTheAgent: false);
         $messages = $agentConnectionOperation->callProvenance->conversationMessages;
-        $request = OwnerConsentRequest::forAction('sendMail', 'send through Test', 'Send mail', 'It reaches marius@gerdan.net.', 'hash');
+        $request = OwnerConsentRequest::forAction('sendMail', 'send through Test', 'Send mail', 'It reaches anna@example.org.', 'hash');
         $request->shownContentMessageIndex = 1;
         $dialogue = $this->getOwnerConsentsService()->buildOwnerConsentDialogue($messages, 2, null);
         self::assertFalse($this->getOwnerConsentsService()->addShownContentLine($dialogue, $messages, $request), 'a tool or widget row gives no evidence even when named');
@@ -110,14 +110,16 @@ class AgentConnectionOwnerOrderTest extends TestCase
     protected function buildSend(array $recipients, string $bodyText, string $ownerOrder, bool $shownByTheAgent = true): AgentConnectionOperation
     {
         $messages = new AIConversationMessages();
-        $messages->add($this->buildRow(0, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, 'Schreib Marius, dass der Termin passt.'));
+        $requestRow = $this->buildRow(0, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, 'Schreib Anna, dass der Termin passt.');
+        $messages->add($requestRow);
         $shownRow = $this->buildRow(1, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_ASSISTANT,
-            "Hier die Mail:\n\n**An:** marius@gerdan.net, m.gerdan@radbonus.com\n**Betreff:** Termin morgen\n\n" . self::BODY . "\n\nSoll ich sie so senden?");
+            "Hier die Mail:\n\n**An:** anna@example.org, team@example.org\n**Betreff:** Termin morgen\n\n" . self::BODY . "\n\nSoll ich sie so senden?");
         if (!$shownByTheAgent) {
             $shownRow->messageType = AIConversationMessage::MESSAGE_TOOL_MESSAGE;
         }
         $messages->add($shownRow);
-        $messages->add($this->buildRow(2, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_ASSISTANT, 'Die Verbindung darf noch nicht senden.'));
+        $refusalRow = $this->buildRow(2, AIConversationMessage::ROLE_ASSISTANT, AIConversationMessage::AUTHOR_ASSISTANT, 'Die Verbindung darf noch nicht senden.');
+        $messages->add($refusalRow);
         $ownerRow = $this->buildRow(3, AIConversationMessage::ROLE_USER, AIConversationMessage::AUTHOR_USER, $ownerOrder);
         $messages->add($ownerRow);
         $callProvenance = new AgentToolCallProvenance(sourceUserMessage: $ownerRow, conversationId: 70, conversationMessages: $messages);
