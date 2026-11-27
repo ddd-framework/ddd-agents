@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.6
+
+- **Security: no image in a mail the agent sends.** `AgentConnectionMimeMessageBuilder::buildHtmlBody()` renders the body
+  through `AgentConnectionMailMarkdown` (a markdown image becomes its alt text) and removes any `<img>` before
+  `Datafilter::sanitizeHtml()`: a remote image is a tracking pixel an injected instruction could plant in a mail the
+  agent writes. Links stay. The web `MailDraftPreview` card shows an image of the body as its alt text too.
+
 ## 0.11.5
 
 - **Connections: an explicit send order is the yes, at most one confirmation.**

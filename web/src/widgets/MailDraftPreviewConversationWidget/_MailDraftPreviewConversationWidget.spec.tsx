@@ -148,4 +148,11 @@ describe("MailDraftPreview widget", () => {
     expect(isSentMailDraftPreviewOf(sentRow("hash-1").message, "")).toBe(false);
     expect(isSentMailDraftPreviewOf(`\`\`\`widget\n${JSON.stringify({ type: "MailDraftPreview", ...fields })}\n\`\`\``, "hash-1")).toBe(false);
   });
+
+  it("shows an image of the body as its alt text, never loads it", () => {
+    const payload = JSON.stringify({ ...fields, bodyText: "Hello ![Logo](https://tracker.example.org/p.png)" });
+    const { container } = renderWidget(payload, [hostRow]);
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByTestId("mail-draft-preview-widget-body").textContent).toContain("Logo");
+  });
 });

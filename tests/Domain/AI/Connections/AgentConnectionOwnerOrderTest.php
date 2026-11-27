@@ -157,6 +157,14 @@ class AgentConnectionOwnerOrderTest extends TestCase
         self::assertStringContainsString('&lt;b&gt;x&lt;/b&gt;', $htmlBody, 'safe mode: no raw HTML from model text');
     }
 
+    public function testTheHtmlBodyCarriesNoImageOfAnyOrigin(): void
+    {
+        $htmlBody = AgentConnectionMimeMessageBuilder::buildHtmlBody("Hallo ![Logo](https://tracker.example.org/p.png?id=1)\n\n<img src=\"https://tracker.example.org/q.png\">\n\n[Bericht](https://example.org/bericht)");
+        self::assertStringNotContainsString('<img', $htmlBody, 'a remote image is a tracking pixel');
+        self::assertStringContainsString('Logo', $htmlBody, 'the image\'s alt text stays');
+        self::assertStringContainsString('<a href="https://example.org/bericht">Bericht</a>', $htmlBody, 'links stay');
+    }
+
     protected function buildPreviewRow(int $index, AgentConnectionOperation $agentConnectionOperation, string $status, ConversationWidgetOrigin $conversationWidgetOrigin): AIConversationMessage
     {
         $mailDraftPreviewWidget = MailDraftPreviewConversationWidget::forMailDraft(

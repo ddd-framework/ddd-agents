@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAgentsTexts } from "../../provider/AgentsProvider";
 import { classNames } from "../../provider/class-names";
 import { Button, Markdown, Text } from "../../provider/components";
+import type { AgentsMarkdownComponents } from "../../provider/components/types";
 import { textKey } from "../../provider/text-key";
 import { ModelText } from "../../kit/ModelText/ModelText";
 import { useConversationWidgetContext } from "../../renderer/ConversationWidgetCallbacksContext";
@@ -13,6 +14,14 @@ import { isSentMailDraftPreviewOf, parseMailDraftPreviewPayload } from "./mail-d
 import styles from "./MailDraftPreviewConversationWidget.module.scss";
 
 const TEST_ID = "mail-draft-preview-widget";
+
+/**
+ * An image in the mail body (model text) shows as its alt text: a remote image would load in the owner's browser (a
+ * tracking pixel an injected instruction could plant), and the sent mail carries none either.
+ */
+const ImageAsAltText = (props: Record<string, unknown>) => <span>{typeof props.alt === "string" ? props.alt : ""}</span>;
+
+const MAIL_BODY_MARKDOWN_COMPONENTS: AgentsMarkdownComponents = { img: ImageAsAltText };
 
 /** The height the body folds to; a body only slightly taller is shown whole. */
 const BODY_FOLD_HEIGHT_PX = 240;
@@ -149,7 +158,7 @@ export const MailDraftPreviewConversationWidget = (props: PayloadConversationWid
               style={isFolded ? { maxHeight: BODY_FOLD_HEIGHT_PX } : undefined}
               data-testid={`${TEST_ID}-body`}
             >
-              <Markdown markdown={bodyText} translate={false} />
+              <Markdown markdown={bodyText} translate={false} components={MAIL_BODY_MARKDOWN_COMPONENTS} />
             </div>
             {isFoldable && !isEmailRender ? (
               <button
