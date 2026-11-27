@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.11
+
+- Web: the preview fixtures of `ContinueInPersonalSpace`, `ExtendConnectionPermission` and `MailDraftPreview` are
+  exported (`./widgets/<Folder>/<name>.preview-fixtures.json`) and shipped below `dist/files/widgets/`, like the other
+  widget fixtures; a host that reads the shipped fixture files sees them. A test checks that every fixture file below
+  `src/widgets` and `src/kit` has its `exports` entry.
+
 ## 0.11.10
 
 - Web: the signal-source parity fixture (`web/src/chat/signal-source-parity.json`) carries `CONNECTION_APPROVAL`

@@ -1,6 +1,6 @@
 {
   "name": "@mgamadeus/ddd-agents",
-  "version": "0.11.10",
+  "version": "0.11.11",
   "description": "The web frontend of the ddd-agents module: the agent chat, the widget renderer and the composed-view kit.",
   "keywords": [
     "ddd",
@@ -95,6 +95,7 @@
     "./widgets/ClockConversationWidget/ClockConversationWidget.md": "./dist/files/widgets/ClockConversationWidget/ClockConversationWidget.md",
     "./widgets/ConceptExplainerConversationWidget/ConceptExplainerConversationWidget.md": "./dist/files/widgets/ConceptExplainerConversationWidget/ConceptExplainerConversationWidget.md",
     "./widgets/ContinueInPersonalSpaceConversationWidget/ContinueInPersonalSpaceConversationWidget.md": "./dist/files/widgets/ContinueInPersonalSpaceConversationWidget/ContinueInPersonalSpaceConversationWidget.md",
+    "./widgets/ContinueInPersonalSpaceConversationWidget/continue-in-personal-space.preview-fixtures.json": "./dist/files/widgets/ContinueInPersonalSpaceConversationWidget/continue-in-personal-space.preview-fixtures.json",
     "./widgets/ConversationSearchResultsConversationWidget/ConversationSearchResultsConversationWidget.md": "./dist/files/widgets/ConversationSearchResultsConversationWidget/ConversationSearchResultsConversationWidget.md",
     "./widgets/CurrencyConverterConversationWidget/CurrencyConverterConversationWidget.md": "./dist/files/widgets/CurrencyConverterConversationWidget/CurrencyConverterConversationWidget.md",
     "./widgets/CustomVisualizationConversationWidget/CustomVisualizationConversationWidget.md": "./dist/files/widgets/CustomVisualizationConversationWidget/CustomVisualizationConversationWidget.md",
@@ -102,6 +103,8 @@
     "./widgets/EntityMentionConversationWidget/EntityMentionConversationWidget.md": "./dist/files/widgets/EntityMentionConversationWidget/EntityMentionConversationWidget.md",
     "./widgets/ExtendConnectionPermissionConversationWidget/ExtendConnectionPermissionConversationWidget.md": "./dist/files/widgets/ExtendConnectionPermissionConversationWidget/ExtendConnectionPermissionConversationWidget.md",
     "./widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.md": "./dist/files/widgets/MailDraftPreviewConversationWidget/MailDraftPreviewConversationWidget.md",
+    "./widgets/ExtendConnectionPermissionConversationWidget/extend-connection-permission.preview-fixtures.json": "./dist/files/widgets/ExtendConnectionPermissionConversationWidget/extend-connection-permission.preview-fixtures.json",
+    "./widgets/MailDraftPreviewConversationWidget/mail-draft-preview.preview-fixtures.json": "./dist/files/widgets/MailDraftPreviewConversationWidget/mail-draft-preview.preview-fixtures.json",
     "./widgets/MultiChoiceConversationWidget/MultiChoiceConversationWidget.md": "./dist/files/widgets/MultiChoiceConversationWidget/MultiChoiceConversationWidget.md",
     "./widgets/QuickRepliesConversationWidget/QuickRepliesConversationWidget.md": "./dist/files/widgets/QuickRepliesConversationWidget/QuickRepliesConversationWidget.md",
     "./widgets/SuggestedActions/SuggestedActions.md": "./dist/files/widgets/SuggestedActions/SuggestedActions.md",
