@@ -16,6 +16,8 @@ use DDD\Domain\AI\Services\Conversations\Environments\AgentEnvironmentNamesServi
 use DDD\Domain\Base\Repo\DB\Attributes\EntityCache;
 use DDD\Domain\Base\Repo\DB\DBEntitySet;
 use DDD\Domain\Base\Repo\DB\Doctrine\EntityManagerFactory;
+use DDD\Domain\AI\Entities\Connections\AgentConnectionsConfiguration;
+use DDD\Domain\AI\Repo\DB\Connections\DBAgentConnectionThreadModel;
 use DDD\Domain\Base\Repo\DB\Doctrine\DoctrineQueryBuilder;
 use DDD\Infrastructure\Base\DateTime\DateTime;
 use DDD\Infrastructure\Exceptions\BadRequestException;
@@ -301,6 +303,120 @@ class DBAIConversations extends DBEntitySet
     }
 
     /**
+     * The scope of the search across conversations: the conversations of account `$accountId`, and with
+     * `$agentSpaceIds` also every conversation of those spaces (any account). `$conversationAlias` is the alias of the
+     * conversation table in `$queryBuilder` (the root, or a joined conversation); `$parameterPrefix` keeps the
+     * parameter names apart when one query applies it twice. A filter of the search, not a right.
+     *
+     * A conversation of another account in such a space is left out when a thread of a connection marks it as read
+     * by its owner only (a direct message with the bot, `AgentConnectionThread::$readByOwnerOnly`), whatever space it
+     * is stored in. `$extraConditionOfOtherAccounts` (DQL) narrows the rows of other accounts further, e.g. to the
+     * dialogue messages.
+     *
+     * @param int[] $agentSpaceIds
+     */
+    public static function restrictToConversationsOfAccountOrAgentSpaces(
+        DoctrineQueryBuilder $queryBuilder,
+        string $conversationAlias,
+        int $accountId,
+        array $agentSpaceIds,
+        string $parameterPrefix,
+        ?string $extraConditionOfOtherAccounts = null
+    ): void {
+        $accountParameter = $parameterPrefix . 'ScopeAccountId';
+        $queryBuilder->setParameter($accountParameter, $accountId);
+        $agentSpaceIds = static::normalizePositiveIds($agentSpaceIds);
+        if ($agentSpaceIds === []) {
+            $queryBuilder->andWhere("$conversationAlias.accountId = :$accountParameter");
+            return;
+        }
+        $agentSpacesParameter = $parameterPrefix . 'ScopeAgentSpaceIds';
+        $otherAccountsCondition = "$conversationAlias.agentSpaceId IN (:$agentSpacesParameter)";
+        if (AgentConnectionsConfiguration::current()->isEnabled()) {
+            // without connections there is no thread (and an application may leave the table out)
+            $threadModelClass = DBAgentConnectionThreadModel::class;
+            $threadAlias = $parameterPrefix . 'ScopeOwnerOnlyThread';
+            $otherAccountsCondition .= " AND NOT EXISTS (SELECT $threadAlias.id FROM $threadModelClass $threadAlias"
+                . " WHERE $threadAlias.aiConversationId = $conversationAlias.id AND $threadAlias.readByOwnerOnly = true)";
+        }
+        if ($extraConditionOfOtherAccounts !== null && $extraConditionOfOtherAccounts !== '') {
+            $otherAccountsCondition .= " AND ($extraConditionOfOtherAccounts)";
+        }
+        $queryBuilder
+            ->andWhere("($conversationAlias.accountId = :$accountParameter OR ($otherAccountsCondition))")
+            ->setParameter($agentSpacesParameter, $agentSpaceIds);
+    }
+
+    /**
+     * The positive, distinct ids of `$ids` (agent spaces, conversations), ascending. Pure.
+     *
+     * @param array<int|string> $ids
+     * @return int[]
+     */
+    public static function normalizePositiveIds(array $ids): array
+    {
+        $normalizedIds = [];
+        foreach ($ids as $id) {
+            $id = (int)$id;
+            if ($id > 0) {
+                $normalizedIds[$id] = $id;
+            }
+        }
+        sort($normalizedIds);
+        return $normalizedIds;
+    }
+
+    /**
+     * Of `$conversationIds`, the ids of the conversations whose `accountId` is `$accountId`; ascending. No rights: ids
+     * in, ids out — the caller already holds the ids from a scoped query.
+     *
+     * @param int[] $conversationIds
+     * @return int[]
+     */
+    public function findIdsOfConversationsOfAccountAmong(array $conversationIds, int $accountId): array
+    {
+        $conversationIds = static::normalizePositiveIds($conversationIds);
+        if ($conversationIds === [] || $accountId < 1) {
+            return [];
+        }
+        $alias = static::getBaseModelAlias();
+        $queryBuilder = self::createQueryBuilder(true);
+        $queryBuilder
+            ->select("$alias.id")
+            ->andWhere("$alias.id IN (:ownershipConversationIds)")
+            ->andWhere("$alias.accountId = :ownershipAccountId")
+            ->setParameter('ownershipConversationIds', $conversationIds)
+            ->setParameter('ownershipAccountId', $accountId);
+        return static::normalizePositiveIds($queryBuilder->getQuery()->getSingleColumnResult());
+    }
+
+    /**
+     * The conversation `$conversationId` when it is in the scope of the search across conversations: the account's
+     * own or one of `$agentSpaceIds`, visible to a customer and one the search answers from
+     * ({@see self::restrictToConversationsTheSearchAcrossConversationsAnswersFrom()}: no eval run, no sub-agent, no
+     * left-out purpose or initiator). The read of a conversation the search found for another account; the caller
+     * lifts the row rights, the scope is the authorization. Null outside the scope.
+     *
+     * @param int[] $agentSpaceIds
+     * @throws BadRequestException
+     * @throws InternalErrorException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function findConversationInSearchScope(int $conversationId, int $accountId, array $agentSpaceIds): ?AIConversation
+    {
+        $alias = static::getBaseModelAlias();
+        $queryBuilder = self::createQueryBuilder(true);
+        $queryBuilder->andWhere("$alias.id = :scopeConversationId")->setParameter('scopeConversationId', $conversationId);
+        static::restrictToConversationsOfAccountOrAgentSpaces($queryBuilder, $alias, $accountId, $agentSpaceIds, 'readScope');
+        static::restrictToCustomerVisibleConversations($queryBuilder);
+        static::restrictToConversationsTheSearchAcrossConversationsAnswersFrom($queryBuilder, $alias);
+        $queryBuilder->setMaxResults(1);
+        $conversation = $this->find($queryBuilder)?->first();
+        return $conversation instanceof AIConversation ? $conversation : null;
+    }
+
+    /**
      * The conversations of account `$accountId` the agent's conversation recall answers from
      * ({@see \DDD\Domain\AI\Services\Conversations\AgentConversationRecallService}), newest activity first: under the
      * read rights of the caller, visible to a customer, and only the owner's dialogue
@@ -308,12 +424,17 @@ class DBAIConversations extends DBEntitySet
      * summary holding ANY of `$words` (case-insensitive), one space, and an activity window (`$from` ≤ updated,
      * created ≤ `$to`).
      *
+     * With `$searchableAgentSpaceIds` the scope is the account's conversations OR the conversations of those spaces
+     * (any account): {@see \DDD\Domain\AI\Services\Conversations\AgentConversationRecallService::findSearchableAgentSpaceIds()}.
+     * The caller lifts the row rights for such a call; the scope condition is then the authorization.
+     *
      * @param int $accountId
      * @param string[] $words lower-case words; empty = no text condition
      * @param int|null $agentSpaceId
      * @param DateTime|null $from
      * @param DateTime|null $to
      * @param int $limit
+     * @param int[] $searchableAgentSpaceIds spaces whose conversations of other accounts are in scope; [] = the account's alone
      * @return AIConversations|null
      * @throws BadRequestException
      * @throws InternalErrorException
@@ -326,13 +447,12 @@ class DBAIConversations extends DBEntitySet
         ?int $agentSpaceId,
         ?DateTime $from,
         ?DateTime $to,
-        int $limit
+        int $limit,
+        array $searchableAgentSpaceIds = []
     ): ?AIConversations {
         $alias = static::getBaseModelAlias();
         $queryBuilder = self::createQueryBuilder(true);
-        $queryBuilder
-            ->andWhere("$alias.accountId = :recallAccountId")
-            ->setParameter('recallAccountId', $accountId);
+        static::restrictToConversationsOfAccountOrAgentSpaces($queryBuilder, $alias, $accountId, $searchableAgentSpaceIds, 'recall');
         static::restrictToCustomerVisibleConversations($queryBuilder);
         static::restrictToConversationsTheSearchAcrossConversationsAnswersFrom($queryBuilder, $alias);
         // the summary is a JSON column: its title and text are read as text (LOWER over json fails on PostgreSQL)

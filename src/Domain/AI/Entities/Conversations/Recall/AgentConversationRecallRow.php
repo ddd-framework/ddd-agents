@@ -25,6 +25,9 @@ class AgentConversationRecallRow extends ValueObject
     /** @var string The space as the model reads it */
     public string $agentSpace = '';
 
+    /** @var string|null Who owns the conversation when it is not the acting account's (a conversation of a readable space); null for an own one */
+    public ?string $owner = null;
+
     /** @var DateTime|null When the conversation started */
     public ?DateTime $created = null;
 
@@ -51,7 +54,8 @@ class AgentConversationRecallRow extends ValueObject
      */
     public function toConversationSearchGroup(): ?AIConversationSearchGroup
     {
-        if ($this->hits->isEmpty()) {
+        // a conversation of another account is no group to open: the chat routes load the owner's conversations
+        if ($this->hits->isEmpty() || $this->owner !== null) {
             return null;
         }
         $group = new AIConversationSearchGroup();

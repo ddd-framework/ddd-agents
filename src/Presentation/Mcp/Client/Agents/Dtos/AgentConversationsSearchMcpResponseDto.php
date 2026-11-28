@@ -118,6 +118,9 @@ class AgentConversationsSearchMcpResponseDto extends RestResponseDto implements 
     protected function renderRow(AgentConversationRecallRow $row): string
     {
         $headParts = ['conversation #' . $row->conversationId, 'space: ' . $row->agentSpace];
+        if ($row->owner !== null) {
+            $headParts[] = 'of: ' . $row->owner . ' (not the owner\'s own conversation)';
+        }
         if ($row->updated !== null) {
             $headParts[] = 'last active ' . AgentClock::formatMoment($row->updated);
         }

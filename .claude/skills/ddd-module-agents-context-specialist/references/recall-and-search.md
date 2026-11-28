@@ -119,14 +119,23 @@ through a same-path subclass of the service; it builds no recall tool of its own
 | Tool | What it reads |
 |---|---|
 | `searchThisConversation(query, limit?)` | the conversation the owner talks in (the root of a delegation tree), messages and compaction regions, through `searchWithinConversation()`; each match with its message number |
-| `searchConversations(query?, onlySpaceId?, fromDate?, toDate?, limit?)` | the acting account's earlier conversations in every space, through `searchAcrossConversations()` and a title search; without a query the newest or those of a period (up to 25); never the current conversation or its tree root; hands its groups to the `ConversationSearchResults` widget (`groupsFromToolCallId`) |
+| `searchConversations(query?, onlySpaceId?, fromDate?, toDate?, limit?)` | the acting account's earlier conversations in every space (plus other accounts' in the host's readable spaces), through `searchAcrossConversations()` and a title search; without a query the newest or those of a period (up to 25); never the current conversation or its tree root; hands its groups to the `ConversationSearchResults` widget (`groupsFromToolCallId`) |
 | `readConversation(conversationId?, fromIndex?, aroundIndex?, aroundMessageId?, limit?)` | one conversation page by page, around a match's number, or around a message named by its id (a signal, a link) |
 
 - `onlySpaceId` is the number of a space label in a result: `AgentSpacesService::findAgentSpaceIdOfLabelNumber()`
   inverts `buildAgentSpaceLabelForTheModel()`; a host whose label names its own entity's id overrides both.
 - A read by id keeps to the acting account (`isConversationOfActingAccount()`), as the search does; the conversation
   the call runs in and its tree root are read under the read rights alone (`findOwnConversation()`).
+- Readable spaces of other accounts: `findSearchableAgentSpaceIds(Account)` (default `[]` = own conversations only).
+  A host answers it with `findAgentSpaceIdsReadableUnderTheRights()` (the AgentSpace read rights of the signed-in
+  account; `[]` when another account is signed in or the rights are lifted). The search, the candidates and the read by
+  id or around a message then also answer from those spaces' conversations of other accounts
+  (`accountId = :acting OR agentSpaceId IN (:spaces)`, row rights lifted for those queries, every search filter kept,
+  only the dialogue messages of other accounts, no owner-only connection thread). Such a row names its owner
+  (`describeOwnerOfConversation()`, `of: …`) and is no widget group. A host that opens a space this way answers
+  `isConversationReadByOthers()` true for it.
 - Hooks of the service: `isConversationReadByOthers()` (the audience rule), `describeAgentSpace()`,
+  `findSearchableAgentSpaceIds()`, `describeOwnerOfConversation()`,
   `findRecallCandidates()`, `findReadableConversation()`, `findOwnConversation()`, `findMessageToReadAround()`,
   `buildRow()`, `buildRecallMessage()`.
 

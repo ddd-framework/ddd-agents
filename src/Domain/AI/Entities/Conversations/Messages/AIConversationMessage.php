@@ -956,9 +956,10 @@ class AIConversationMessage extends Entity
     /**
      * SEARCH_HIT = a semantic-search hit renders only its text + locus; drops ALL heavy columns. The vector it ranked on
      * lives in the joined {@see AIConversationMessageEmbedding} row (the COSINE_DISTANCE ORDER BY references it in SQL —
-     * the message hit never selects/hydrates it). {@see \DDD\Domain\AI\Services\Conversations\SemanticSearchService} reads only these.
+     * the message hit never selects/hydrates it). {@see \DDD\Domain\AI\Services\Conversations\SemanticSearchService} reads only these
+     * (`messageType` and `role`: whether a hit of another account's conversation is dialogue).
      */
-    public const array SEARCH_HIT_LOAD_COLUMNS = ['id', 'aiConversationId', 'indexInConversation', 'role', 'message', 'created'];
+    public const array SEARCH_HIT_LOAD_COLUMNS = ['id', 'aiConversationId', 'indexInConversation', 'messageType', 'role', 'message', 'created'];
 
     /**
      * CURATION = the ONLY fields the memory curator reads: `id` (ingest marker), aiConversationId/indexInConversation/
@@ -1945,6 +1946,16 @@ class AIConversationMessage extends Entity
     public function isOwnerOrLegacyUserRoleText(): bool
     {
         return $this->isOwnerOrLegacyUserRoleRow() && ($this->messageType ?? null) === self::MESSAGE_TEXT;
+    }
+
+    /**
+     * A TEXT row of the user or assistant role: the dialogue of a conversation, the part of another account's
+     * conversation the search across readable spaces may show (the same condition as the message legs' query).
+     */
+    public function isDialogueText(): bool
+    {
+        return ($this->messageType ?? null) === self::MESSAGE_TEXT
+            && in_array($this->role ?? null, [self::ROLE_USER, self::ROLE_ASSISTANT], true);
     }
 
     /** The owner's own TEXT: the user role, authored by the user (a legacy row with a null author is not). */

@@ -15,9 +15,12 @@ use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallTranscrip
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHit;
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHits;
 use DDD\Domain\AI\Services\Connections\AgentConnectionsService;
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessagePosition;
+use DDD\Domain\AI\Repo\DB\AgentSpaces\DBAgentSpace;
 use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessages;
 use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
+use DDD\Domain\Base\Repo\DB\DBEntity;
 use DDD\Infrastructure\Services\AuthService;
 use DDD\Infrastructure\Services\Service;
 use DDD\Domain\Common\Entities\Accounts\Account;
@@ -37,10 +40,15 @@ use DDD\Infrastructure\Services\DDDService;
  * ({@see findRecallCandidates()}), the readable conversation ({@see findReadableConversation()}) and the result rows
  * ({@see buildRow()}, {@see buildRecallMessage()}); the retrieval itself through {@see SemanticSearchService}.
  *
- * Visibility is the one of the chat's own list and search: the conversations of the acting account in EVERY space,
- * read under the read rights of the conversation table, customer-visible, the owner's dialogue only
+ * Visibility: the conversations of the acting account in EVERY space, read under the read rights of the conversation
+ * table, customer-visible, the owner's dialogue only
  * ({@see DBAIConversations::restrictToConversationsTheSearchAcrossConversationsAnswersFrom()}); the message search is
- * {@see SemanticSearchService::searchAcrossConversations()}, the search box of the chat. No second rights logic.
+ * {@see SemanticSearchService::searchAcrossConversations()}, the search box of the chat. A host widens the scope to the
+ * conversations of other accounts in the spaces the acting account may read ({@see findSearchableAgentSpaceIds()},
+ * default none; {@see findAgentSpaceIdsReadableUnderTheRights()} answers it from the AgentSpace read rights). Such a
+ * conversation is found and read through the scope condition (account OR space) with the row rights of the
+ * conversation tables lifted for that query, and every filter of the search applies to it; a row names its owner
+ * ({@see describeOwnerOfConversation()}).
  *
  * Audience rule (as for connections): text of a conversation flows into the current conversation only when the
  * readers of the source are not narrower than the readers of the current one. A conversation only its owner reads
@@ -133,12 +141,14 @@ class AgentConversationRecallService extends Service
         $query = trim($query);
         $limit = max(1, min($limit, $query === '' ? static::MAX_LIST_LIMIT : static::MAX_SEARCH_LIMIT));
 
+        $searchableAgentSpaceIds = $this->findSearchableAgentSpaceIdsOfActingAccount($account);
+
         /** @var array<int, SemanticSearchHit[]> $hitsByConversationId best conversation first */
         $hitsByConversationId = [];
         if ($query !== '') {
             /** @var SemanticSearchService $semanticSearchService */
             $semanticSearchService = DDDService::instance()->getService(SemanticSearchService::class);
-            $hits = $semanticSearchService->searchAcrossConversations($account, $query, $limit * 4, static::EXCERPT_CHARS);
+            $hits = $semanticSearchService->searchAcrossConversations($account, $query, $limit * 4, static::EXCERPT_CHARS, $searchableAgentSpaceIds);
             foreach ($hits as $hit) {
                 if ($hit->conversationId === null || $this->isOwnConversation($currentConversation, $hit->conversationId)) {
                     continue;
@@ -150,7 +160,15 @@ class AgentConversationRecallService extends Service
             }
         }
 
-        $candidateConversations = $this->findRecallCandidates($account, $this->splitIntoWords($query), $agentSpaceId, $from, $to, $limit * 2);
+        $candidateConversations = $this->findRecallCandidatesInScope(
+            $account,
+            $this->splitIntoWords($query),
+            $agentSpaceId,
+            $from,
+            $to,
+            $limit * 2,
+            $searchableAgentSpaceIds
+        );
         /** @var array<int, AIConversation> $conversationsById */
         $conversationsById = [];
         foreach ($candidateConversations?->getElements() ?? [] as $conversation) {
@@ -171,7 +189,7 @@ class AgentConversationRecallService extends Service
             if ($this->isOwnConversation($currentConversation, $conversationId) || $result->rows->count() >= $limit) {
                 continue;
             }
-            $conversation = $conversationsById[$conversationId] ?? $this->findReadableConversation($conversationId);
+            $conversation = $conversationsById[$conversationId] ?? $this->findConversationOfSearch($conversationId, $account, $searchableAgentSpaceIds);
             if (!$conversation instanceof AIConversation) {
                 continue; // not readable under the rights or hidden: as if it did not exist
             }
@@ -183,6 +201,7 @@ class AgentConversationRecallService extends Service
                 continue;
             }
             $row = $this->buildRow($conversation, array_slice($hitsByConversationId[$conversationId] ?? [], 0, static::HITS_PER_CONVERSATION));
+            $this->applyOwnerOfConversation($row, $conversation, $account);
             $result->rows->add($row);
         }
         return $result;
@@ -208,10 +227,24 @@ class AgentConversationRecallService extends Service
         if (!$isOwnConversation) {
             $this->requireRecallEnabled($currentConversation);
         }
+        $actingAccount = $isOwnConversation ? null : $this->findActingAccount($currentConversation);
+        $searchableAgentSpaceIds = $actingAccount !== null ? $this->findSearchableAgentSpaceIdsOfActingAccount($actingAccount) : [];
         $conversation = $isOwnConversation ? $this->findOwnConversation($conversationId) : $this->findReadableConversation($conversationId);
+        $isOfAnotherAccountInScope = false;
+        if (
+            !$isOwnConversation
+            && $actingAccount !== null
+            && $searchableAgentSpaceIds !== []
+            && (!$conversation instanceof AIConversation || !$this->isConversationOfActingAccount($conversation, $currentConversation))
+        ) {
+            // another account's conversation: only through the scope of the search (one of the readable spaces)
+            $conversation = $this->findConversationOfSearch($conversationId, $actingAccount, $searchableAgentSpaceIds);
+            $isOfAnotherAccountInScope = $conversation instanceof AIConversation
+                && !$this->isConversationOfActingAccount($conversation, $currentConversation);
+        }
         if (
             !$conversation instanceof AIConversation
-            || (!$isOwnConversation && !$this->isConversationOfActingAccount($conversation, $currentConversation))
+            || (!$isOwnConversation && !$isOfAnotherAccountInScope && !$this->isConversationOfActingAccount($conversation, $currentConversation))
         ) {
             throw new NotFoundException("Conversation #$conversationId was not found or may not be read. Find conversations with searchConversations.");
         }
@@ -223,13 +256,26 @@ class AgentConversationRecallService extends Service
         $limit = max(1, min($limit, static::MAX_READ_LIMIT));
         /** @var DBAIConversationMessages $messagesRepository */
         $messagesRepository = AIConversationMessages::getRepoClassInstance();
-        if ($aroundIndex !== null) {
-            $fromIndex = $this->findFirstIndexOfReadAround($messagesRepository, $conversationId, max(0, $aroundIndex), $limit);
+        // the messages of another account's conversation lie outside the row rights; the conversation passed the scope
+        if ($isOfAnotherAccountInScope) {
+            DDDService::instance()->deactivateEntityRightsRestrictions();
         }
-        $messages = $messagesRepository->findContentMessagesFromIndex($conversationId, $fromIndex, $limit + 1)?->getElements() ?? [];
+        try {
+            if ($aroundIndex !== null) {
+                $fromIndex = $this->findFirstIndexOfReadAround($messagesRepository, $conversationId, max(0, $aroundIndex), $limit);
+            }
+            $messages = $messagesRepository->findContentMessagesFromIndex($conversationId, $fromIndex, $limit + 1)?->getElements() ?? [];
+        } finally {
+            if ($isOfAnotherAccountInScope) {
+                DDDService::instance()->restoreEntityRightsRestrictionsStateSnapshot();
+            }
+        }
 
         $transcript = new AgentConversationRecallTranscript();
         $transcript->conversation = $this->buildRow($conversation, []);
+        if ($actingAccount !== null) {
+            $this->applyOwnerOfConversation($transcript->conversation, $conversation, $actingAccount);
+        }
         $transcript->aroundIndex = $aroundIndex !== null ? max(0, $aroundIndex) : null;
         foreach (array_slice(array_values($messages), 0, $limit) as $message) {
             $recallMessage = $this->buildRecallMessage($message);
@@ -252,10 +298,22 @@ class AgentConversationRecallService extends Service
     public function readConversationAroundMessage(?AIConversation $currentConversation, int $messageId, int $limit): AgentConversationRecallTranscript
     {
         $message = $this->findMessageToReadAround($messageId);
-        if (!$message instanceof AIConversationMessage || !isset($message->aiConversationId, $message->indexInConversation)) {
-            throw new NotFoundException("Message #$messageId was not found or may not be read. Find conversations with searchConversations.");
+        if ($message instanceof AIConversationMessage && isset($message->aiConversationId, $message->indexInConversation)) {
+            return $this->readConversation($currentConversation, (int)$message->aiConversationId, 0, $limit, (int)$message->indexInConversation);
         }
-        return $this->readConversation($currentConversation, (int)$message->aiConversationId, 0, $limit, (int)$message->indexInConversation);
+        // a message of another account: its two numbers alone, then the conversation only through the scope of the search
+        $actingAccount = $this->findActingAccount($currentConversation);
+        $searchableAgentSpaceIds = $actingAccount !== null ? $this->findSearchableAgentSpaceIdsOfActingAccount($actingAccount) : [];
+        if ($actingAccount !== null && $searchableAgentSpaceIds !== []) {
+            $messagePosition = $this->findPositionOfMessageIgnoringRights($messageId);
+            if (
+                $messagePosition !== null
+                && $this->findConversationOfSearch($messagePosition->aiConversationId, $actingAccount, $searchableAgentSpaceIds) instanceof AIConversation
+            ) {
+                return $this->readConversation($currentConversation, $messagePosition->aiConversationId, 0, $limit, $messagePosition->indexInConversation);
+            }
+        }
+        throw new NotFoundException("Message #$messageId was not found or may not be read. Find conversations with searchConversations.");
     }
 
     /**
@@ -270,6 +328,60 @@ class AgentConversationRecallService extends Service
             ? (int)$currentConversation->accountId
             : (int)(AuthService::instance()->getAccount()?->id ?? 0);
         return $actingAccountId > 0 && isset($conversation->accountId) && (int)$conversation->accountId === $actingAccountId;
+    }
+
+    /**
+     * HOST HOOK: the agent spaces whose conversations of OTHER accounts `$account` searches and reads (its own
+     * conversations are always in scope). Default: none — the search answers from the account's own conversations.
+     * A host whose AgentSpace read rights say who reads a space returns {@see findAgentSpaceIdsReadableUnderTheRights()}.
+     * Every space returned widens the audience of its conversations: answer {@see isConversationReadByOthers()} true
+     * for a conversation of a space other accounts search.
+     *
+     * @return int[]
+     */
+    public function findSearchableAgentSpaceIds(Account $account): array
+    {
+        return [];
+    }
+
+    /**
+     * The ids of every agent space the authenticated account reads under the AgentSpace read rights
+     * ({@see \DDD\Domain\AI\Repo\DB\AgentSpaces\DBAgentSpace::applyReadRightsQuery()} or the host's same-path
+     * repo). Fail closed: none when the authenticated account is not `$account` (a worker or a console run acting for
+     * another account), so the rights of one account never widen the search of another, and none while the rights are
+     * lifted (a console inspection that drives a turn would otherwise read every space).
+     *
+     * @return int[]
+     */
+    public function findAgentSpaceIdsReadableUnderTheRights(Account $account): array
+    {
+        if (!DBEntity::getApplyRightsRestrictions()) {
+            return [];
+        }
+        $authenticatedAccountId = (int)(AuthService::instance()->getAccount()?->id ?? 0);
+        if ($authenticatedAccountId < 1 || $authenticatedAccountId !== (int)($account->id ?? 0)) {
+            return [];
+        }
+        /** @var AgentSpacesService $agentSpacesService */
+        $agentSpacesService = DDDService::instance()->getService(AgentSpacesService::class);
+        /** @var DBAgentSpace $agentSpaceRepository the host's same-path repo, with the host's read rights */
+        $agentSpaceRepository = $agentSpacesService->getEntityRepoClassInstance();
+        $alias = $agentSpaceRepository::getBaseModelAlias();
+        $queryBuilder = $agentSpaceRepository::createQueryBuilder(true);
+        $queryBuilder->select("$alias.id");
+        // a scalar query applies no rights by itself
+        $agentSpaceRepository::applyReadRightsQuery($queryBuilder);
+        return DBAIConversations::normalizePositiveIds($queryBuilder->getQuery()->getSingleColumnResult());
+    }
+
+    /**
+     * HOST HOOK: how the owner of a conversation of another account is named beside a result (`of: …`), so the model
+     * never tells another person's words as the owner's. Default: `account #<id>`. Runs outside the lifted rights: a
+     * host that reads a name loads it itself (with the rights it needs).
+     */
+    public function describeOwnerOfConversation(AIConversation $conversation): string
+    {
+        return 'account #' . (int)($conversation->accountId ?? 0);
     }
 
     /**
@@ -344,6 +456,93 @@ class AgentConversationRecallService extends Service
         if ($currentConversation !== null && !$currentConversation->isCrossConversationRecallEnabled()) {
             throw new ForbiddenException('Recalling other conversations is switched off for this conversation.');
         }
+    }
+
+    /** {@see findSearchableAgentSpaceIds()}, normalised (positive, distinct) */
+    protected function findSearchableAgentSpaceIdsOfActingAccount(Account $account): array
+    {
+        return DBAIConversations::normalizePositiveIds($this->findSearchableAgentSpaceIds($account));
+    }
+
+    /**
+     * The account the call acts for: the owner of the current conversation, else the signed-in account (an MCP
+     * client), as the tool package resolves it.
+     */
+    protected function findActingAccount(?AIConversation $currentConversation): ?Account
+    {
+        $actingAccount = ($currentConversation !== null ? ($currentConversation->account ?? null) : null) ?? AuthService::instance()->getAccount();
+        return $actingAccount instanceof Account && isset($actingAccount->id) ? $actingAccount : null;
+    }
+
+    /**
+     * The conversation `$conversationId` of a search: without searchable spaces the readable conversation as before
+     * ({@see findReadableConversation()}), with them the conversation in the scope of the search
+     * ({@see DBAIConversations::findConversationInSearchScope()}), read with the row rights lifted.
+     *
+     * @param int[] $searchableAgentSpaceIds
+     */
+    protected function findConversationOfSearch(int $conversationId, Account $account, array $searchableAgentSpaceIds): ?AIConversation
+    {
+        if ($searchableAgentSpaceIds === []) {
+            return $this->findReadableConversation($conversationId);
+        }
+        /** @var DBAIConversations $conversationsRepository */
+        $conversationsRepository = AIConversations::getRepoClassInstance();
+        DDDService::instance()->deactivateEntityRightsRestrictions();
+        try {
+            return $conversationsRepository->findConversationInSearchScope($conversationId, (int)$account->id, $searchableAgentSpaceIds);
+        } finally {
+            DDDService::instance()->restoreEntityRightsRestrictionsStateSnapshot();
+        }
+    }
+
+    /**
+     * The candidates of a search ({@see findRecallCandidates()}); with searchable spaces the account's conversations
+     * and those of the spaces, read with the row rights lifted (the scope condition is part of the query).
+     *
+     * @param string[] $words
+     * @param int[] $searchableAgentSpaceIds
+     */
+    protected function findRecallCandidatesInScope(
+        Account $account,
+        array $words,
+        ?int $agentSpaceId,
+        ?DateTime $from,
+        ?DateTime $to,
+        int $limit,
+        array $searchableAgentSpaceIds
+    ): ?AIConversations {
+        if ($searchableAgentSpaceIds === []) {
+            return $this->findRecallCandidates($account, $words, $agentSpaceId, $from, $to, $limit);
+        }
+        /** @var DBAIConversations $conversationsRepository */
+        $conversationsRepository = AIConversations::getRepoClassInstance();
+        DDDService::instance()->deactivateEntityRightsRestrictions();
+        try {
+            return $conversationsRepository->findRecallCandidatesOfAccount((int)$account->id, $words, $agentSpaceId, $from, $to, $limit, $searchableAgentSpaceIds);
+        } finally {
+            DDDService::instance()->restoreEntityRightsRestrictionsStateSnapshot();
+        }
+    }
+
+    /** Names the owner on `$row` when `$conversation` is not `$actingAccount`'s ({@see describeOwnerOfConversation()}) */
+    protected function applyOwnerOfConversation(AgentConversationRecallRow $row, AIConversation $conversation, Account $actingAccount): void
+    {
+        $ownerAccountId = (int)($conversation->accountId ?? 0);
+        if ($ownerAccountId > 0 && $ownerAccountId !== (int)$actingAccount->id) {
+            $row->owner = $this->describeOwnerOfConversation($conversation);
+        }
+    }
+
+    /**
+     * The position of message `$messageId` without the read rights (two numbers, no text); the caller checks the
+     * conversation against the scope of the search before it reads anything.
+     */
+    protected function findPositionOfMessageIgnoringRights(int $messageId): ?AIConversationMessagePosition
+    {
+        /** @var DBAIConversationMessages $messagesRepository */
+        $messagesRepository = AIConversationMessages::getRepoClassInstance();
+        return $messagesRepository->findPositionOfMessageIgnoringRights($messageId);
     }
 
     /** The conversation under the read rights and customer visibility, else null */

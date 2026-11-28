@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.11.12
+
+- **Conversation search across every readable agent space.** `searchConversations`, `readConversation` (also with
+  `aroundMessageId`) and `SemanticSearchService::searchAcrossConversations()` can answer from the conversations of
+  OTHER accounts in the spaces the acting account may read:
+  - New host hook `AgentConversationRecallService::findSearchableAgentSpaceIds(Account): int[]`. **Default `[]`**:
+    unchanged behaviour, the acting account's own conversations only. A host whose AgentSpace read rights say who reads
+    a space returns the new helper `findAgentSpaceIdsReadableUnderTheRights(Account)` (the ids of every AgentSpace row
+    under the read rights of the authenticated account; `[]` when the authenticated account is not the acting one).
+  - The scope is `accountId = :acting OR agentSpaceId IN (:spaces)`
+    (`DBAIConversations::restrictToConversationsOfAccountOrAgentSpaces()`, `normalizePositiveIds()`), on both
+    engines. Such a search and the read of a conversation it found run with the row rights of the conversation tables
+    lifted (snapshot/restore in `finally`); every filter of the search stays in the query (customer-visible, no eval
+    run, no sub-agent, no left-out purpose or initiator, no truncated message).
+  - A conversation of another account is read only through `DBAIConversations::findConversationInSearchScope()`; a
+    message named by id outside the row rights is located by its two numbers alone
+    (`DBAIConversationMessages::findPositionOfMessageIgnoringRights()` → `AIConversationMessagePosition`,
+    `AgentConversationRecallService::findPositionOfMessageIgnoringRights()`) and read only when its conversation is in
+    the scope.
+  - Of another account's conversation only the dialogue is searched: owner and assistant text in the message legs and
+    in the messages a compaction node of the scope expands to (`DBAIConversations::findIdsOfConversationsOfAccountAmong()`).
+    `AIConversationMessage::isDialogueText()`; `SEARCH_HIT_LOAD_COLUMNS` now loads `messageType`.
+  - New host hook `describeOwnerOfConversation(AIConversation): string` (default `account #<id>`); a row and a
+    transcript of another account's conversation carry `owner` (`AgentConversationRecallRow::$owner`) and the tool
+    results say `of: …`.
+  - The audience rule is unchanged. A host that makes a space searchable for other accounts answers
+    `isConversationReadByOthers()` true for that space's conversations.
+  - Signatures: optional trailing `array $searchableAgentSpaceIds = []` on `DBAIConversations::findRecallCandidatesOfAccount()`,
+    `DBAIConversationMessages::findSimilarAcrossConversationsByEmbedding()`, `findByKeywordAcrossConversations()`,
+    `buildVectorSearchQueryBuilderForConversationsOfAccount()`, `buildKeywordSearchMessageIdsQueryBuilderForConversationsOfAccount()`,
+    `restrictToConversationsOfAccount()`, `DBConversationCompactionNodes::findSimilarAcrossConversationsByEmbedding()`,
+    `buildVectorSearchQueryBuilderForConversationsOfAccount()`, `SemanticSearchService::searchAcrossConversations()` and
+    its three protected legs. New protected `findActingAccount()`, `findConversationOfSearch()`,
+    `findRecallCandidatesInScope()`, `findSearchableAgentSpaceIdsOfActingAccount()`, `applyOwnerOfConversation()` and
+    `SemanticSearchService::searchAcrossConversationsInScope()`. Backward compatible for subclasses that override none
+    of these with a narrower signature.
+  - The REST chat search (`searchAcrossConversationsGrouped()`) stays on the acting account's conversations: its
+    results open through the chat routes, which load under the row rights.
+
 ## 0.11.11
 
 - Web: the preview fixtures of `ContinueInPersonalSpace`, `ExtendConnectionPermission` and `MailDraftPreview` are

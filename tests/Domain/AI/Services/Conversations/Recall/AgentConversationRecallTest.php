@@ -14,6 +14,7 @@ use DDD\Domain\AI\Entities\Conversations\Recall\AgentConversationRecallTranscrip
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHit;
 use DDD\Domain\AI\Entities\Conversations\Recall\SemanticSearchHits;
 use DDD\Domain\AI\Entities\Conversations\Widgets\Composed\Bindings\ComposedViewBindableResult;
+use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Domain\AI\Services\AgentSpaces\AgentSpacesService;
 use DDD\Domain\Common\Entities\Accounts\Account;
 use DDD\Infrastructure\Exceptions\NotFoundException;
@@ -350,6 +351,146 @@ class AgentConversationRecallTest extends UnitTestCase
         foreach (['searchThisConversation', 'searchConversations', 'readConversation', 'aroundIndex'] as $toolOrArgument) {
             self::assertStringContainsString($toolOrArgument, $skillSource);
         }
+    }
+
+    public function testTheDefaultHostHookSearchesNoSpaceOfAnotherAccount(): void
+    {
+        $agentConversationRecallService = self::instantiateWithoutConstructor(\DDD\Domain\AI\Services\Conversations\AgentConversationRecallService::class);
+
+        self::assertSame([], $agentConversationRecallService->findSearchableAgentSpaceIds($this->buildAccount()));
+    }
+
+    public function testTheSpacesReadableUnderTheRightsAreNoneWhenAnotherAccountIsSignedIn(): void
+    {
+        $agentConversationRecallService = self::instantiateWithoutConstructor(\DDD\Domain\AI\Services\Conversations\AgentConversationRecallService::class);
+
+        // no signed-in account in a unit test: the rights of nobody never widen the search of account 7
+        self::assertSame([], $agentConversationRecallService->findAgentSpaceIdsReadableUnderTheRights($this->buildAccount()));
+    }
+
+    public function testTheSpaceIdsOfTheScopeArePositiveDistinctAndSorted(): void
+    {
+        self::assertSame([3, 5, 9], DBAIConversations::normalizePositiveIds([9, '5', 3, 5, 0, -2]));
+        self::assertSame([], DBAIConversations::normalizePositiveIds([]));
+    }
+
+    public function testASearchHandsTheSearchableSpacesToTheCandidatesAndNamesTheOwnerOfAnotherAccountsConversation(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->searchableAgentSpaceIds = [5, 5, 2];
+        $ownConversation = $this->buildConversation(21, 2);
+        $ownConversation->accountId = 7;
+        $sharedSpaceConversationOfAnotherAccount = $this->buildConversation(22, 5);
+        $sharedSpaceConversationOfAnotherAccount->accountId = 8;
+        $agentConversationRecallService->candidateConversations = $this->buildConversations($ownConversation, $sharedSpaceConversationOfAnotherAccount);
+
+        $result = $agentConversationRecallService->searchConversations($this->buildAccount(), null, '', null, null, null, 5);
+
+        self::assertSame([2, 5], $agentConversationRecallService->candidateSearchAgentSpaceIds);
+        self::assertSame([21, 22], $this->collectConversationIds($result));
+        self::assertNull($result->rows->getElements()[0]->owner, 'an own conversation names no owner');
+        self::assertSame('account #8', $result->rows->getElements()[1]->owner);
+        $markdown = AgentConversationsSearchMcpResponseDto::forResult($result)->toLlmMarkdown();
+        self::assertStringContainsString('conversation #22 · space: space 5 · of: account #8', $markdown);
+    }
+
+    public function testTheAudienceRuleStillKeepsAnotherSpaceOutOfAConversationOthersRead(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->searchableAgentSpaceIds = [5];
+        $agentConversationRecallService->conversationIdsReadByOthers = [30];
+        $personalConversationOfAnotherAccount = $this->buildConversation(22, 9);
+        $personalConversationOfAnotherAccount->accountId = 8;
+        $sharedSpaceConversationOfAnotherAccount = $this->buildConversation(23, 5);
+        $sharedSpaceConversationOfAnotherAccount->accountId = 8;
+        $agentConversationRecallService->candidateConversations = $this->buildConversations($sharedSpaceConversationOfAnotherAccount);
+
+        $result = $agentConversationRecallService->searchConversations($this->buildAccount(), $this->buildConversation(30, 2), '', null, null, null, 5);
+
+        self::assertSame([], $this->collectConversationIds($result), 'a shared conversation of space 2 receives nothing of space 5');
+        self::assertSame(1, $result->leftOutForAudienceCount);
+    }
+
+    public function testAReadByIdOfAnotherAccountsConversationOutsideTheSearchableSpacesIsNotFound(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->searchableAgentSpaceIds = [5];
+        $agentConversationRecallService->actingAccount = $this->buildAccount();
+        $currentConversation = $this->buildConversation(40, 2);
+        $currentConversation->accountId = 7;
+        $personalConversationOfAnotherAccount = $this->buildConversation(41, 9);
+        $personalConversationOfAnotherAccount->accountId = 8;
+        $agentConversationRecallService->candidateConversations = $this->buildConversations($personalConversationOfAnotherAccount);
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Conversation #41 was not found or may not be read.');
+        $agentConversationRecallService->readConversation($currentConversation, 41, 0, 10);
+    }
+
+    public function testAReadAroundAMessageOfAnotherAccountReadsItOnlyInASearchableSpace(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->recordsReadsInsteadOfReading = true;
+        $agentConversationRecallService->searchableAgentSpaceIds = [5];
+        $agentConversationRecallService->actingAccount = $this->buildAccount();
+        $sharedSpaceConversationOfAnotherAccount = $this->buildConversation(31, 5);
+        $sharedSpaceConversationOfAnotherAccount->accountId = 8;
+        $personalConversationOfAnotherAccount = $this->buildConversation(32, 9);
+        $personalConversationOfAnotherAccount->accountId = 8;
+        $agentConversationRecallService->candidateConversations = $this->buildConversations(
+            $sharedSpaceConversationOfAnotherAccount,
+            $personalConversationOfAnotherAccount
+        );
+        $agentConversationRecallService->positionsOfMessagesOutsideTheRights = [
+            500 => [31, 6],
+            501 => [32, 3],
+        ];
+
+        $agentConversationRecallService->readConversationAroundMessage(null, 500, 10);
+        self::assertSame([31, 0, 10, 6], $agentConversationRecallService->recordedRead);
+
+        $agentConversationRecallService->recordedRead = null;
+        try {
+            $agentConversationRecallService->readConversationAroundMessage(null, 501, 10);
+            self::fail('a message of a space outside the scope is not read');
+        } catch (NotFoundException $notFoundException) {
+            self::assertStringContainsString('Message #501 was not found or may not be read.', $notFoundException->getMessage());
+        }
+        self::assertNull($agentConversationRecallService->recordedRead);
+    }
+
+    public function testWithoutSearchableSpacesAMessageOutsideTheRightsStaysUnread(): void
+    {
+        $agentConversationRecallService = $this->buildService();
+        $agentConversationRecallService->recordsReadsInsteadOfReading = true;
+        $agentConversationRecallService->actingAccount = $this->buildAccount();
+        $agentConversationRecallService->positionsOfMessagesOutsideTheRights = [500 => [31, 6]];
+
+        $this->expectException(NotFoundException::class);
+        $agentConversationRecallService->readConversationAroundMessage(null, 500, 10);
+    }
+
+    public function testAConversationOfAnotherAccountIsNoWidgetGroupToOpen(): void
+    {
+        $ownRow = $this->buildRowWithHit(31, 4, 'Silberau');
+        $rowOfAnotherAccount = $this->buildRowWithHit(32, 5, 'Silberau');
+        $rowOfAnotherAccount->owner = 'account #8';
+
+        self::assertNotNull($ownRow->toConversationSearchGroup());
+        self::assertNull($rowOfAnotherAccount->toConversationSearchGroup(), 'the chat routes open the owner\'s conversations only');
+    }
+
+    public function testTheReadResultNamesTheOwnerOfAnotherAccountsConversation(): void
+    {
+        $transcript = new AgentConversationRecallTranscript();
+        $transcript->conversation = new AgentConversationRecallRow();
+        $transcript->conversation->conversationId = 31;
+        $transcript->conversation->agentSpace = 'space 5';
+        $transcript->conversation->owner = 'account #8';
+
+        $markdown = AgentConversationReadMcpResponseDto::forTranscript($transcript)->toLlmMarkdown();
+
+        self::assertStringContainsString('conversation #31 · space: space 5 · of: account #8', $markdown);
     }
 
     protected function buildRowWithHit(int $conversationId, int $indexInConversation, string $excerpt): AgentConversationRecallRow

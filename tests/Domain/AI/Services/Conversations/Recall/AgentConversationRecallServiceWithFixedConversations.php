@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DDD\Tests\Agents\Domain\AI\Services\Conversations\Recall;
 
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessagePosition;
 use DDD\Domain\AI\Entities\Conversations\AIConversation;
 use DDD\Domain\AI\Entities\Conversations\AIConversations;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
@@ -46,6 +47,58 @@ class AgentConversationRecallServiceWithFixedConversations extends AgentConversa
     protected function findMessageToReadAround(int $messageId): ?AIConversationMessage
     {
         return $this->messagesById[$messageId] ?? null;
+    }
+
+    /** @var int[] The spaces the host hook answers ({@see findSearchableAgentSpaceIds()}) */
+    public array $searchableAgentSpaceIds = [];
+
+    /** @var int[]|null The spaces the last candidate search in scope received */
+    public ?array $candidateSearchAgentSpaceIds = null;
+
+    /** @var array<int, int[]> Positions of messages outside the rights, by id: [conversation id, index] */
+    public array $positionsOfMessagesOutsideTheRights = [];
+
+    public ?Account $actingAccount = null;
+
+    public function findSearchableAgentSpaceIds(Account $account): array
+    {
+        return $this->searchableAgentSpaceIds;
+    }
+
+    protected function findActingAccount(?AIConversation $currentConversation): ?Account
+    {
+        return $this->actingAccount;
+    }
+
+    protected function findRecallCandidatesInScope(
+        Account $account,
+        array $words,
+        ?int $agentSpaceId,
+        ?DateTime $from,
+        ?DateTime $to,
+        int $limit,
+        array $searchableAgentSpaceIds
+    ): ?AIConversations {
+        $this->candidateSearchAgentSpaceIds = $searchableAgentSpaceIds;
+        return parent::findRecallCandidatesInScope($account, $words, $agentSpaceId, $from, $to, $limit, []);
+    }
+
+    /** The scope of the search over the fixed conversations: the account's own or one of the spaces */
+    protected function findConversationOfSearch(int $conversationId, Account $account, array $searchableAgentSpaceIds): ?AIConversation
+    {
+        $conversation = $this->findReadableConversation($conversationId);
+        if (!$conversation instanceof AIConversation) {
+            return null;
+        }
+        $isOfAccount = (int)($conversation->accountId ?? 0) === (int)$account->id;
+        $isInSpace = in_array((int)($conversation->agentSpaceId ?? 0), $searchableAgentSpaceIds, true);
+        return $isOfAccount || ($searchableAgentSpaceIds !== [] && $isInSpace) ? $conversation : null;
+    }
+
+    protected function findPositionOfMessageIgnoringRights(int $messageId): ?AIConversationMessagePosition
+    {
+        $position = $this->positionsOfMessagesOutsideTheRights[$messageId] ?? null;
+        return $position === null ? null : AIConversationMessagePosition::forConversationAndIndex($position[0], $position[1]);
     }
 
     /** @var int[] Ids of the conversations others read */

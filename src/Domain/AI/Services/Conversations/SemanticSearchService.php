@@ -20,6 +20,9 @@ use DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessages;
 use DDD\Domain\AI\Services\Conversations\Memories\AgentMemoriesService;
 use DDD\Domain\AI\Services\Texts\Embeddings\AITextEmbeddingsService;
 use DDD\Domain\Common\Entities\Accounts\Account;
+use DDD\Domain\AI\Entities\Conversations\AIConversations;
+use DDD\Domain\AI\Entities\Conversations\Compaction\AIConversationCompactionNode;
+use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Infrastructure\Services\DDDService;
 use DDD\Domain\Base\Repo\DB\Doctrine\EntityManagerFactory;
 use DDD\Infrastructure\Base\DateTime\DateTime;
@@ -318,17 +321,72 @@ class SemanticSearchService extends Service
      * account with the admin role too, whose read rights alone restrict nothing. The rerank is attributed to the
      * same account.
      *
+     * With `$searchableAgentSpaceIds` the conversations of those spaces (any account) are searched too
+     * ({@see AgentConversationRecallService::findSearchableAgentSpaceIds()}). Their rows lie outside the row rights of
+     * the conversation tables, so the three retrieval legs then run with the row rights lifted
+     * ({@see liftRowRightsForScope()}): every query of a leg carries the scope (account OR spaces) and the
+     * filters of the search. The query embedding, the rerank and the hidden/eval filters run under the rights.
+     *
+     * @param int[] $searchableAgentSpaceIds
      * @return SemanticSearchHit[]
      */
     public function searchAcrossConversations(
         Account $account,
         string $query,
         int $limit = 5,
-        int $excerptChars = 0
+        int $excerptChars = 0,
+        array $searchableAgentSpaceIds = []
     ): array {
         if (trim($query) === '' || !isset($account->id)) {
             return [];
         }
+        return $this->searchAcrossConversationsInScope(
+            $account,
+            $query,
+            $limit,
+            $excerptChars,
+            DBAIConversations::normalizePositiveIds($searchableAgentSpaceIds)
+        );
+    }
+
+    /**
+     * Lifts the row rights when `$searchableAgentSpaceIds` is not empty (the scope condition of the queries that follow
+     * is then the authorization). Returns whether it lifted them; the caller passes that to
+     * {@see restoreRowRightsAfterScope()} in `finally`.
+     *
+     * @param int[] $searchableAgentSpaceIds
+     */
+    protected function liftRowRightsForScope(array $searchableAgentSpaceIds): bool
+    {
+        if ($searchableAgentSpaceIds === []) {
+            return false;
+        }
+        DDDService::instance()->deactivateEntityRightsRestrictions();
+        return true;
+    }
+
+    /** Restores the row rights {@see liftRowRightsForScope()} lifted */
+    protected function restoreRowRightsAfterScope(bool $rowRightsLifted): void
+    {
+        if ($rowRightsLifted) {
+            DDDService::instance()->restoreEntityRightsRestrictionsStateSnapshot();
+        }
+    }
+
+    /**
+     * The search of {@see searchAcrossConversations()} over the scope: the account's conversations and those of
+     * `$searchableAgentSpaceIds`.
+     *
+     * @param int[] $searchableAgentSpaceIds
+     * @return SemanticSearchHit[]
+     */
+    protected function searchAcrossConversationsInScope(
+        Account $account,
+        string $query,
+        int $limit,
+        int $excerptChars,
+        array $searchableAgentSpaceIds
+    ): array {
         // no query embedding → the vector legs find nothing, the keyword leg still answers
         $queryEmbedding = $this->embedQueryOrEmptyEmbedding($query);
         $overFetch = max($limit * self::OVERFETCH_FACTOR, $limit);
@@ -336,7 +394,7 @@ class SemanticSearchService extends Service
         // (a) direct leaf hits across the account's conversations. Like (b), a failing vector query (a bad row, the
         // index) must never take the whole search of the account down: it degrades to the node and keyword legs.
         try {
-            $directMessages = $this->findMessagesSimilarAcrossConversations($account, $queryEmbedding, $overFetch);
+            $directMessages = $this->findMessagesSimilarAcrossConversations($account, $queryEmbedding, $overFetch, $searchableAgentSpaceIds);
         } catch (Throwable $vectorSearchError) {
             $this->logVectorSearchFailure($vectorSearchError, 'search across the conversations of account ' . $account->id . ' runs without the message vector leg');
             $directMessages = [];
@@ -349,14 +407,14 @@ class SemanticSearchService extends Service
         // The node path is an ENHANCEMENT over the leaf baseline — a failure here must never break the core recall
         // (graceful degrade to leaf-only, same spirit as the rerank fallback).
         try {
-            $nodeExpandedMessages = $this->expandNodeRegionsToMessagesAcrossConversations($account, $queryEmbedding, $overFetch);
+            $nodeExpandedMessages = $this->expandNodeRegionsToMessagesAcrossConversations($account, $queryEmbedding, $overFetch, $searchableAgentSpaceIds);
         } catch (Throwable $nodeSearchError) {
             $this->logVectorSearchFailure($nodeSearchError, 'search across the conversations of account ' . $account->id . ' runs without the compaction-node leg');
             $nodeExpandedMessages = [];
         }
 
         // (c) BM25/keyword leg across the account's conversations — lexical complement.
-        $keywordMessages = $this->findMessagesByKeywordAcrossConversations($account, $query, $overFetch);
+        $keywordMessages = $this->findMessagesByKeywordAcrossConversations($account, $query, $overFetch, $searchableAgentSpaceIds);
 
         // Fuse the ranked id-lists (dense + node + keyword + recency) then sharpen with the rerank — same as within-conversation.
         $messagesById = $this->indexMessagesById($directMessages, $nodeExpandedMessages, $keywordMessages);
@@ -438,25 +496,37 @@ class SemanticSearchService extends Service
     /**
      * The dense leg across the account's conversations: the messages nearest to the query embedding.
      *
+     * @param int[] $searchableAgentSpaceIds
      * @return AIConversationMessage[]
      */
-    protected function findMessagesSimilarAcrossConversations(Account $account, TextEmbedding $queryEmbedding, int $overFetch): array
+    protected function findMessagesSimilarAcrossConversations(Account $account, TextEmbedding $queryEmbedding, int $overFetch, array $searchableAgentSpaceIds = []): array
     {
-        return array_values(
-            $this->getMessagesRepoClassInstance()->findSimilarAcrossConversationsByEmbedding($account, $queryEmbedding, $overFetch)?->getElements() ?? []
-        );
+        $rowRightsLifted = $this->liftRowRightsForScope($searchableAgentSpaceIds);
+        try {
+            return array_values(
+                $this->getMessagesRepoClassInstance()->findSimilarAcrossConversationsByEmbedding($account, $queryEmbedding, $overFetch, $searchableAgentSpaceIds)?->getElements() ?? []
+            );
+        } finally {
+            $this->restoreRowRightsAfterScope($rowRightsLifted);
+        }
     }
 
     /**
      * The keyword leg across the account's conversations: the FULLTEXT matches of the query, best first.
      *
+     * @param int[] $searchableAgentSpaceIds
      * @return AIConversationMessage[]
      */
-    protected function findMessagesByKeywordAcrossConversations(Account $account, string $query, int $overFetch): array
+    protected function findMessagesByKeywordAcrossConversations(Account $account, string $query, int $overFetch, array $searchableAgentSpaceIds = []): array
     {
-        return array_values(
-            $this->getMessagesRepoClassInstance()->findByKeywordAcrossConversations($account, $query, $overFetch)?->getElements() ?? []
-        );
+        $rowRightsLifted = $this->liftRowRightsForScope($searchableAgentSpaceIds);
+        try {
+            return array_values(
+                $this->getMessagesRepoClassInstance()->findByKeywordAcrossConversations($account, $query, $overFetch, $searchableAgentSpaceIds)?->getElements() ?? []
+            );
+        } finally {
+            $this->restoreRowRightsAfterScope($rowRightsLifted);
+        }
     }
 
     /**
@@ -684,13 +754,33 @@ class SemanticSearchService extends Service
      * The node summaries cover the COMPACTED bulk of the whole history, so this is the DB-efficient way to reach old
      * content: search a small summary index instead of every leaf. Skips nodes missing a conversation or range.
      *
+     * @param int[] $searchableAgentSpaceIds
      * @return AIConversationMessage[]
      */
-    protected function expandNodeRegionsToMessagesAcrossConversations(Account $account, TextEmbedding $queryEmbedding, int $overFetch): array
+    protected function expandNodeRegionsToMessagesAcrossConversations(Account $account, TextEmbedding $queryEmbedding, int $overFetch, array $searchableAgentSpaceIds = []): array
+    {
+        $rowRightsLifted = $this->liftRowRightsForScope($searchableAgentSpaceIds);
+        try {
+            return $this->expandNodeRegionsToMessagesAcrossConversationsInScope($account, $queryEmbedding, $overFetch, $searchableAgentSpaceIds);
+        } finally {
+            $this->restoreRowRightsAfterScope($rowRightsLifted);
+        }
+    }
+
+    /**
+     * The node leg of {@see expandNodeRegionsToMessagesAcrossConversations()}: the nodes come from the scope, each
+     * node's messages from that node's own conversation; of another account's conversation only the dialogue (owner
+     * and assistant text), as the message legs.
+     *
+     * @param int[] $searchableAgentSpaceIds
+     * @return AIConversationMessage[]
+     */
+    protected function expandNodeRegionsToMessagesAcrossConversationsInScope(Account $account, TextEmbedding $queryEmbedding, int $overFetch, array $searchableAgentSpaceIds): array
     {
         $nodes = $this->getCompactionNodesRepoClassInstance()
-            ->findSimilarAcrossConversationsByEmbedding($account, $queryEmbedding, $overFetch)?->getElements() ?? [];
+            ->findSimilarAcrossConversationsByEmbedding($account, $queryEmbedding, $overFetch, $searchableAgentSpaceIds)?->getElements() ?? [];
         $messageRepo = $this->getMessagesRepoClassInstance();
+        $conversationIdsOfAccount = $searchableAgentSpaceIds === [] ? [] : $this->findIdsOfConversationsOfAccountAmongNodes($nodes, $account);
         $expanded = [];
         foreach ($nodes as $node) {
             if ($node->aiConversationId === null
@@ -706,11 +796,35 @@ class SemanticSearchService extends Service
                 $node->coveredFromMessageIndex,
                 $node->coveredToMessageIndex
             )?->getElements() ?? [];
+            $isConversationOfAnotherAccount = $searchableAgentSpaceIds !== []
+                && !in_array((int)$node->aiConversationId, $conversationIdsOfAccount, true);
             foreach ($inRange as $message) {
+                if ($isConversationOfAnotherAccount && !$message->isDialogueText()) {
+                    continue;
+                }
                 $expanded[] = $message;
             }
         }
         return $expanded;
+    }
+
+    /**
+     * Of the conversations of `$nodes`, those of `$account`.
+     *
+     * @param AIConversationCompactionNode[] $nodes
+     * @return int[]
+     */
+    protected function findIdsOfConversationsOfAccountAmongNodes(array $nodes, Account $account): array
+    {
+        $conversationIds = [];
+        foreach ($nodes as $node) {
+            if ($node->aiConversationId !== null) {
+                $conversationIds[] = (int)$node->aiConversationId;
+            }
+        }
+        /** @var DBAIConversations $conversationsRepository */
+        $conversationsRepository = AIConversations::getRepoClassInstance();
+        return $conversationsRepository->findIdsOfConversationsOfAccountAmong($conversationIds, (int)$account->id);
     }
 
     /**

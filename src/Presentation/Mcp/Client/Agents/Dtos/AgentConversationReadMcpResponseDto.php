@@ -33,6 +33,9 @@ class AgentConversationReadMcpResponseDto extends RestResponseDto implements Llm
     {
         $row = $this->transcript->conversation;
         $headParts = ['conversation #' . $row->conversationId, 'space: ' . $row->agentSpace];
+        if ($row->owner !== null) {
+            $headParts[] = 'of: ' . $row->owner . ' (not the owner\'s own conversation)';
+        }
         if ($row->title !== null && $row->title !== '') {
             $headParts[] = '"' . str_replace(["\n", '"'], [' ', "'"], $row->title) . '"';
         }

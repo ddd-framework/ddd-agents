@@ -60,31 +60,43 @@ class DBConversationCompactionNodes extends DBEntitySet
      *
      * @return AIConversationCompactionNodes|null
      */
-    public function findSimilarAcrossConversationsByEmbedding(Account $account, TextEmbedding $queryEmbedding, int $limit = 20): ?AIConversationCompactionNodes
-    {
+    public function findSimilarAcrossConversationsByEmbedding(
+        Account $account,
+        TextEmbedding $queryEmbedding,
+        int $limit = 20,
+        array $searchableAgentSpaceIds = []
+    ): ?AIConversationCompactionNodes {
         if ($queryEmbedding->isEmpty() || !isset($account->id)) {
             return AIConversationCompactionNodes::newInstance();
         }
         return $this->findWithSearchHitColumns(
-            $this->buildVectorSearchQueryBuilderForConversationsOfAccount($account, $queryEmbedding, $limit)
+            $this->buildVectorSearchQueryBuilderForConversationsOfAccount($account, $queryEmbedding, $limit, $searchableAgentSpaceIds)
         );
     }
 
     /**
      * The query of {@see findSimilarAcrossConversationsByEmbedding()}: the vector search of this repo, restricted to
-     * the conversations whose `accountId` is the account's and that the search answers from
+     * the conversations whose `accountId` is the account's (or that lie in `$searchableAgentSpaceIds`) and that the search answers from
      * ({@see DBAIConversations::restrictToConversationsTheSearchAcrossConversationsAnswersFrom()}). The restriction is a filter of the search, not a right
      * (see {@see \DDD\Domain\AI\Repo\DB\Conversations\Messages\DBAIConversationMessages::restrictToConversationsOfAccount()}).
      */
-    public function buildVectorSearchQueryBuilderForConversationsOfAccount(Account $account, TextEmbedding $queryEmbedding, int $limit): DoctrineQueryBuilder
-    {
+    public function buildVectorSearchQueryBuilderForConversationsOfAccount(
+        Account $account,
+        TextEmbedding $queryEmbedding,
+        int $limit,
+        array $searchableAgentSpaceIds = []
+    ): DoctrineQueryBuilder {
         $alias = self::getBaseModelAlias();
         $conversationAlias = $alias . '_aiConversation_ofAccount';
         $queryBuilder = $this->buildVectorSearchQueryBuilder($queryEmbedding, $limit);
-        $queryBuilder
-            ->innerJoin("$alias.aiConversation", $conversationAlias)
-            ->andWhere("$conversationAlias.accountId = :conversationAccountId")
-            ->setParameter('conversationAccountId', (int)$account->id);
+        $queryBuilder->innerJoin("$alias.aiConversation", $conversationAlias);
+        DBAIConversations::restrictToConversationsOfAccountOrAgentSpaces(
+            $queryBuilder,
+            $conversationAlias,
+            (int)$account->id,
+            $searchableAgentSpaceIds,
+            'conversation'
+        );
         DBAIConversations::restrictToConversationsTheSearchAcrossConversationsAnswersFrom($queryBuilder, $conversationAlias);
         return $queryBuilder;
     }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace DDD\Domain\AI\Repo\DB\Conversations\Messages;
 
+use Doctrine\ORM\AbstractQuery;
 use DDD\Domain\AI\Repo\DB\Conversations\DBAIConversations;
 use DDD\Domain\AI\Entities\Conversations\SignalSources\ConversationSignalSources;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessage;
+use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessagePosition;
 use DDD\Domain\AI\Entities\Conversations\Messages\AIConversationMessages;
 use DDD\Domain\AI\Entities\Texts\Embeddings\TextEmbedding;
 use DDD\Domain\Common\Entities\Accounts\Account;
@@ -92,24 +94,34 @@ class DBAIConversationMessages extends DBEntitySet
      *
      * @return AIConversationMessages|null
      */
-    public function findSimilarAcrossConversationsByEmbedding(Account $account, TextEmbedding $queryEmbedding, int $limit = 20): ?AIConversationMessages
-    {
+    public function findSimilarAcrossConversationsByEmbedding(
+        Account $account,
+        TextEmbedding $queryEmbedding,
+        int $limit = 20,
+        array $searchableAgentSpaceIds = []
+    ): ?AIConversationMessages {
         if ($queryEmbedding->isEmpty() || !isset($account->id)) {
             return AIConversationMessages::newInstance();
         }
         return $this->findWithSearchHitColumns(
-            $this->buildVectorSearchQueryBuilderForConversationsOfAccount($account, $queryEmbedding, $limit)
+            $this->buildVectorSearchQueryBuilderForConversationsOfAccount($account, $queryEmbedding, $limit, $searchableAgentSpaceIds)
         );
     }
 
     /**
      * The query of {@see findSimilarAcrossConversationsByEmbedding()}: the vector search of this repo, restricted to
-     * the conversations of the account.
+     * the conversations of the account (and of `$searchableAgentSpaceIds`, see {@see restrictToConversationsOfAccount()}).
+     *
+     * @param int[] $searchableAgentSpaceIds
      */
-    public function buildVectorSearchQueryBuilderForConversationsOfAccount(Account $account, TextEmbedding $queryEmbedding, int $limit): DoctrineQueryBuilder
-    {
+    public function buildVectorSearchQueryBuilderForConversationsOfAccount(
+        Account $account,
+        TextEmbedding $queryEmbedding,
+        int $limit,
+        array $searchableAgentSpaceIds = []
+    ): DoctrineQueryBuilder {
         $queryBuilder = $this->buildVectorSearchQueryBuilder($queryEmbedding, $limit);
-        $this->restrictToConversationsOfAccount($queryBuilder, $account);
+        $this->restrictToConversationsOfAccount($queryBuilder, $account, $searchableAgentSpaceIds);
         return $queryBuilder;
     }
 
@@ -189,26 +201,33 @@ class DBAIConversationMessages extends DBEntitySet
      * on top. The lexical leg of the cross-conversation hybrid search (fused with the dense + node-summary legs in
      * {@see \DDD\Domain\AI\Services\Conversations\SemanticSearchService}).
      *
+     * @param int[] $searchableAgentSpaceIds see {@see restrictToConversationsOfAccount()}
      * @return AIConversationMessages|null
      */
-    public function findByKeywordAcrossConversations(Account $account, string $query, int $limit = 20): ?AIConversationMessages
+    public function findByKeywordAcrossConversations(Account $account, string $query, int $limit = 20, array $searchableAgentSpaceIds = []): ?AIConversationMessages
     {
         if (trim($query) === '' || !isset($account->id)) {
             return AIConversationMessages::newInstance();
         }
         return $this->findMessagesRankedByMessageIdsQuery(
-            $this->buildKeywordSearchMessageIdsQueryBuilderForConversationsOfAccount($account, $query, $limit)
+            $this->buildKeywordSearchMessageIdsQueryBuilderForConversationsOfAccount($account, $query, $limit, $searchableAgentSpaceIds)
         );
     }
 
     /**
      * The first query of {@see findByKeywordAcrossConversations()}: the ranked message ids of the keyword search,
-     * restricted to the conversations of the account.
+     * restricted to the conversations of the account (and of `$searchableAgentSpaceIds`).
+     *
+     * @param int[] $searchableAgentSpaceIds
      */
-    public function buildKeywordSearchMessageIdsQueryBuilderForConversationsOfAccount(Account $account, string $query, int $limit): DoctrineQueryBuilder
-    {
+    public function buildKeywordSearchMessageIdsQueryBuilderForConversationsOfAccount(
+        Account $account,
+        string $query,
+        int $limit,
+        array $searchableAgentSpaceIds = []
+    ): DoctrineQueryBuilder {
         $messageIdsQueryBuilder = $this->buildKeywordSearchMessageIdsQueryBuilder($query, $limit);
-        $this->restrictToConversationsOfAccount($messageIdsQueryBuilder, $account);
+        $this->restrictToConversationsOfAccount($messageIdsQueryBuilder, $account, $searchableAgentSpaceIds);
         return $messageIdsQueryBuilder;
     }
 
@@ -293,19 +312,62 @@ class DBAIConversationMessages extends DBEntitySet
     }
 
     /**
+     * The position (conversation id and index) of message `$messageId` (not truncated), WITHOUT the read rights: two
+     * numbers, no text. For the read around a message named by its id whose conversation the caller then checks
+     * against the scope of the search ({@see DBAIConversations::findConversationInSearchScope()}) before it reads
+     * anything.
+     */
+    public function findPositionOfMessageIgnoringRights(int $messageId): ?AIConversationMessagePosition
+    {
+        $alias = self::getBaseModelAlias();
+        $queryBuilder = self::createQueryBuilder(true);
+        $queryBuilder
+            ->select("$alias.aiConversationId AS aiConversationId", "$alias.indexInConversation AS indexInConversation")
+            ->andWhere("$alias.id = :lookupMessageId")
+            ->andWhere("$alias.truncatedAt IS NULL")
+            ->setParameter('lookupMessageId', $messageId)
+            ->setMaxResults(1);
+        $positionRow = $queryBuilder->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+        if (!is_array($positionRow) || ($positionRow['aiConversationId'] ?? null) === null || ($positionRow['indexInConversation'] ?? null) === null) {
+            return null;
+        }
+        return AIConversationMessagePosition::forConversationAndIndex((int)$positionRow['aiConversationId'], (int)$positionRow['indexInConversation']);
+    }
+
+    /**
      * Restrict a message query to the conversations whose `accountId` is the account's and that the search answers
      * from ({@see DBAIConversations::restrictToConversationsTheSearchAcrossConversationsAnswersFrom()}: no eval run, no
      * left-out purpose, no scheduled run). This is a filter of the search, not a right: it also holds where the read rights are wider — an account with the admin role (no
      * condition at all), or an account the application lets read the conversations of other accounts (the accounts
      * below it, the accounts it provisioned).
+     *
+     * With `$searchableAgentSpaceIds` the conversations of those spaces (any account) are in scope too
+     * ({@see DBAIConversations::restrictToConversationsOfAccountOrAgentSpaces()}); the caller lifts the row rights for
+     * such a search, the scope is then the authorization.
+     *
+     * @param int[] $searchableAgentSpaceIds
      */
-    protected function restrictToConversationsOfAccount(DoctrineQueryBuilder $queryBuilder, Account $account): void
+    protected function restrictToConversationsOfAccount(DoctrineQueryBuilder $queryBuilder, Account $account, array $searchableAgentSpaceIds = []): void
     {
-        $conversationAlias = self::getBaseModelAlias() . '_aiConversation_ofAccount';
-        $queryBuilder
-            ->innerJoin(self::getBaseModelAlias() . '.aiConversation', $conversationAlias)
-            ->andWhere("$conversationAlias.accountId = :conversationAccountId")
-            ->setParameter('conversationAccountId', (int)$account->id);
+        $alias = self::getBaseModelAlias();
+        $conversationAlias = $alias . '_aiConversation_ofAccount';
+        $queryBuilder->innerJoin($alias . '.aiConversation', $conversationAlias);
+        $dialogueCondition = null;
+        if (DBAIConversations::normalizePositiveIds($searchableAgentSpaceIds) !== []) {
+            // of another account's conversation only the dialogue (owner and assistant text), as readConversation shows it
+            $dialogueCondition = "$alias.messageType = :scopeDialogueMessageType AND $alias.role IN (:scopeDialogueRoles)";
+            $queryBuilder
+                ->setParameter('scopeDialogueMessageType', AIConversationMessage::MESSAGE_TEXT)
+                ->setParameter('scopeDialogueRoles', [AIConversationMessage::ROLE_USER, AIConversationMessage::ROLE_ASSISTANT]);
+        }
+        DBAIConversations::restrictToConversationsOfAccountOrAgentSpaces(
+            $queryBuilder,
+            $conversationAlias,
+            (int)$account->id,
+            $searchableAgentSpaceIds,
+            'conversation',
+            $dialogueCondition
+        );
         DBAIConversations::restrictToConversationsTheSearchAcrossConversationsAnswersFrom($queryBuilder, $conversationAlias);
     }
 
